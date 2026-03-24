@@ -72,9 +72,10 @@ interface HookLabPromptParams {
   language: string;
   nHooks: number;
   nAngles: number;
+  strategyBlock?: string;
 }
 
-export const getHookLabFreePrompt = ({ topicTrim, audience, tone, language, nHooks, nAngles }: HookLabPromptParams) => `Eres copywriter para vídeos cortos verticales.
+export const getHookLabFreePrompt = ({ topicTrim, audience, tone, language, nHooks, nAngles, strategyBlock }: HookLabPromptParams) => `Eres copywriter para vídeos cortos verticales.
 
 Tema: ${topicTrim}
 Audiencia: ${audience}
@@ -89,9 +90,9 @@ JSON solo (sin markdown). "hooks" debe tener exactamente ${nHooks} strings; "ang
   "topic": "breve",
   "hooks": ["...", "..."],
   "angles": [{ "title": "...", "pitch": "..." }]
-}`;
+}${strategyBlock ? `\n\n---\n${strategyBlock}` : ''}`;
 
-export const getHookLabProPrompt = ({ topicTrim, audience, tone, language, nHooks, nAngles }: HookLabPromptParams) => `Eres copywriter senior para TikTok, Reels y Shorts (retención y claridad).
+export const getHookLabProPrompt = ({ topicTrim, audience, tone, language, nHooks, nAngles, strategyBlock }: HookLabPromptParams) => `Eres copywriter senior para TikTok, Reels y Shorts (retención y claridad).
 
 Tema: ${topicTrim}
 Audiencia: ${audience}
@@ -111,4 +112,83 @@ JSON solo (sin markdown):
   "angles": [{ "title": "...", "pitch": "..." }],
   "sound_mood": "...",
   "on_screen_texts": ["...", "...", "..."]
+}${strategyBlock ? `\n\n---\n${strategyBlock}` : ''}`;
+
+export type HookLabStrategyAppendixParams = {
+    nicheAnalysis?: string;
+    viralLines?: string;
+    scriptLines?: string;
+};
+
+export function buildHookLabStrategyAppendix(p: HookLabStrategyAppendixParams): string | undefined {
+    const parts: string[] = [];
+    if (p.nicheAnalysis?.trim())
+        parts.push(`### Análisis de nicho\n${p.nicheAnalysis.trim()}`);
+    if (p.viralLines?.trim())
+        parts.push(`### Patrones virales detectados\n${p.viralLines.trim()}`);
+    if (p.scriptLines?.trim())
+        parts.push(`### Ideas de guion (beats)\n${p.scriptLines.trim()}`);
+    if (parts.length === 0)
+        return undefined;
+    return `${parts.join('\n\n')}\n\nAlinea hooks, ángulos y textos en pantalla con este contexto cuando encaje.`;
+}
+
+interface SocialPipelineNicheParams {
+    topicTrim: string;
+    audience: string;
+    tone: string;
+    language: string;
+}
+
+export const getSocialAnalyzeNichePrompt = ({ topicTrim, audience, tone, language }: SocialPipelineNicheParams) => `Eres estratega de contenido. Analiza el nicho/tema del creador para vídeos cortos.
+
+Tema: ${topicTrim}
+Audiencia declarada: ${audience}
+Tono: ${tone}
+Idioma: ${language}
+
+Responde SOLO JSON válido (sin markdown):
+{
+  "summary": "2-3 frases: qué problema u oportunidad ve el público en este tema",
+  "keywords": ["3-6 palabras clave o frases cortas"],
+  "audience_insight": "1 frase sobre motivación o objeción típica de la audiencia"
+}`;
+
+interface SocialPipelineViralParams {
+    topicTrim: string;
+    nicheSummary: string;
+    keywordsLine: string;
+}
+
+export const getSocialViralPatternsPrompt = ({ topicTrim, nicheSummary, keywordsLine }: SocialPipelineViralParams) => `Eres experto en formatos virales en TikTok, Reels y Shorts.
+
+Tema: ${topicTrim}
+Resumen de nicho: ${nicheSummary}
+Palabras clave: ${keywordsLine}
+
+Responde SOLO JSON válido (sin markdown):
+{
+  "patterns": [
+    "5-8 patrones concretos (ej. 'POV + twist en 3s', 'lista numerada en pantalla', 'contradicción + prueba') aplicables a ESTE tema"
+  ]
+}`;
+
+interface SocialPipelineScriptsParams {
+    topicTrim: string;
+    nicheSummary: string;
+    patternsBlock: string;
+}
+
+export const getSocialScriptIdeasPrompt = ({ topicTrim, nicheSummary, patternsBlock }: SocialPipelineScriptsParams) => `Eres guionista de vídeos cortos verticales.
+
+Tema: ${topicTrim}
+Nicho: ${nicheSummary}
+Patrones a aprovechar:
+${patternsBlock}
+
+Responde SOLO JSON válido (sin markdown):
+{
+  "ideas": [
+    "4-6 ideas de guion en UNA línea cada una (gancho + desarrollo + cierre sugerido, muy breve)"
+  ]
 }`;

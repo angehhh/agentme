@@ -1,5 +1,5 @@
 'use client';
-import { Layers, Calendar, ArrowRight, Zap, CirclePlay, Sparkles } from 'lucide-react';
+import { Layers, Calendar, ArrowRight, Zap, CirclePlay, Moon } from 'lucide-react';
 import { T, SHADOW, IconTile, SocialSection } from './SocialCommon';
 import { EDITORIAL_DAYS, HOOK_LAB_COUNTS, SOCIAL_LIMITS } from '@/lib/social-limits';
 import type { SocialPlanTier } from '@/lib/social-limits';
@@ -103,14 +103,20 @@ export default function SocialHub({ planTier, isPro, setSection }: SocialHubProp
                     </div>
                 </button>
 
-                <div style={{ ...hubButtonStyle, borderStyle: 'dashed', opacity: 0.65, pointerEvents: 'none' }}>
-                    <IconTile icon={Sparkles} background="#EEF0F5" iconColor={T.ink40} />
-                    <div>
-                        <p style={hubTitleStyle}>Más herramientas</p>
-                        <span style={{ ...hubLabelStyle, color: T.ink40, background: T.paper }}>Próximamente</span>
-                        <p style={hubDescStyle}>Ideas, formatos y flujos nuevos para Social Mode.</p>
+                <button type="button" onClick={() => setSection('sleep')} style={hubButtonStyle}
+                    onMouseEnter={handleHubMouseEnter} onMouseLeave={handleHubMouseLeave}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
+                        <IconTile icon={Moon} background="#E8E6F5" iconColor="#5B4B8A" />
+                        <ArrowRight size={20} strokeWidth={1.75} color={T.ink40} aria-hidden />
                     </div>
-                </div>
+                    <div>
+                        <p style={hubTitleStyle}>Segundo plano</p>
+                        <span style={{ ...hubLabelStyle, color: '#5B4B8A', background: 'rgba(91,75,138,.1)' }}>Sleep · beta</span>
+                        <p style={hubDescStyle}>
+                            Encola trabajos que el asistente puede ir completando sin que mantengas la app abierta. Vista pensada para evolucionar hacia tareas largas y recordatorios.
+                        </p>
+                    </div>
+                </button>
             </div>
         </>
     );

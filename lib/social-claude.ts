@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { SocialPlanTier } from '@/lib/social-limits';
 import { EDITORIAL_DAYS, HOOK_LAB_COUNTS } from '@/lib/social-limits';
-import { getEditorialFreePrompt, getEditorialProPrompt, getHookLabFreePrompt, getHookLabProPrompt } from '@/lib/prompts/social';
+import { getEditorialFreePrompt, getEditorialProPrompt, getHookLabFreePrompt, getHookLabProPrompt, } from '@/lib/prompts/social';
 const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -187,17 +187,19 @@ export async function generateHookLab(params: {
     tone?: string;
     language?: string;
     tier: SocialPlanTier;
+    /** Contexto de pasos previos del pipeline (Pro); se inyecta en el prompt del pack final. */
+    strategyAppendix?: string;
 }): Promise<HookLabGenResult> {
     if (!process.env.ANTHROPIC_API_KEY?.trim()) {
         return { ok: false, reason: 'missing_api_key' };
     }
-    const { topic, audience = 'usuarios de TikTok, Reels y Shorts', tone = 'directo, energético, sin postureo', language = 'español', tier, } = params;
+    const { topic, audience = 'usuarios de TikTok, Reels y Shorts', tone = 'directo, energético, sin postureo', language = 'español', tier, strategyAppendix, } = params;
     const topicTrim = topic.trim();
     if (!topicTrim)
         return { ok: false, reason: 'api_or_parse' };
     const { hooks: nHooks, angles: nAngles } = tier === 'free' ? HOOK_LAB_COUNTS.free : HOOK_LAB_COUNTS.pro;
     const isPro = tier === 'pro';
-    const paramsPrompt = { topicTrim, audience, tone, language, nHooks, nAngles };
+    const paramsPrompt = { topicTrim, audience, tone, language, nHooks, nAngles, strategyBlock: strategyAppendix?.trim() || undefined };
     const freeContent = getHookLabFreePrompt(paramsPrompt);
     const proContent = getHookLabProPrompt(paramsPrompt);
     try {

@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 import { T, SHADOW, IconTile, StrokeIcon, SectionLabel, Ico, splitHashtagTokens, SocialSection } from './SocialCommon';
 import { EDITORIAL_DAYS } from '@/lib/social-limits';
 import type { EditorialCalendarResult, EditorialFormat, EditorialPost } from '@/lib/social-claude';
+import { labelsForEditorialSteps } from '@/lib/user-facing-agent-steps';
 
 const FORMAT_LABEL: Record<EditorialFormat, string> = {
     carrusel: 'Carrusel',
@@ -46,6 +47,8 @@ interface EditorialSectionProps {
     copyWeek: () => void;
     copyOne: (p: EditorialPost, idx: number) => void;
     copiedFlash: string | null;
+    /** Pasos del asistente ya traducidos para la UI (vacío si no hay datos). */
+    editorialAssistantLabels: string[];
 }
 
 export default function EditorialSection({
@@ -53,7 +56,7 @@ export default function EditorialSection({
     mainPlatform, setMainPlatform, language, setLanguage,
     calendar, genLoading, generate, savingPrefs, savePrefs,
     genErr, setSection,
-    copyWeek, copyOne, copiedFlash
+    copyWeek, copyOne, copiedFlash, editorialAssistantLabels,
 }: EditorialSectionProps) {
 
     const inputStyle: React.CSSProperties = {
@@ -86,7 +89,7 @@ export default function EditorialSection({
                     Calendario editorial
                 </h2>
                 <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.6, maxWidth: 640 }}>
-                    Define tu nicho, tono y red; la IA propone publicaciones para la semana.
+                    Define tu nicho, tono y red; tu asistente prepara ideas para la semana y te muestra el orden en que ha trabajado.
                 </p>
             </div>
 
@@ -135,10 +138,10 @@ export default function EditorialSection({
                             cursor: genLoading || !niche.trim() ? 'wait' : 'pointer', opacity: !niche.trim() ? 0.5 : 1,
                         }}>
                             {genLoading
-                                ? `Generando ${calDays} día${calDays > 1 ? 's' : ''}…`
+                                ? 'Tu asistente está preparando el calendario…'
                                 : isPro
-                                    ? 'Generar semana completa — 7 días (IA)'
-                                    : 'Generar vista previa — 3 días (IA)'}
+                                    ? 'Generar semana completa (7 días)'
+                                    : 'Generar vista previa (3 días)'}
                         </button>
                     </div>
                     <p style={{ fontSize: 11, color: T.ink40, marginTop: 12 }}>
@@ -155,6 +158,25 @@ export default function EditorialSection({
                     padding: '12px 16px', marginBottom: 18, fontSize: 13, color: '#8B2E2E',
                 }}>
                     {genErr}
+                </div>
+            )}
+
+            {genLoading && (
+                <div style={{
+                    marginBottom: 20, padding: '16px 18px', background: T.paper,
+                    borderRadius: 12, border: `1px solid ${T.ink10}`,
+                }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: T.ink, margin: '0 0 12px' }}>
+                        Así va avanzando tu asistente
+                    </p>
+                    {labelsForEditorialSteps(['ingest_brief', 'generate_calendar']).map((step, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13,
+                            color: T.ink60, marginBottom: 10,
+                            animation: `fadeIn .4s ${i * 0.35}s ease both`, opacity: 0 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: T.ink20, flexShrink: 0 }}/>
+                            {step}…
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -175,6 +197,16 @@ export default function EditorialSection({
                             {calendar.posts.length} {calendar.posts.length === 1 ? 'pieza' : 'piezas'}
                         </span>
                     </div>
+
+                    {editorialAssistantLabels.length > 0 && (
+                        <div style={{
+                            fontSize: 12, color: T.ink60, lineHeight: 1.55, padding: '12px 14px',
+                            background: T.paper, borderRadius: 10, border: `1px solid ${T.ink10}`, marginBottom: 18,
+                        }}>
+                            <span style={{ fontWeight: 700, color: T.ink }}>Qué ha hecho tu asistente: </span>
+                            {editorialAssistantLabels.join(' · ')}
+                        </div>
+                    )}
 
                     <div style={{
                         background: `linear-gradient(145deg, ${T.white} 0%, #FAFAF8 100%)`,

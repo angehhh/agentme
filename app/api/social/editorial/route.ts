@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { generateEditorialCalendar } from '@/lib/social-claude';
+import { runSocialEditorialAgent } from '@/lib/modes/social';
 import { SOCIAL_LIMITS, tierFromPlan, utcStartOfIsoWeekIso, } from '@/lib/social-limits';
 import { createRouteHandlerClient } from '@/lib/supabase-server';
 
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
                 }, { status: 429 });
             }
         }
-        const gen = await generateEditorialCalendar({
+        const agent = await runSocialEditorialAgent({
             niche: niche.trim(),
             audience: typeof audience === 'string' ? audience : undefined,
             tone: typeof tone === 'string' ? tone : undefined,
@@ -64,12 +64,14 @@ export async function POST(req: NextRequest) {
             language: typeof language === 'string' ? language : undefined,
             tier,
         });
-        if (!gen.ok) {
-            const message = gen.reason === 'missing_api_key'
+        const gen = agent.state.gen;
+        if (!agent.ok || !gen?.ok) {
+            const reason = gen && !gen.ok ? gen.reason : 'api_or_parse';
+            const message = reason === 'missing_api_key'
                 ? 'Falta ANTHROPIC_API_KEY en el servidor (p. ej. .env.local). Añádela y reinicia `next dev`.'
                 : 'No se pudo generar el calendario (API de Anthropic o respuesta inesperada). Revisa la consola del servidor, créditos de la cuenta e inténtalo de nuevo.';
             return NextResponse.json({
-                error: gen.reason === 'missing_api_key' ? 'missing_api_key' : 'ia_no_disponible',
+                error: reason === 'missing_api_key' ? 'missing_api_key' : 'ia_no_disponible',
                 message,
             }, { status: 503 });
         }
@@ -88,6 +90,7 @@ export async function POST(req: NextRequest) {
             success: true,
             calendar,
             tier,
+            pipeline: { steps: agent.plan.map(s => s.id) },
             limit: isFree ? SOCIAL_LIMITS.editorial.freePerWeek : null,
             limitWindow: isFree ? 'week' : null,
         });

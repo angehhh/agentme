@@ -34,7 +34,7 @@ export const Ico = {
     mobile: Smartphone,
 } as const satisfies Record<string, LucideIcon>;
 
-export type SocialSection = 'hub' | 'editorial' | 'hooklab' | 'ytclips';
+export type SocialSection = 'hub' | 'editorial' | 'hooklab' | 'ytclips' | 'sleep';
 
 export type YtCloudSession = {
     id: string;

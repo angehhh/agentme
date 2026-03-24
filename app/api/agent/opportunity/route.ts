@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { scrapeLinkedInJobs } from '@/lib/agent';
-import { analyzeJobs, generateMarketInsights } from '@/lib/claude';
 import { createClient } from '@supabase/supabase-js';
 import { createRouteHandlerClient } from '@/lib/supabase-server';
+import { runOpportunityAgent } from '@/lib/modes/opportunity';
 
 const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 const FREE_DAILY_LIMIT = 5;
@@ -39,41 +38,28 @@ export async function POST(req: NextRequest) {
             }, { status: 429 });
         }
         console.log(`[Opportunity Mode] Usuario: ${userId} | Query: ${query} | Plan: ${profile.plan || 'free'}`);
-        const result = await scrapeLinkedInJobs(query, location || 'Spain', 15, {
-            workType: workType || null,
-            experience: experience || null,
+        const agent = await runOpportunityAgent({
+            query,
+            location: location || 'Spain',
+            filters: {
+                workType: workType || null,
+                experience: experience || null,
+            },
+            isFree,
         });
-        if (!result.success) {
-            return NextResponse.json({ error: result.error || 'Error del agente' }, { status: 500 });
+        if (!agent.ok) {
+            return NextResponse.json({ error: agent.error || 'Error del agente' }, { status: 500 });
         }
-        let jobs = result.jobs;
-        let aiAnalysis = null;
-        let marketInsights = null;
-        if (!isFree && jobs.length > 0) {
-            try {
-                const [analyzed, insights] = await Promise.all([
-                    analyzeJobs(jobs, query),
-                    generateMarketInsights(jobs, query, result.marketStats, location || 'Spain'),
-                ]);
-                if (analyzed) {
-                    jobs = analyzed.jobs;
-                    aiAnalysis = analyzed.summary;
-                }
-                if (insights)
-                    marketInsights = insights;
-            }
-            catch (e) {
-                console.error('[Claude] Analysis failed, returning raw results:', e);
-            }
-        }
+        const { jobs, expandedSearch, searchedIn, marketStats, aiAnalysis, marketInsights, companiesCatalog, companiesFiltered, outreachDrafts, } = agent.state;
+        const resultTotal = jobs.length;
         const { data: mission, error: missionError } = await supabaseAdmin
             .from('missions')
             .insert({
             user_id: userId,
             mode: 'opportunity',
-            status: result.total > 0 ? 'completed' : 'partial',
+            status: resultTotal > 0 ? 'completed' : 'partial',
             goal: query,
-            actions: result.total,
+            actions: resultTotal,
             created_at: new Date().toISOString(),
         })
             .select()
@@ -105,14 +91,18 @@ export async function POST(req: NextRequest) {
         const actionsRemaining = isFree ? Math.max(0, FREE_DAILY_LIMIT - newActionsUsed) : -1;
         return NextResponse.json({
             success: true,
-            total: result.total,
+            total: resultTotal,
             jobs,
             mission: mission?.id,
-            expandedSearch: result.expandedSearch || false,
-            searchedIn: result.searchedIn || location || 'Spain',
+            expandedSearch: expandedSearch || false,
+            searchedIn: searchedIn || location || 'Spain',
             aiAnalysis,
-            marketStats: result.marketStats,
+            marketStats,
             marketInsights,
+            companiesCatalog,
+            companiesFiltered,
+            outreachDrafts,
+            pipeline: { steps: agent.plan.map(s => s.id) },
             actionsUsed: newActionsUsed,
             actionsRemaining,
             actionsLimit: isFree ? FREE_DAILY_LIMIT : -1,

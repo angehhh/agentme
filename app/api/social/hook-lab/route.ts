@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { generateHookLab } from '@/lib/social-claude';
 import { SOCIAL_LIMITS, tierFromPlan, utcStartOfIsoWeekIso, } from '@/lib/social-limits';
 import { createRouteHandlerClient } from '@/lib/supabase-server';
+import { runSocialHookLabAgent } from '@/lib/modes/social-hook-pipeline';
 
 const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 export async function POST(req: NextRequest) {
@@ -55,23 +55,24 @@ export async function POST(req: NextRequest) {
                 }, { status: 429 });
             }
         }
-        const gen = await generateHookLab({
+        const agent = await runSocialHookLabAgent({
             topic: topic.trim(),
-            audience: typeof audience === 'string' ? audience : undefined,
-            tone: typeof tone === 'string' ? tone : undefined,
-            language: typeof language === 'string' ? language : undefined,
+            audience: typeof audience === 'string' ? audience : 'usuarios de TikTok, Reels y Shorts',
+            tone: typeof tone === 'string' ? tone : 'directo, energético, sin postureo',
+            language: typeof language === 'string' ? language : 'español',
             tier,
+            isPro: !isFree,
         });
-        if (!gen.ok) {
-            const message = gen.reason === 'missing_api_key'
+        if (!agent.ok || !agent.state.hookLab) {
+            const message = agent.error === 'missing_api_key'
                 ? 'Falta ANTHROPIC_API_KEY en el servidor (p. ej. .env.local). Añádela y reinicia `next dev`.'
                 : 'No se pudo generar Hook Lab (API de Anthropic o respuesta inesperada). Revisa la consola del servidor e inténtalo de nuevo.';
             return NextResponse.json({
-                error: gen.reason === 'missing_api_key' ? 'missing_api_key' : 'ia_no_disponible',
+                error: agent.error === 'missing_api_key' ? 'missing_api_key' : 'ia_no_disponible',
                 message,
             }, { status: 503 });
         }
-        const { data: hookData } = gen;
+        const hookData = agent.state.hookLab;
         const { error: mErr } = await supabaseAdmin.from('missions').insert({
             user_id: userId,
             mode: 'social_hook',
@@ -89,6 +90,10 @@ export async function POST(req: NextRequest) {
             limit: isFree ? SOCIAL_LIMITS.hookLab.freePerWeek : null,
             limitWindow: isFree ? 'week' : null,
             plan: tier,
+            pipeline: { steps: agent.plan.map(s => s.id) },
+            nicheAnalysis: agent.state.nicheAnalysis,
+            viralPatterns: agent.state.viralPatterns,
+            scriptIdeas: agent.state.scriptIdeas,
         });
     }
     catch (e) {

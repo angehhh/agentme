@@ -3,6 +3,14 @@ import { ArrowLeft, ExternalLink, Zap } from 'lucide-react';
 import { T, SHADOW, IconTile, StrokeIcon, SectionLabel, Ico, STROKE, SocialSection } from './SocialCommon';
 import { SOCIAL_LIMITS } from '@/lib/social-limits';
 import type { HookLabResult } from '@/lib/social-claude';
+import { labelsForHookLabSteps } from '@/lib/user-facing-agent-steps';
+
+type HookLabPipelineMeta = {
+    pipelineSteps: string[];
+    nicheAnalysis: { summary: string; keywords: string[]; audience_insight: string } | null;
+    viralPatterns: string[];
+    scriptIdeas: string[];
+};
 
 interface HookLabSectionProps {
     isPro: boolean;
@@ -14,6 +22,7 @@ interface HookLabSectionProps {
     hookLoading: boolean;
     hookErr: string | null;
     hookLab: HookLabResult | null;
+    hookLabMeta: HookLabPipelineMeta | null;
     copyHookLabAll: () => void;
     copySingleHook: (h: string, i: number) => void;
     copiedFlash: string | null;
@@ -22,7 +31,7 @@ interface HookLabSectionProps {
 
 export default function HookLabSection({
     isPro, hl, hookTopic, setHookTopic, niche,
-    generateHookLab, hookLoading, hookErr, hookLab,
+    generateHookLab, hookLoading, hookErr, hookLab, hookLabMeta,
     copyHookLabAll, copySingleHook, copiedFlash,
     setSection
 }: HookLabSectionProps) {
@@ -55,7 +64,7 @@ export default function HookLabSection({
                     Hook Lab
                 </h2>
                 <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.6, maxWidth: 640 }}>
-                    Ganchos, ángulos y (en Pro) audio y textos para overlay. El mismo nicho, tono y audiencia del calendario editorial se envían a la IA.
+                    Tu asistente prepara ganchos y ángulos para vídeos cortos. En Pro, primero entiende tu tema y luego te propone el pack (también audio y textos en pantalla). Usa el mismo nicho, tono y audiencia que en el calendario editorial.
                 </p>
             </div>
             <div style={{
@@ -102,7 +111,7 @@ export default function HookLabSection({
                         background: T.coral, color: T.white, fontWeight: 600, fontSize: 14, fontFamily: T.sans,
                         cursor: hookLoading || !hookTopic.trim() ? 'wait' : 'pointer', opacity: !hookTopic.trim() ? 0.5 : 1,
                     }}>
-                        {hookLoading ? 'Generando…' : 'Generar Hook Lab (IA)'}
+                        {hookLoading ? 'Tu asistente está trabajando…' : 'Generar pack de hooks'}
                     </button>
                 </div>
                 <p style={{ fontSize: 11, color: T.ink40, marginTop: 12 }}>
@@ -111,12 +120,91 @@ export default function HookLabSection({
                 </p>
             </div>
 
+            {hookLoading && (
+                <div style={{
+                    marginBottom: 20, padding: '16px 18px', background: T.paper,
+                    borderRadius: 12, border: `1px solid ${T.ink10}`,
+                }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: T.ink, margin: '0 0 12px' }}>
+                        {isPro ? 'Así va avanzando tu asistente' : 'Preparando tu pack'}
+                    </p>
+                    {(isPro
+                        ? [
+                            'Entendiendo de qué va tu tema…',
+                            'Buscando formatos que suelen funcionar en vídeo corto…',
+                            'Esquematizando ideas que puedes grabar…',
+                            'Escribiendo ganchos y ángulos listos para usar…',
+                        ]
+                        : [
+                            'Leyendo tu tema y preferencias…',
+                            'Creando ganchos y ángulos para tu vídeo…',
+                        ]
+                    ).map((step, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13,
+                            color: T.ink60, marginBottom: 10,
+                            animation: `fadeIn .4s ${i * 0.35}s ease both`, opacity: 0 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: T.ink20, flexShrink: 0 }}/>
+                            {step}
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {hookErr && (
                 <div style={{
                     background: 'rgba(232,93,76,.1)', border: '1px solid rgba(232,93,76,.25)', borderRadius: 10,
                     padding: '12px 16px', marginBottom: 18, fontSize: 13, color: '#9A3D2E',
                 }}>
                     {hookErr}
+                </div>
+            )}
+
+            {hookLab && hookLabMeta && hookLabMeta.pipelineSteps.length > 0 && (
+                <div style={{
+                    background: T.paper, borderRadius: 14, padding: '16px 18px',
+                    border: `1px solid ${T.ink10}`, marginBottom: 20, fontSize: 13, color: T.ink60, lineHeight: 1.55,
+                }}>
+                    <p style={{ fontSize: 11, fontWeight: 800, color: T.ink40, textTransform: 'uppercase', letterSpacing: '.08em', margin: '0 0 10px' }}>
+                        Qué ha hecho antes de los ganchos
+                    </p>
+                    <p style={{ margin: '0 0 10px', fontFamily: T.sans, fontSize: 12, color: T.ink40 }}>
+                        Tu asistente ha seguido estos pasos (en orden):
+                    </p>
+                    <ol style={{ margin: '0 0 14px', paddingLeft: 20, color: T.ink, fontWeight: 600, fontSize: 13 }}>
+                        {labelsForHookLabSteps(hookLabMeta.pipelineSteps).map((label, i) => (
+                            <li key={i} style={{ marginBottom: 6 }}>{label}</li>
+                        ))}
+                    </ol>
+                    {isPro && hookLabMeta.nicheAnalysis && (
+                        <>
+                            <p style={{ margin: '12px 0 6px', fontWeight: 700, color: T.ink, fontSize: 13 }}>Tu tema, en pocas palabras</p>
+                            <p style={{ margin: 0 }}>{hookLabMeta.nicheAnalysis.summary}</p>
+                            <p style={{ margin: '8px 0 0', fontSize: 12 }}>
+                                <strong>Palabras clave:</strong> {hookLabMeta.nicheAnalysis.keywords.join(', ')}
+                            </p>
+                            {hookLabMeta.nicheAnalysis.audience_insight && (
+                                <p style={{ margin: '6px 0 0', fontSize: 12 }}>
+                                    <strong>Qué suele importar a tu audiencia:</strong> {hookLabMeta.nicheAnalysis.audience_insight}
+                                </p>)}
+                        </>)}
+                    {isPro && hookLabMeta.viralPatterns.length > 0 && (
+                        <>
+                            <p style={{ margin: '14px 0 6px', fontWeight: 700, color: T.ink, fontSize: 13 }}>Formatos que encajan con tu tema</p>
+                            <ul style={{ margin: 0, paddingLeft: 18 }}>
+                                {hookLabMeta.viralPatterns.map((p, i) => (<li key={i} style={{ marginBottom: 4 }}>{p}</li>))}
+                            </ul>
+                        </>)}
+                    {isPro && hookLabMeta.scriptIdeas.length > 0 && (
+                        <>
+                            <p style={{ margin: '14px 0 6px', fontWeight: 700, color: T.ink, fontSize: 13 }}>Ideas rápidas para plantear el vídeo</p>
+                            <ul style={{ margin: 0, paddingLeft: 18 }}>
+                                {hookLabMeta.scriptIdeas.map((p, i) => (<li key={i} style={{ marginBottom: 4 }}>{p}</li>))}
+                            </ul>
+                        </>)}
+                    {isPro && (hookLabMeta.nicheAnalysis || hookLabMeta.viralPatterns.length > 0) && (
+                        <p style={{ margin: '14px 0 0', fontSize: 11, color: T.ink40 }}>
+                            Usamos esto para que los ganchos y ángulos encajen mejor con lo que quieres contar.
+                        </p>)}
                 </div>
             )}
 

@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase';
 import { generateTips } from '@/lib/tips';
 import { IC, T, LocationInput, EXP_LEVELS, RELEVANCE_COLORS } from './DashboardCommon';
+import { labelsForOpportunitySteps } from '@/lib/user-facing-agent-steps';
 
 export type Profile = {
     id: string;
@@ -21,6 +22,26 @@ export type JobResult = {
     relevance?: 'alta' | 'media' | 'baja';
     reason?: string;
     tip?: string;
+};
+
+type CompanyFilteredRow = {
+    name: string;
+    job_count: number;
+    sample_titles: string[];
+    sector_guess?: string;
+    angle?: string;
+    explore?: string[];
+    focus: 'primary' | 'secondary' | 'out';
+    filter_reason?: string;
+};
+
+type OutreachDraft = {
+    job_url: string;
+    company: string;
+    title: string;
+    linkedin_note: string;
+    email_opener: string;
+    one_liner_value: string;
 };
 
 export default function OpportunityView({ profile, onProfileUpdate }: {
@@ -58,8 +79,12 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
     } | null>(null);
     const [shareUrl, setShareUrl] = useState('');
     const [sharing, setSharing] = useState(false);
+    const [companiesFiltered, setCompaniesFiltered] = useState<CompanyFilteredRow[]>([]);
+    const [outreachDrafts, setOutreachDrafts] = useState<OutreachDraft[]>([]);
+    const [assistantJourneyLabels, setAssistantJourneyLabels] = useState<string[]>([]);
     const isFree = !profile.plan || profile.plan === 'free';
-    
+    const primaryCompanyNames = useMemo(() => new Set(companiesFiltered.filter(c => c.focus === 'primary').map(c => c.name.trim().toLowerCase())), [companiesFiltered]);
+
     useEffect(() => {
         const loadFavorites = async () => {
             const { data } = await supabase
@@ -129,6 +154,9 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
         setMarketInsights(null);
         setShareUrl('');
         setSharing(false);
+        setCompaniesFiltered([]);
+        setOutreachDrafts([]);
+        setAssistantJourneyLabels([]);
         try {
             const res = await fetch('/api/agent/opportunity', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -164,6 +192,12 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
                 setMarketStats(data.marketStats);
             if (data.marketInsights)
                 setMarketInsights(data.marketInsights);
+            if (Array.isArray(data.companiesFiltered))
+                setCompaniesFiltered(data.companiesFiltered as CompanyFilteredRow[]);
+            if (!isFree && Array.isArray(data.outreachDrafts))
+                setOutreachDrafts(data.outreachDrafts as OutreachDraft[]);
+            if (Array.isArray(data.pipeline?.steps))
+                setAssistantJourneyLabels(labelsForOpportunitySteps(data.pipeline.steps as string[]));
             if (data.actionsRemaining !== undefined)
                 setActionsRemaining(data.actionsRemaining);
             if (data.actionsUsed !== undefined) {
@@ -214,7 +248,7 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
             </div>)}
         </div>
         <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.65 }}>
-          El agente busca ofertas en LinkedIn que encajan con tu perfil y las guarda aquí.
+            Tu asistente busca ofertas recientes y te las ordena con contexto útil (en Pro: empresas, mercado y borradores de mensaje).
         </p>
       </div>
 
@@ -263,16 +297,23 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
             cursor: loading || !query.trim() ? 'not-allowed' : 'pointer', transition: 'all .15s' }}>
           {loading ? (<><div style={{ width: 14, height: 14, border: `2px solid ${T.ink20}`,
                 borderTopColor: T.ink40, borderRadius: '50%', animation: 'spin .7s linear infinite' }}/>
-            El agente está buscando...</>) : (<>{IC.zap} Lanzar agente</>)}
+            Buscando ofertas…</>) : (<>{IC.zap} Buscar ofertas</>)}
         </button>
 
         {loading && (<div style={{ marginTop: 20, padding: '16px 18px', background: T.paper,
                 borderRadius: 10, border: `1px solid ${T.ink10}` }}>
-            {['Abriendo navegador...', 'Navegando a LinkedIn Jobs...',
-                `Buscando "${query}"${location ? ` en ${location}` : ''}...`,
-                ...(experience ? [`Filtrando por experiencia: ${EXP_LEVELS.find(e => e.id === experience)?.label}...`] : []),
-                'Filtrando ofertas relevantes...',
-                ...(isFree ? ['Guardando resultados...'] : ['Analizando con IA...', 'Guardando resultados...']),
+            {[`Buscando ofertas de «${query}»${location ? ` en ${location}` : ''}…`,
+                'Descartando lo que no encaja con tu búsqueda…',
+                ...(experience ? [`Aplicando el nivel de experiencia que elegiste…`] : []),
+                ...(isFree
+                    ? ['Preparando la lista para ti…']
+                    : [
+                        'Agrupando empresas que aparecen en los resultados…',
+                        'Decidiendo qué empresas encajan mejor contigo…',
+                        'Ordenando ofertas y resumiendo el mercado…',
+                        'Redactando ideas de mensajes (LinkedIn y email)…',
+                        'Últimos retoques…',
+                    ]),
             ].map((step, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13,
                     color: T.ink60, marginBottom: 10,
                     animation: `fadeIn .4s ${i * 0.4}s ease both`, opacity: 0 }}>
@@ -307,7 +348,7 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
           {IC.info}
           <span>
             No había ofertas de <strong>{query}</strong> en <strong>{location}</strong> esta semana.
-            El agente amplió la búsqueda a <strong>{searchedIn}</strong>.
+            Hemos ampliado la búsqueda a <strong>{searchedIn}</strong>.
           </span>
         </div>)}
 
@@ -388,6 +429,117 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
             </>)}
         </div>)}
 
+      {ran && companiesFiltered.length > 0 && (<div style={{ background: T.white, borderRadius: 16, padding: '22px 24px',
+                border: `1px solid ${T.ink10}`, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: T.ink40,
+                textTransform: 'uppercase', letterSpacing: '.08em' }}>
+              Empresas en tus resultados
+            </span>
+            {!isFree && (<span style={{ fontSize: 10, fontWeight: 700, color: '#7B68EE',
+                background: 'rgba(123,104,238,.1)', padding: '3px 10px', borderRadius: 100 }}>
+                Vista Pro
+              </span>)}
+          </div>
+          <p style={{ fontSize: 13, color: T.ink60, marginBottom: 16, lineHeight: 1.55 }}>
+            {isFree
+                ? 'Lista de empresas que salen en las ofertas de esta búsqueda.'
+                : 'Quién está contratando, con contexto breve y una etiqueta de encaje (prioritaria, secundaria o poco alineada).'}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {companiesFiltered.map((c, i) => {
+                const fc = c.focus === 'primary'
+                    ? { bg: 'rgba(40,200,64,.08)', text: T.green }
+                    : c.focus === 'secondary'
+                        ? { bg: 'rgba(232,160,32,.1)', text: '#B8860B' }
+                        : { bg: T.paper, text: T.ink40 };
+                return (<div key={i} style={{ borderRadius: 12, padding: '14px 16px',
+                        border: `1px solid ${T.ink10}`, background: fc.bg }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: T.ink }}>{c.name}</span>
+                      <span style={{ fontSize: 11, color: T.ink40 }}>
+                        {c.job_count} oferta{c.job_count === 1 ? '' : 's'}
+                      </span>
+                      {!isFree && (<span style={{ fontSize: 10, fontWeight: 700,
+                            letterSpacing: '.02em', color: fc.text, background: T.white,
+                            padding: '2px 8px', borderRadius: 100, border: `1px solid ${T.ink10}` }}>
+                          {c.focus === 'primary' ? 'Prioritaria' : c.focus === 'secondary' ? 'También interesante' : 'Poco alineada'}
+                        </span>)}
+                    </div>
+                    {c.sector_guess && (<p style={{ fontSize: 12, color: T.ink60, marginTop: 8 }}>
+                        <strong>Sector (estimado):</strong> {c.sector_guess}
+                      </p>)}
+                    {c.angle && (<p style={{ fontSize: 12, color: T.ink60, marginTop: 6, fontStyle: 'italic', lineHeight: 1.5 }}>
+                        {c.angle}
+                      </p>)}
+                    {c.filter_reason && !isFree && c.focus !== 'primary' && (
+                        <p style={{ fontSize: 11, color: T.ink40, marginTop: 6 }}>{c.filter_reason}</p>)}
+                    {c.sample_titles && c.sample_titles.length > 0 && (
+                        <p style={{ fontSize: 11, color: T.ink40, marginTop: 8 }}>
+                          Roles: {c.sample_titles.slice(0, 3).join(' · ')}
+                        </p>)}
+                    {c.explore && c.explore.length > 0 && !isFree && (
+                        <div style={{ marginTop: 10 }}>
+                          <p style={{ fontSize: 10, fontWeight: 700, color: T.ink40, textTransform: 'uppercase',
+                                letterSpacing: '.06em', marginBottom: 6 }}>
+                            Otras empresas que podrías investigar (solo ideas; no vienen de esta búsqueda)
+                          </p>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                            {c.explore.map((ex, j) => (<span key={j} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 100,
+                                    background: T.paper, border: `1px solid ${T.ink10}`, color: T.ink60 }}>
+                                {ex}
+                              </span>))}
+                          </div>
+                        </div>)}
+                  </div>);
+            })}
+          </div>
+        </div>)}
+
+      {ran && !isFree && outreachDrafts.length > 0 && (<div style={{ background: 'linear-gradient(135deg, #0F1419 0%, #1a2332 100%)',
+                borderRadius: 16, padding: '24px 28px', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#5BC0BE', background: 'rgba(91,192,190,.15)',
+                padding: '3px 10px', borderRadius: 100, letterSpacing: '.06em', textTransform: 'uppercase' }}>
+              Mensajes sugeridos
+            </span>
+            <span style={{ fontSize: 12, color: '#8892a0' }}>Borradores para tus mejores encajes (hasta 5). Revísalos siempre antes de enviar.</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {outreachDrafts.map((o, i) => (<div key={i} style={{ background: 'rgba(255,255,255,.04)', borderRadius: 12,
+                    padding: '16px 18px', border: '1px solid rgba(255,255,255,.08)' }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#e6e8ec', marginBottom: 4 }}>{o.title}</p>
+                <p style={{ fontSize: 12, color: '#8892a0', marginBottom: 12 }}>{o.company}</p>
+                <div style={{ marginBottom: 10 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#5BC0BE', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+                    Nota LinkedIn
+                  </p>
+                  <p style={{ fontSize: 13, color: '#c5cad3', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{o.linkedin_note}</p>
+                  <button type="button" onClick={() => navigator.clipboard.writeText(o.linkedin_note)} style={{ marginTop: 8,
+                        fontSize: 11, fontWeight: 600, color: '#5BC0BE', background: 'transparent', border: 'none',
+                        cursor: 'pointer', fontFamily: T.sans, textDecoration: 'underline' }}>
+                    Copiar nota
+                  </button>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#8892a0', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+                    Apertura email
+                  </p>
+                  <p style={{ fontSize: 13, color: '#c5cad3', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{o.email_opener}</p>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#8892a0', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+                    Propuesta de valor (1 línea)
+                  </p>
+                  <p style={{ fontSize: 13, color: '#c5cad3', lineHeight: 1.5 }}>{o.one_liner_value}</p>
+                </div>
+                <a href={o.job_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontWeight: 600, color: '#7B68EE' }}>
+                  Ver oferta {IC.externalLink}
+                </a>
+              </div>))}
+          </div>
+        </div>)}
+
       {ran && isFree && (<div style={{ background: T.ink, borderRadius: 14, padding: '22px 26px', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: '#7B68EE', background: 'rgba(123,104,238,.2)',
@@ -400,6 +552,8 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
             {[
                 'Análisis IA de cada oferta',
                 'Ranking de relevancia personalizado',
+                'Mapa de empresas + filtro por encaje',
+                'Borradores de outreach (LinkedIn + email)',
                 'Rango salarial estimado',
                 'Tendencias del sector',
                 'Demanda por ciudad',
@@ -416,9 +570,20 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
         </div>)}
 
       {ran && (<div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ marginBottom: 14 }}>
+              {assistantJourneyLabels.length > 0 && (
+                <div style={{
+                  fontSize: 12, color: T.ink60, lineHeight: 1.55, padding: '12px 14px',
+                  background: T.paper, borderRadius: 10, border: `1px solid ${T.ink10}`, marginBottom: 14,
+                }}>
+                  <span style={{ fontWeight: 700, color: T.ink }}>Qué ha hecho tu asistente: </span>
+                  {assistantJourneyLabels.join(' · ')}
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-.01em', color: T.ink }}>Resultados</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-.01em', color: T.ink }}>Ofertas</h3>
               <span style={{ fontSize: 12, fontWeight: 700, color: T.green,
                 background: 'rgba(40,200,64,.1)', padding: '3px 10px', borderRadius: 100 }}>
                 {total} ofertas encontradas
@@ -454,6 +619,12 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
                         padding: '2px 9px', borderRadius: 100, textTransform: 'uppercase',
                         letterSpacing: '.04em' }}>
                           {job.relevance}
+                        </span>)}
+                      {!isFree && primaryCompanyNames.has((job.company || '').trim().toLowerCase()) && (
+                        <span style={{ fontSize: 9, fontWeight: 700, flexShrink: 0, color: T.green,
+                            background: 'rgba(40,200,64,.1)', padding: '2px 8px', borderRadius: 100,
+                            textTransform: 'uppercase', letterSpacing: '.04em' }}>
+                          Encaja muy bien contigo
                         </span>)}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
