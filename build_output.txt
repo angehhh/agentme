@@ -1,0 +1,58 @@
+
+> agentmev2@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\angee\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\angee\proyectos\agentmev2\package-lock.json
+
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./proyectos/agentmev2/lib/agent.ts:24:9
+Expected a semicolon
+  [90m22 |[0m [36mconst[0m [33mSECTOR_KEYWORDS[0m: [33mRecord[0m<string, string[]> = {
+  [90m23 |[0m     marketing: [[32m'marketing'[0m, [32m'digital'[0m, [32m'seo'[0m, [32m'sem'[0m, [32m'social media'[0m, [32m'contenido'[0m, [32m'conten..[0m.
+[31m[1m>[0m [90m24 |[0m     dise�o: [[32m'dise�o'[0m, [32m'design'[0m, [32m'ux'[0m, [32m'ui'[0m, [32m'figma'[0m, [32m'producto'[0m, [32m'product'[0m, [32m'creativo'[0m, '...
+  [90m   |[0m         [31m[1m^[0m
+  [90m25 |[0m     desarrollo: [[32m'developer'[0m, [32m'desarrollador'[0m, [32m'frontend'[0m, [32m'backend'[0m, [32m'fullstack'[0m, [32m'softwa...[0m
+  [90m26 |[0m     ventas: [[32m'ventas'[0m, [32m'sales'[0m, [32m'comercial'[0m, [32m'account'[0m, [32m'business development'[0m, [32m'sdr'[0m, [32m'bd..[0m.
+  [90m27 |[0m     datos: [[32m'data'[0m, [32m'datos'[0m, [32m'analytics'[0m, [32m'analyst'[0m, [32m'scientist'[0m, [32m'machine learning'[0m, [32m'ia'[0m..[32m.[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  App Route:
+    ./proyectos/agentmev2/lib/agent.ts
+    ./proyectos/agentmev2/app/api/agent/opportunity/route.ts
+
+
+./proyectos/agentmev2/lib/agent.ts:24:9
+Unexpected character '�'
+  [90m22 |[0m [36mconst[0m [33mSECTOR_KEYWORDS[0m: [33mRecord[0m<string, string[]> = {
+  [90m23 |[0m     marketing: [[32m'marketing'[0m, [32m'digital'[0m, [32m'seo'[0m, [32m'sem'[0m, [32m'social media'[0m, [32m'contenido'[0m, [32m'conten..[0m.
+[31m[1m>[0m [90m24 |[0m     dise�o: [[32m'dise�o'[0m, [32m'design'[0m, [32m'ux'[0m, [32m'ui'[0m, [32m'figma'[0m, [32m'producto'[0m, [32m'product'[0m, [32m'creativo'[0m, '...
+  [90m   |[0m         [31m[1m^[0m
+  [90m25 |[0m     desarrollo: [[32m'developer'[0m, [32m'desarrollador'[0m, [32m'frontend'[0m, [32m'backend'[0m, [32m'fullstack'[0m, [32m'softwa...[0m
+  [90m26 |[0m     ventas: [[32m'ventas'[0m, [32m'sales'[0m, [32m'comercial'[0m, [32m'account'[0m, [32m'business development'[0m, [32m'sdr'[0m, [32m'bd..[0m.
+  [90m27 |[0m     datos: [[32m'data'[0m, [32m'datos'[0m, [32m'analytics'[0m, [32m'analyst'[0m, [32m'scientist'[0m, [32m'machine learning'[0m, [32m'ia'[0m..[32m.[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  App Route:
+    ./proyectos/agentmev2/lib/agent.ts
+    ./proyectos/agentmev2/app/api/agent/opportunity/route.ts
+
+
+    at <unknown> (./proyectos/agentmev2/lib/agent.ts:24:9)
+    at <unknown> (./proyectos/agentmev2/lib/agent.ts:24:9)

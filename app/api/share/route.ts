@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createRouteHandlerClient } from '@/lib/supabase-server';
 import { randomBytes } from 'crypto';
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 export async function POST(req: NextRequest) {
     try {
-        const { userId, query, location, jobs, total } = await req.json();
-        if (!userId || !query || !jobs?.length) {
+        const supabase = await createRouteHandlerClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            return NextResponse.json({ error: 'Usuario no autenticado' }, { status: 401 });
+        }
+        const userId = user.id;
+
+        const { query, location, jobs, total } = await req.json();
+        if (!query || !jobs?.length) {
             return NextResponse.json({ error: 'Datos requeridos' }, { status: 400 });
         }
         const id = randomBytes(6).toString('base64url');
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('shared_results')
             .insert({
             id,

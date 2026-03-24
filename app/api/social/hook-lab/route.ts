@@ -2,21 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateHookLab } from '@/lib/social-claude';
 import { SOCIAL_LIMITS, tierFromPlan, utcStartOfIsoWeekIso, } from '@/lib/social-limits';
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+import { createRouteHandlerClient } from '@/lib/supabase-server';
+
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 export async function POST(req: NextRequest) {
     try {
+        const supabase = await createRouteHandlerClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
+        const userId = user.id;
         const body = await req.json();
-        const { userId, topic, audience, tone, language } = body as {
-            userId?: string;
+        const { topic, audience, tone, language } = body as {
             topic?: string;
             audience?: string;
             tone?: string;
             language?: string;
         };
-        if (!userId || !topic?.trim()) {
-            return NextResponse.json({ error: 'Faltan userId o tema' }, { status: 400 });
+
+        if (!topic?.trim()) {
+            return NextResponse.json({ error: 'Falta tema' }, { status: 400 });
         }
-        const { data: profile } = await supabase
+        const { data: profile } = await supabaseAdmin
             .from('profiles')
             .select('plan')
             .eq('id', userId)
@@ -28,7 +38,7 @@ export async function POST(req: NextRequest) {
         const isFree = tier === 'free';
         if (isFree) {
             const since = utcStartOfIsoWeekIso();
-            const { count, error: cErr } = await supabase
+            const { count, error: cErr } = await supabaseAdmin
                 .from('missions')
                 .select('id', { count: 'exact', head: true })
                 .eq('user_id', userId)
@@ -62,7 +72,7 @@ export async function POST(req: NextRequest) {
             }, { status: 503 });
         }
         const { data: hookData } = gen;
-        const { error: mErr } = await supabase.from('missions').insert({
+        const { error: mErr } = await supabaseAdmin.from('missions').insert({
             user_id: userId,
             mode: 'social_hook',
             status: 'completed',

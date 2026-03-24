@@ -4,9 +4,11 @@ import { extractYoutubeVideoId } from '@/lib/youtube-video-id';
 import { SOCIAL_LIMITS, tierFromPlan, utcStartOfIsoWeekIso, } from '@/lib/social-limits';
 import { formatExpiresLabelEs, getOrCreateYoutubeRenderSession, saveYoutubeRenderToStorage, signedUrlSecondsForProject, youtubeThumbUrl, type YoutubeRenderProjectRow, type YoutubeRenderSessionRow, } from '@/lib/youtube-render-projects';
 import { renderYoutubeClipsToZipBuffer, renderYoutubeSingleClipToMp4Buffer, type YoutubeRenderClip, validateRenderClips, } from '@/lib/youtube-render-pipeline';
+import { createRouteHandlerClient } from '@/lib/supabase-server';
+
 export const maxDuration = 300;
 export const runtime = 'nodejs';
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 function isYoutubeRenderDisabled(): boolean {
     if (process.env.DISABLE_YOUTUBE_RENDER === '1')
         return true;
@@ -26,7 +28,7 @@ async function assertRenderLimit(userId: string, tier: 'free' | 'pro'): Promise<
     if (tier !== 'free')
         return null;
     const since = utcStartOfIsoWeekIso();
-    const { count, error: cErr } = await supabase
+    const { count, error: cErr } = await supabaseAdmin
         .from('missions')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
@@ -46,7 +48,7 @@ async function assertRenderLimit(userId: string, tier: 'free' | 'pro'): Promise<
 }
 async function jsonStoredProject(row: YoutubeRenderProjectRow) {
     const expiresIn = signedUrlSecondsForProject(row.expires_at);
-    const { data: signed, error: sErr } = await supabase.storage
+    const { data: signed, error: sErr } = await supabaseAdmin.storage
         .from('youtube-renders')
         .createSignedUrl(row.storage_path, expiresIn);
     if (sErr)
@@ -60,14 +62,22 @@ async function jsonStoredProject(row: YoutubeRenderProjectRow) {
 }
 export async function POST(req: NextRequest) {
     try {
+        const supabase = await createRouteHandlerClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
         if (isYoutubeRenderDisabled()) {
             return NextResponse.json({
                 error: 'render_disabled',
                 message: 'La descarga y render 9:16 no está activa en este despliegue. Usa un servidor propio (VPS/Docker) con `next start` o define ENABLE_YOUTUBE_RENDER=1 en Vercel sabiendo los límites de tiempo y disco.',
             }, { status: 501 });
         }
+
+        if (!user) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
+        const userId = user.id;
         const body = (await req.json()) as {
-            userId?: string;
             youtubeUrl?: string;
             clips?: YoutubeRenderClip[];
             output?: 'zip' | 'mp4';
@@ -77,14 +87,11 @@ export async function POST(req: NextRequest) {
             sessionId?: string;
             clipsPlan?: unknown;
         };
-        const userId = body.userId?.trim();
         const youtubeUrl = body.youtubeUrl?.trim();
         const clips = Array.isArray(body.clips) ? body.clips : [];
         const output = body.output === 'mp4' ? 'mp4' : 'zip';
         const store = body.store === true;
-        if (!userId) {
-            return NextResponse.json({ error: 'Falta userId' }, { status: 400 });
-        }
+
         if (!youtubeUrl) {
             return NextResponse.json({ error: 'Falta la URL de YouTube' }, { status: 400 });
         }
@@ -113,7 +120,7 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: 'clips_invalidos', message: oneOk.message }, { status: 400 });
             }
         }
-        const { data: profile } = await supabase.from('profiles').select('plan').eq('id', userId).maybeSingle();
+        const { data: profile } = await supabaseAdmin.from('profiles').select('plan').eq('id', userId).maybeSingle();
         if (!profile) {
             return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
         }
@@ -125,7 +132,7 @@ export async function POST(req: NextRequest) {
         let sessionForStore: YoutubeRenderSessionRow | null = null;
         if (store) {
             const sr = await getOrCreateYoutubeRenderSession({
-                supabase,
+                supabase: supabaseAdmin,
                 userId,
                 youtubeVideoId: videoId,
                 youtubeUrl,
@@ -148,7 +155,7 @@ export async function POST(req: NextRequest) {
                 const filename = asciiDownloadName(videoId, singleClip, clipIndex);
                 const durationSec = Math.round(singleClip.end_sec - singleClip.start_sec);
                 const displayTitle = singleClip.title?.trim() || `Clip ${clipIndex + 1}`;
-                const { error: mErr } = await supabase.from('missions').insert({
+                const { error: mErr } = await supabaseAdmin.from('missions').insert({
                     user_id: userId,
                     mode: 'social_youtube_render',
                     status: 'completed',
@@ -160,7 +167,7 @@ export async function POST(req: NextRequest) {
                     console.error('[social/youtube-render] mission insert', mErr);
                 if (store && sessionForStore) {
                     const saved = await saveYoutubeRenderToStorage({
-                        supabase,
+                        supabase: supabaseAdmin,
                         userId,
                         sessionId: sessionForStore.id,
                         buffer,
@@ -207,7 +214,7 @@ export async function POST(req: NextRequest) {
             const totalDur = Math.round(clips.reduce((acc, c) => acc + (c.end_sec - c.start_sec), 0));
             const packTitle = body.videoTitle?.trim() ||
                 `Pack ${clips.length} clips`;
-            const { error: mErr } = await supabase.from('missions').insert({
+            const { error: mErr } = await supabaseAdmin.from('missions').insert({
                 user_id: userId,
                 mode: 'social_youtube_render',
                 status: 'completed',
@@ -219,7 +226,7 @@ export async function POST(req: NextRequest) {
                 console.error('[social/youtube-render] mission insert', mErr);
             if (store && sessionForStore) {
                 const saved = await saveYoutubeRenderToStorage({
-                    supabase,
+                    supabase: supabase,
                     userId,
                     sessionId: sessionForStore.id,
                     buffer: zipBuf,

@@ -1,7 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
-export const YOUTUBE_RENDER_BUCKET = 'youtube-renders';
-export const YOUTUBE_RENDER_TTL_DAYS = 2;
+import { YOUTUBE_RENDER_BUCKET, YOUTUBE_RENDER_TTL_DAYS } from './constants';
 export type YoutubeRenderProjectRow = {
     id: string;
     user_id: string;

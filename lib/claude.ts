@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { JobResult, MarketStats } from './agent';
+import { getAnalyzeJobsPrompt, getMarketInsightsPrompt } from './prompts/opportunity';
 const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -17,31 +18,17 @@ export async function analyzeJobs(jobs: JobResult[], userQuery: string): Promise
         return null;
     const jobList = jobs.map((j, i) => `${i + 1}. "${j.title}" en ${j.company || 'empresa desconocida'} (${j.location || 'ubicación no especificada'})`).join('\n');
     try {
+        const prompt = getAnalyzeJobsPrompt({
+            userQuery,
+            jobList,
+            numJobs: jobs.length
+        });
         const msg = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 1024,
             messages: [{
                     role: 'user',
-                    content: `Eres un asesor de carrera. El usuario busca: "${userQuery}".
-
-Estas son las ofertas encontradas:
-${jobList}
-
-Responde SOLO con JSON válido (sin markdown, sin backticks). El formato:
-{
-  "summary": "Un párrafo breve (2-3 frases) resumiendo las oportunidades encontradas y recomendación general",
-  "rankings": [
-    { "index": 1, "relevance": "alta", "reason": "Frase corta explicando por qué encaja", "tip": "Consejo específico para aplicar a esta oferta" },
-    { "index": 2, "relevance": "media", "reason": "Frase corta", "tip": "Consejo específico" }
-  ]
-}
-
-Reglas:
-- relevance: "alta", "media" o "baja"
-- reason: máximo 15 palabras, en español, directo
-- tip: consejo personalizado para aplicar a esa oferta concreta (máx 25 palabras), ej: "Destaca tu experiencia con React y proyectos de e-commerce en tu CV"
-- Devuelve un ranking para CADA oferta (${jobs.length} en total)
-- summary: máximo 3 frases, en español`
+                    content: prompt
                 }]
         });
         const text = msg.content[0].type === 'text' ? msg.content[0].text : '';
@@ -89,30 +76,19 @@ export async function generateMarketInsights(jobs: JobResult[], query: string, s
         .join(', ');
     const titles = jobs.map(j => j.title).join(', ');
     try {
+        const prompt = getMarketInsightsPrompt({
+            query,
+            location,
+            totalLinkedIn: stats.totalLinkedIn,
+            cityList,
+            titles
+        });
         const msg = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 512,
             messages: [{
                     role: 'user',
-                    content: `Eres un analista del mercado laboral español. El usuario busca "${query}" en "${location}".
-
-Datos:
-- Total aproximado en LinkedIn: ${stats.totalLinkedIn || 'desconocido'}
-- Distribución por ciudad en resultados: ${cityList || 'no disponible'}
-- Títulos encontrados: ${titles}
-
-Responde SOLO con JSON válido (sin markdown):
-{
-  "trends": "1-2 frases sobre la tendencia actual de este sector (demanda, crecimiento, etc.)",
-  "salaryRange": "Rango salarial estimado para este tipo de puesto en España (ej: '25.000€ - 40.000€/año')",
-  "topCities": [
-    { "city": "Madrid", "demand": "Alta" },
-    { "city": "Barcelona", "demand": "Media" }
-  ],
-  "tip": "1 consejo práctico para el candidato (máx 20 palabras)"
-}
-
-Reglas: en español, datos realistas del mercado español 2025-2026, máximo 3 ciudades en topCities.`
+                    content: prompt
                 }]
         });
         const text = msg.content[0].type === 'text' ? msg.content[0].text : '';

@@ -5,9 +5,11 @@ import { fetchYoutubeTranscript } from '@/lib/youtube-fetch-transcript';
 import { totalDurationSec, transcriptToTimedLines } from '@/lib/youtube-transcript-helpers';
 import { extractYoutubeVideoId } from '@/lib/youtube-video-id';
 import { SOCIAL_LIMITS, tierFromPlan, utcStartOfIsoWeekIso, } from '@/lib/social-limits';
+import { createRouteHandlerClient } from '@/lib/supabase-server';
+
 export const maxDuration = 300;
 export const runtime = 'nodejs';
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 const MAX_TIMED_CHARS = 110000;
 async function fetchYoutubeOEmbedTitle(videoId: string): Promise<string | null> {
     try {
@@ -26,16 +28,21 @@ async function fetchYoutubeOEmbedTitle(videoId: string): Promise<string | null> 
 }
 export async function POST(req: NextRequest) {
     try {
+        const supabase = await createRouteHandlerClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
+        const userId = user.id;
         const body = await req.json();
-        const { userId, youtubeUrl, captionLang, language } = body as {
-            userId?: string;
+        const { youtubeUrl, captionLang, language } = body as {
             youtubeUrl?: string;
             captionLang?: string;
             language?: string;
         };
-        if (!userId?.trim()) {
-            return NextResponse.json({ error: 'Falta userId' }, { status: 400 });
-        }
+
         if (!youtubeUrl?.trim()) {
             return NextResponse.json({ error: 'Falta la URL de YouTube' }, { status: 400 });
         }
@@ -43,7 +50,7 @@ export async function POST(req: NextRequest) {
         if (!videoId) {
             return NextResponse.json({ error: 'URL inválida', message: 'Pega un enlace de youtube.com, youtu.be o Shorts.' }, { status: 400 });
         }
-        const { data: profile } = await supabase.from('profiles').select('plan').eq('id', userId).maybeSingle();
+        const { data: profile } = await supabaseAdmin.from('profiles').select('plan').eq('id', userId).maybeSingle();
         if (!profile) {
             return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 });
         }
@@ -51,7 +58,7 @@ export async function POST(req: NextRequest) {
         const isFree = tier === 'free';
         if (isFree) {
             const since = utcStartOfIsoWeekIso();
-            const { count, error: cErr } = await supabase
+            const { count, error: cErr } = await supabaseAdmin
                 .from('missions')
                 .select('id', { count: 'exact', head: true })
                 .eq('user_id', userId)
@@ -95,7 +102,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: gen.reason === 'missing_api_key' ? 'missing_api_key' : 'ia_no_disponible', message }, { status: 503 });
         }
         const titleForMission = oEmbedTitle || gen.data.video_title_hint || videoId;
-        const { error: mErr } = await supabase.from('missions').insert({
+        const { error: mErr } = await supabaseAdmin.from('missions').insert({
             user_id: userId,
             mode: 'social_youtube_clips',
             status: 'completed',

@@ -2,15 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { scrapeLinkedInJobs } from '@/lib/agent';
 import { analyzeJobs, generateMarketInsights } from '@/lib/claude';
 import { createClient } from '@supabase/supabase-js';
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+import { createRouteHandlerClient } from '@/lib/supabase-server';
+
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 const FREE_DAILY_LIMIT = 5;
 export async function POST(req: NextRequest) {
     try {
-        const { userId, query, location, workType, experience } = await req.json();
-        if (!userId || !query) {
-            return NextResponse.json({ error: 'userId y query son requeridos' }, { status: 400 });
+        const supabase = await createRouteHandlerClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            return NextResponse.json({ error: 'Usuario no autenticado' }, { status: 401 });
         }
-        const { data: profile } = await supabase
+        const userId = user.id;
+
+        const { query, location, workType, experience } = await req.json();
+        if (!query) {
+            return NextResponse.json({ error: 'La query es requerida' }, { status: 400 });
+        }
+        const { data: profile } = await supabaseAdmin
             .from('profiles')
             .select('plan, actions_today')
             .eq('id', userId)
@@ -57,7 +66,7 @@ export async function POST(req: NextRequest) {
                 console.error('[Claude] Analysis failed, returning raw results:', e);
             }
         }
-        const { data: mission, error: missionError } = await supabase
+        const { data: mission, error: missionError } = await supabaseAdmin
             .from('missions')
             .insert({
             user_id: userId,
@@ -72,7 +81,7 @@ export async function POST(req: NextRequest) {
         if (missionError)
             console.error('Mission insert error:', missionError);
         if (mission && jobs.length > 0) {
-            const { error: resultsError } = await supabase
+            const { error: resultsError } = await supabaseAdmin
                 .from('results')
                 .insert(jobs.map(job => ({
                 mission_id: mission.id,
@@ -89,7 +98,7 @@ export async function POST(req: NextRequest) {
                 console.error('Results insert error:', resultsError);
         }
         const newActionsUsed = actionsUsed + 1;
-        await supabase
+        await supabaseAdmin
             .from('profiles')
             .update({ actions_today: newActionsUsed })
             .eq('id', userId);

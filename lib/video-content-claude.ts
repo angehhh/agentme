@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { SocialPlanTier } from '@/lib/social-limits';
+import { getVideoContentPrompt } from './prompts/media';
 const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -75,38 +76,13 @@ export async function generateVideoContentPack(params: {
     const nicheLine = nicheHint?.trim()
         ? `Contexto del creador (opcional): ${nicheHint.trim()}`
         : 'Sin contexto extra del creador.';
-    const prompt = `Eres editor de redes y copywriter. A partir de la TRANSCRIPCIÓN de un vídeo (lo dicho en voz), genera material listo para publicar.
-
-Idioma de salida: ${language}
-${nicheLine}
-${truncated ? 'NOTA: la transcripción está truncada por longitud; infiere con prudencia lo que falte.' : ''}
-
-TRANSCRIPCIÓN:
----
-${transcript}
----
-
-Responde SOLO con JSON válido (sin markdown):
-{
-  "summary": "2-4 frases: de qué va el vídeo y por qué importa",
-  "key_takeaways": ["punto 1", ...],
-  "hook_suggestions": ["gancho corto 1", ...],
-  "caption_short": "una línea tipo TikTok/IG (máx ~200 caracteres)",
-  "caption_long": "párrafo para IG/LinkedIn con saltos de línea \\n donde tenga sentido",
-  "thread_outline": ["tweet/hilo 1", "2", ...],
-  "hashtags": ["#tema", ...] sin repetir,
-  "cta_ideas": ["CTA 1", ...],
-  "quote_cards": ["frase corta citable 1", ...]
-}
-
-Reglas estrictas:
-- Todos los textos en el idioma indicado.
-- key_takeaways: exactamente ${counts.takeaways} ítems, muy concretos.
-- hook_suggestions: exactamente ${counts.hooks} ítems; primera persona o imperativo; para vídeo corto vertical.
-- thread_outline: exactamente ${counts.thread} ítems; cada uno autónomo (orden narrativo).
-- hashtags: exactamente ${counts.hashtags} ítems; relevantes al contenido; formato #palabra o #varias_palabras.
-- cta_ideas: exactamente ${counts.cta} ítems.
-- quote_cards: exactamente ${counts.quotes} ítems; memorables, sin comillas externas en el string.`;
+    const prompt = getVideoContentPrompt({
+        language,
+        nicheLine,
+        truncated,
+        transcript,
+        counts
+    });
     try {
         const msg = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',

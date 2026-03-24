@@ -6,16 +6,12 @@ import { Writable } from 'stream';
 import archiver from 'archiver';
 import { create as createYoutubeDl } from 'youtube-dl-exec';
 import { resolveFfmpegPath, resolveYtDlpExecutable } from '@/lib/resolve-media-binaries';
+import { YOUTUBE_RENDER_MAX_CLIPS, YOUTUBE_RENDER_MIN_CLIP_SEC, YOUTUBE_RENDER_MAX_CLIP_SEC, YOUTUBE_RENDER_MAX_TOTAL_CLIP_SEC, YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC } from './constants';
 export type YoutubeRenderClip = {
     start_sec: number;
     end_sec: number;
     title?: string;
 };
-export const YOUTUBE_RENDER_MAX_CLIPS = 14;
-export const YOUTUBE_RENDER_MIN_CLIP_SEC = 2;
-export const YOUTUBE_RENDER_MAX_CLIP_SEC = 90;
-export const YOUTUBE_RENDER_MAX_TOTAL_CLIP_SEC = 16 * 60;
-export const YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC = 2 * 60 * 60;
 function youtubeDlClient() {
     return createYoutubeDl(resolveYtDlpExecutable());
 }
