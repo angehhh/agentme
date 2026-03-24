@@ -7,6 +7,7 @@ import MissionsView from './MissionsView';
 import SocialView from './SocialView';
 import { IC, T, type Suggestion, CITIES, LocationInput, JOB_CATEGORIES, QueryInput, WORK_TYPES, EXP_LEVELS, RELEVANCE_COLORS } from './DashboardCommon';
 import OpportunityView, { type Profile } from './OpportunityView';
+import { SHELL } from '@/lib/app-shell';
 
 function SleepModal({ onClose }: {
     onClose: () => void;
@@ -16,8 +17,8 @@ function SleepModal({ onClose }: {
     return (<div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.55)',
             backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center',
             justifyContent: 'center', padding: 24 }} onClick={onClose}>
-      <div style={{ background: T.white, borderRadius: 20, padding: 40, width: '100%',
-            maxWidth: 520, boxShadow: '0 32px 80px rgba(0,0,0,.22)', animation: 'slideUp .3s ease' }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: T.white, borderRadius: SHELL.radius.xl, padding: '36px 40px', width: '100%',
+            maxWidth: 480, boxShadow: SHELL.shadow.modal, animation: 'slideUp .3s ease', border: `1px solid ${T.ink10}` }} onClick={e => e.stopPropagation()}>
         {!saved ? (<>
             <div style={{ width: 44, height: 44, borderRadius: 11, background: T.ink,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -128,10 +129,12 @@ export default function DashboardPage() {
         id: View;
         icon: React.ReactNode;
         label: string;
-    }) => (<button key={id} onClick={() => setView(id)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 10px',
-            borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: T.sans, fontSize: 14,
-            fontWeight: view === id ? 600 : 400, background: view === id ? T.paper : 'transparent',
-            color: view === id ? T.ink : T.ink60, marginBottom: 2, transition: 'all .15s', textAlign: 'left' }} onMouseEnter={e => { if (view !== id)
+    }) => (<button key={id} onClick={() => setView(id)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 12px',
+            borderRadius: 11, border: 'none', cursor: 'pointer', fontFamily: T.sans, fontSize: 14,
+            fontWeight: view === id ? 600 : 500, background: view === id ? T.white : 'transparent',
+            color: view === id ? T.ink : T.ink60, marginBottom: 4, transition: 'all .18s ease', textAlign: 'left',
+            boxShadow: view === id ? '0 1px 3px rgba(12,12,12,.06)' : 'none',
+            borderLeft: view === id ? `3px solid ${T.ink}` : '3px solid transparent' }} onMouseEnter={e => { if (view !== id)
         e.currentTarget.style.background = T.paper; }} onMouseLeave={e => { if (view !== id)
         e.currentTarget.style.background = 'transparent'; }}>
       {icon} {label}
@@ -154,36 +157,42 @@ export default function DashboardPage() {
       <div style={{ display: 'flex', minHeight: '100vh' }}>
 
         
-        <aside style={{ width: 240, flexShrink: 0, background: T.white, borderRight: `1px solid ${T.ink10}`,
+        <aside style={{ width: SHELL.sidebarWidth, flexShrink: 0, background: SHELL.sidebarBg,
+            borderRight: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.sidebar,
             display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
 
-          <div style={{ padding: '22px 20px 18px', borderBottom: `1px solid ${T.ink10}` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ padding: '24px 22px 20px', borderBottom: `1px solid ${T.ink10}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
               {IC.logo}
-              <span style={{ fontFamily: T.serif, fontWeight: 700, fontSize: 16,
-            letterSpacing: '-.02em', color: T.ink }}>AGENTME</span>
+              <div>
+                <span style={{ fontFamily: T.serif, fontWeight: 700, fontSize: 17,
+            letterSpacing: '-.025em', color: T.ink, display: 'block', lineHeight: 1.15 }}>AGENTME</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: T.ink40, letterSpacing: '.04em' }}>Tu workspace</span>
+              </div>
             </div>
           </div>
 
-          <nav style={{ padding: '14px 12px', flexGrow: 1 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', color: T.ink20,
-            textTransform: 'uppercase', padding: '0 8px', marginBottom: 8 }}>Principal</p>
+          <nav style={{ padding: '16px 14px', flexGrow: 1 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: T.ink40,
+            textTransform: 'uppercase', padding: '0 10px', marginBottom: 10 }}>Principal</p>
             {renderNavBtn({ id: 'home', icon: IC.home, label: 'Inicio' })}
             {renderNavBtn({ id: 'missions', icon: IC.activity, label: 'Misiones' })}
             {renderNavBtn({ id: 'settings', icon: IC.settings, label: 'Ajustes' })}
-            <div style={{ height: 1, background: T.ink10, margin: '14px 8px' }}/>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', color: T.ink20,
-            textTransform: 'uppercase', padding: '0 8px', marginBottom: 8 }}>Modos</p>
+            <div style={{ height: 1, background: T.ink10, margin: '16px 10px' }}/>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: T.ink40,
+            textTransform: 'uppercase', padding: '0 10px', marginBottom: 10 }}>Modos</p>
             {modes.map((m, i) => (<button key={i} onClick={() => { if (m.sleep) {
             setSleepOpen(true);
             return;
         } ; if (m.available && m.id)
-            setView(m.id); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 10px',
-                borderRadius: 8, border: 'none', cursor: m.available ? 'pointer' : 'default',
-                fontFamily: T.sans, fontSize: 13, fontWeight: view === m.id ? 600 : 400,
-                background: view === m.id ? T.paper : 'transparent',
+            setView(m.id); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 12px',
+                borderRadius: 11, border: 'none', cursor: m.available ? 'pointer' : 'default',
+                fontFamily: T.sans, fontSize: 13, fontWeight: view === m.id ? 600 : 500,
+                background: view === m.id ? T.white : 'transparent',
                 color: m.available ? (view === m.id ? T.ink : T.ink60) : T.ink20,
-                marginBottom: 2, transition: 'all .15s', textAlign: 'left' }} onMouseEnter={e => { if (m.available && view !== m.id)
+                marginBottom: 4, transition: 'all .18s ease', textAlign: 'left',
+                boxShadow: view === m.id && m.available ? '0 1px 3px rgba(12,12,12,.06)' : 'none',
+                borderLeft: view === m.id && m.available ? `3px solid ${T.ink}` : '3px solid transparent' }} onMouseEnter={e => { if (m.available && view !== m.id)
             e.currentTarget.style.background = T.paper; }} onMouseLeave={e => { if (m.available && view !== m.id)
             e.currentTarget.style.background = 'transparent'; }}>
                 <span style={{ opacity: m.available ? 1 : .4 }}>{m.icon}</span>
@@ -194,11 +203,11 @@ export default function DashboardPage() {
               </button>))}
           </nav>
 
-          <div style={{ padding: '14px 12px', borderTop: `1px solid ${T.ink10}` }}>
+          <div style={{ padding: '16px 14px', borderTop: `1px solid ${T.ink10}`, background: 'rgba(255,255,255,.5)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: T.ink,
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: T.ink,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: T.white, fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
+            color: T.white, fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
               <div style={{ flexGrow: 1, minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 600, color: T.ink,
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</p>
@@ -213,24 +222,33 @@ export default function DashboardPage() {
         </aside>
 
         
-        <main style={{ flexGrow: 1, minHeight: '100vh', background: T.paper, overflow: 'auto' }}>
-          <div style={{ height: 60, borderBottom: `1px solid ${T.ink10}`, background: T.white,
+        <main style={{ flexGrow: 1, minHeight: '100vh', background: SHELL.mainGradient, overflow: 'auto' }}>
+          <div style={{
+            minHeight: SHELL.topBarHeight, borderBottom: `1px solid ${T.ink10}`,
+            background: SHELL.topBarBg, backdropFilter: 'saturate(180%) blur(12px)',
+            WebkitBackdropFilter: 'saturate(180%) blur(12px)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 32px', position: 'sticky', top: 0, zIndex: 50 }}>
-            <h1 style={{ fontFamily: T.serif, fontSize: 18, fontWeight: 700, letterSpacing: '-.02em', color: T.ink }}>
-              {view === 'home' && 'Inicio'}{view === 'opportunity' && 'Opportunity Mode'}
-              {view === 'social' && 'Social Mode'}
-              {view === 'missions' && 'Misiones'}{view === 'settings' && 'Ajustes'}
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-            color: T.green, background: 'rgba(40,200,64,.1)', padding: '5px 12px', borderRadius: 100 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.green, display: 'inline-block' }}/>
-              Agente activo
+            padding: `0 ${SHELL.pagePadding}px`, position: 'sticky', top: 0, zIndex: 50,
+            boxShadow: SHELL.shadow.topBar,
+          }}>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: T.ink40, textTransform: 'uppercase', marginBottom: 2 }}>Vista</p>
+              <h1 style={{ fontFamily: T.serif, fontSize: 22, fontWeight: 700, letterSpacing: '-.03em', color: T.ink, lineHeight: 1.15 }}>
+                {view === 'home' && 'Inicio'}{view === 'opportunity' && 'Opportunity Mode'}
+                {view === 'social' && 'Social Mode'}
+                {view === 'missions' && 'Misiones'}{view === 'settings' && 'Ajustes'}
+              </h1>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600,
+            color: '#1a6b2c', background: 'linear-gradient(135deg, rgba(40,200,64,.14) 0%, rgba(40,200,64,.08) 100%)',
+            padding: '7px 14px', borderRadius: 100, border: '1px solid rgba(40,200,64,.2)' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: T.green, display: 'inline-block', boxShadow: '0 0 0 2px rgba(40,200,64,.25)' }}/>
+              Asistente listo
             </div>
           </div>
 
           
-          {view === 'home' && (<div className="fade" style={{ padding: 32 }}>
+          {view === 'home' && (<div className="fade" style={{ padding: SHELL.pagePadding, maxWidth: SHELL.contentMax + SHELL.pagePadding * 2, margin: '0 auto' }}>
               <div style={{ marginBottom: 36 }}>
                 <h2 style={{ fontFamily: T.serif, fontSize: 'clamp(28px,3vw,40px)', fontWeight: 700,
                 letterSpacing: '-.03em', color: T.ink, marginBottom: 6 }}>
@@ -239,10 +257,10 @@ export default function DashboardPage() {
                 <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.6 }}>Tu agente está listo para trabajar por ti.</p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, marginBottom: 32 }}>
-                {stats.map((s, i) => (<div key={i} style={{ background: T.white, borderRadius: 14, padding: '22px 24px',
-                    border: `1px solid ${T.ink10}`, display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, background: T.paper,
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 36 }}>
+                {stats.map((s, i) => (<div key={i} style={{ background: T.white, borderRadius: SHELL.radius.lg, padding: '24px 26px',
+                    border: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.card, display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: T.paper,
                     border: `1px solid ${T.ink10}`, display: 'flex', alignItems: 'center',
                     justifyContent: 'center', color: T.ink, flexShrink: 0 }}>{s.icon}</div>
                     <div>
@@ -253,8 +271,9 @@ export default function DashboardPage() {
                   </div>))}
               </div>
 
-              <div style={{ background: T.ink, borderRadius: 16, padding: '24px 28px', marginBottom: 32,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+              <div style={{ background: 'linear-gradient(145deg, #121212 0%, #1c1c1c 100%)', borderRadius: SHELL.radius.xl, padding: '28px 32px', marginBottom: 36,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
+                boxShadow: '0 16px 40px rgba(0,0,0,.12)', border: '1px solid rgba(255,255,255,.06)' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                     <span style={{ width: 7, height: 7, borderRadius: '50%', background: T.green, display: 'inline-block' }}/>
@@ -264,23 +283,24 @@ export default function DashboardPage() {
                   <p style={{ fontSize: 13, color: '#555', marginTop: 4 }}>Activa un modo para empezar</p>
                 </div>
                 <button onClick={() => setView('opportunity')} style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.white, color: T.ink,
-                padding: '11px 22px', borderRadius: 9, fontSize: 14, fontWeight: 600, border: 'none',
-                fontFamily: T.sans, cursor: 'pointer', transition: 'opacity .15s' }} onMouseEnter={e => (e.currentTarget.style.opacity = '.88')} onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                  {IC.zap} Lanzar agente
+                padding: '12px 24px', borderRadius: 11, fontSize: 14, fontWeight: 600, border: 'none',
+                fontFamily: T.sans, cursor: 'pointer', transition: 'transform .15s, box-shadow .15s', boxShadow: '0 4px 14px rgba(0,0,0,.15)' }} onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+                  {IC.zap} Ir a Opportunity
                 </button>
               </div>
 
-              <h3 style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-.01em', color: T.ink, marginBottom: 16 }}>Modos disponibles</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-.02em', color: T.ink, marginBottom: 18 }}>Modos disponibles</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 16 }}>
                 {modes.map((m, i) => (<div key={i} onClick={() => { if (m.sleep) {
                 setSleepOpen(true);
                 return;
             } ; if (m.available && m.id)
-                setView(m.id); }} style={{ background: T.white, borderRadius: 16, padding: 24, border: `1px solid ${T.ink10}`,
-                    cursor: m.available ? 'pointer' : 'default', transition: 'all .18s ease' }} onMouseEnter={e => { if (m.available) {
-                e.currentTarget.style.borderColor = T.ink;
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,.08)';
-            } }} onMouseLeave={e => { e.currentTarget.style.borderColor = T.ink10; e.currentTarget.style.boxShadow = 'none'; }}>
+                setView(m.id); }} style={{ background: T.white, borderRadius: SHELL.radius.xl, padding: 26, border: `1px solid ${T.ink10}`,
+                    boxShadow: SHELL.shadow.card, cursor: m.available ? 'pointer' : 'default', transition: 'all .2s ease' }} onMouseEnter={e => { if (m.available) {
+                e.currentTarget.style.borderColor = T.ink20;
+                e.currentTarget.style.boxShadow = SHELL.shadow.cardHover;
+                e.currentTarget.style.transform = 'translateY(-2px)';
+            } }} onMouseLeave={e => { e.currentTarget.style.borderColor = T.ink10; e.currentTarget.style.boxShadow = SHELL.shadow.card; e.currentTarget.style.transform = 'translateY(0)'; }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
                       <div style={{ width: 44, height: 44, borderRadius: 11,
                     background: m.available ? T.ink : T.paper,
@@ -317,9 +337,9 @@ export default function DashboardPage() {
               <MissionsView userId={profile.id} supabase={supabase} onNewMission={() => setView('opportunity')}/>
             </div>)}
 
-          {view === 'settings' && (<div className="fade" style={{ padding: 32 }}>
-              <div style={{ maxWidth: 540, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div style={{ background: T.white, borderRadius: 16, padding: 28, border: `1px solid ${T.ink10}` }}>
+          {view === 'settings' && (<div className="fade" style={{ padding: SHELL.pagePadding, maxWidth: SHELL.contentMax + SHELL.pagePadding * 2, margin: '0 auto' }}>
+              <div style={{ maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 22 }}>
+                <div style={{ background: T.white, borderRadius: SHELL.radius.xl, padding: 30, border: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.card }}>
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: T.ink, marginBottom: 24 }}>Perfil</h3>
                   <div style={{ marginBottom: 18 }}>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: T.ink40,
@@ -345,7 +365,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div style={{ background: T.white, borderRadius: 16, padding: 28, border: `1px solid ${T.ink10}` }}>
+                <div style={{ background: T.white, borderRadius: SHELL.radius.xl, padding: 30, border: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.card }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                     <h3 style={{ fontSize: 15, fontWeight: 700, color: T.ink }}>Plan actual</h3>
                     <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase',
@@ -379,7 +399,7 @@ export default function DashboardPage() {
                     </>)}
                 </div>
 
-                <div style={{ background: T.white, borderRadius: 16, padding: 28, border: `1px solid ${T.ink10}` }}>
+                <div style={{ background: T.white, borderRadius: SHELL.radius.xl, padding: 30, border: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.card }}>
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: T.ink, marginBottom: 16 }}>Sesión</h3>
                   <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent',
                 color: '#C0392B', padding: '10px 0', border: 'none', fontSize: 14,

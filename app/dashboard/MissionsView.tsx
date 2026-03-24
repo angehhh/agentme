@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { SHELL } from '@/lib/app-shell';
 import { Calendar, CirclePlay, Clapperboard, Download, Zap } from 'lucide-react';
 const T = {
     ink: '#0C0C0C', ink60: '#606060', ink40: '#909090',
@@ -142,8 +143,8 @@ function MissionCard({ mission, userId, supabase }: {
     };
     const statusColor = mission.status === 'completed' ? T.green : '#E8A020';
     const statusLabel = mission.status === 'completed' ? 'Completada' : 'Parcial';
-    return (<div style={{ background: T.white, borderRadius: 14,
-            border: `1px solid ${T.ink10}`, overflow: 'hidden' }}>
+    return (<div style={{ background: T.white, borderRadius: SHELL.radius.lg,
+            border: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.card, overflow: 'hidden' }}>
 
       
       <div onClick={toggle} style={{ padding: '18px 22px', cursor: 'pointer',
@@ -324,7 +325,7 @@ export default function MissionsView({ userId, supabase, onNewMission, }: {
         load();
     }, [userId]);
     if (loading)
-        return (<div style={{ padding: 32, display: 'flex', alignItems: 'center',
+        return (<div style={{ padding: SHELL.pagePadding, display: 'flex', alignItems: 'center',
                 gap: 10, fontSize: 14, color: T.ink40, fontFamily: T.sans }}>
       <div style={{ width: 16, height: 16, border: `2px solid ${T.ink10}`,
                 borderTopColor: T.ink40, borderRadius: '50%',
@@ -333,7 +334,7 @@ export default function MissionsView({ userId, supabase, onNewMission, }: {
     </div>);
     const totalOfertas = missions.reduce((s, m) => s + (m.result_count || 0), 0);
     const completadas = missions.filter(m => m.status === 'completed').length;
-    return (<div style={{ padding: 32, maxWidth: 860 }}>
+    return (<div style={{ padding: SHELL.pagePadding, maxWidth: SHELL.contentMax, margin: '0 auto', width: '100%' }}>
 
       
       <div style={{ display: 'flex', alignItems: 'flex-start',
@@ -364,8 +365,8 @@ export default function MissionsView({ userId, supabase, onNewMission, }: {
                 { label: 'Total misiones', value: missions.length },
                 { label: 'Ofertas guardadas', value: totalOfertas },
                 { label: 'Completadas', value: completadas },
-            ].map((s, i) => (<div key={i} style={{ background: T.white, borderRadius: 12,
-                    padding: '16px 20px', border: `1px solid ${T.ink10}` }}>
+            ].map((s, i) => (<div key={i} style={{ background: T.white, borderRadius: SHELL.radius.lg,
+                    padding: '18px 22px', border: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.card }}>
               <p style={{ fontSize: 11, color: T.ink40, textTransform: 'uppercase',
                     letterSpacing: '.08em', fontWeight: 700, marginBottom: 6 }}>
                 {s.label}
@@ -378,8 +379,8 @@ export default function MissionsView({ userId, supabase, onNewMission, }: {
         </div>)}
 
       
-      {missions.length === 0 ? (<div style={{ background: T.white, borderRadius: 16, padding: '56px 40px',
-                textAlign: 'center', border: `1px solid ${T.ink10}` }}>
+      {missions.length === 0 ? (<div style={{ background: T.white, borderRadius: SHELL.radius.xl, padding: '56px 40px',
+                textAlign: 'center', border: `1px solid ${T.ink10}`, boxShadow: SHELL.shadow.card }}>
           <div style={{ width: 52, height: 52, borderRadius: 13, background: T.paper,
                 border: `1px solid ${T.ink10}`, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', color: T.ink40, margin: '0 auto 20px' }}>

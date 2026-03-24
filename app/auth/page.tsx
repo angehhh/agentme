@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
+import { SHELL } from '@/lib/app-shell';
 const IC = {
     logo: (<svg width="32" height="32" viewBox="0 0 30 30" fill="none">
       <rect width="30" height="30" rx="7" fill="#0C0C0C"/>
@@ -103,10 +104,10 @@ export default function AuthPage() {
           * { box-sizing:border-box; margin:0; padding:0; }
           body { font-family:${T.sans}; background:${T.paper}; }
         `}</style>
-        <div style={{ minHeight: '100vh', background: T.paper,
+        <div style={{ minHeight: '100vh', background: SHELL.mainGradient,
                 display: 'flex', alignItems: 'center',
                 justifyContent: 'center', padding: 24 }}>
-          <div style={{ textAlign: 'center', maxWidth: 420 }}>
+          <div style={{ textAlign: 'center', maxWidth: 440 }}>
             <div style={{ width: 60, height: 60, borderRadius: '50%',
                 background: 'rgba(40,200,64,.1)',
                 display: 'flex', alignItems: 'center',
@@ -144,13 +145,16 @@ export default function AuthPage() {
         .fade { animation:fadeUp .35s ease; }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: T.paper,
+      <div style={{ minHeight: '100vh', background: SHELL.mainGradient,
             display: 'flex', flexDirection: 'column' }}>
 
         
-        <div style={{ padding: '20px 32px',
+        <div style={{ padding: '18px 32px',
             borderBottom: `1px solid ${T.ink10}`,
-            background: T.white,
+            background: SHELL.topBarBg,
+            backdropFilter: 'saturate(180%) blur(12px)',
+            WebkitBackdropFilter: 'saturate(180%) blur(12px)',
+            boxShadow: SHELL.shadow.topBar,
             display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ cursor: 'pointer', display: 'flex',
             alignItems: 'center', gap: 10 }} onClick={() => router.push('/')}>
@@ -166,7 +170,7 @@ export default function AuthPage() {
         <div style={{ flex: 1, display: 'flex',
             alignItems: 'center', justifyContent: 'center', padding: 24 }}>
 
-          <div className="fade" style={{ width: '100%', maxWidth: 420 }}>
+          <div className="fade" style={{ width: '100%', maxWidth: 440 }}>
 
             
             <div style={{ textAlign: 'center', marginBottom: 36 }}>
@@ -185,9 +189,9 @@ export default function AuthPage() {
             </div>
 
             
-            <div style={{ background: T.white, borderRadius: 18,
-            padding: '32px 32px', border: `1px solid ${T.ink10}`,
-            boxShadow: '0 4px 24px rgba(0,0,0,.06)' }}>
+            <div style={{ background: T.white, borderRadius: SHELL.radius.xl,
+            padding: '34px 36px', border: `1px solid ${T.ink10}`,
+            boxShadow: SHELL.shadow.lift }}>
 
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr',

@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase';
 import { generateTips } from '@/lib/tips';
 import { IC, T, LocationInput, EXP_LEVELS, RELEVANCE_COLORS } from './DashboardCommon';
+import { SHELL } from '@/lib/app-shell';
 import { labelsForOpportunitySteps } from '@/lib/user-facing-agent-steps';
 
 export type Profile = {
@@ -226,7 +227,7 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
     });
 
     return (
-    <div style={{ padding: 32, maxWidth: 860 }}>
+    <div style={{ padding: SHELL.pagePadding, maxWidth: SHELL.contentMax, margin: '0 auto', width: '100%' }}>
 
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>

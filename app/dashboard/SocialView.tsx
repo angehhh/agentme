@@ -11,6 +11,7 @@ import HookLabSection from './social/HookLabSection';
 import SleepSection from './social/SleepSection';
 import { labelsForEditorialSteps } from '@/lib/user-facing-agent-steps';
 import YoutubeClipsSection from './social/YoutubeClipsSection';
+import { SHELL } from '@/lib/app-shell';
 import {
     ensureYoutubeClipShape, sessionClipProgressFromDetail,
     postToText, clipsToText, buildClipsPlanPayload,
@@ -499,7 +500,7 @@ export default function SocialView({ userId, supabase, planTier, }: {
 
     // --- Render ---
     return (
-        <div style={{ padding: 32, maxWidth: 860 }}>
+        <div style={{ padding: SHELL.pagePadding, maxWidth: SHELL.contentMax, margin: '0 auto', width: '100%' }}>
             {settingsErr && (
                 <div style={{ background: '#fef2f2', border: '1px solid #fee2e2', padding: 12, borderRadius: 8, color: '#991b1b', fontSize: 13, marginBottom: 16 }}>
                     {settingsErr}

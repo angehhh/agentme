@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase';
 import SocialView from '@/app/dashboard/SocialView';
 import { T } from '@/app/dashboard/social/SocialCommon';
+import { SHELL } from '@/lib/app-shell';
 
 /**
  * Shared Results Page
@@ -32,7 +33,7 @@ export default function SharedPage() {
 
     if (loading) {
         return (
-            <div style={{ padding: 40, textAlign: 'center', fontFamily: T.sans, color: T.ink40 }}>
+            <div style={{ padding: SHELL.pagePadding, textAlign: 'center', fontFamily: T.sans, color: T.ink40, background: SHELL.mainGradient, minHeight: '100vh' }}>
                 Cargando vista compartida...
             </div>
         );
@@ -40,7 +41,7 @@ export default function SharedPage() {
 
     if (!id) {
         return (
-            <div style={{ padding: 40, textAlign: 'center', fontFamily: T.sans, color: T.ink }}>
+            <div style={{ padding: SHELL.pagePadding, textAlign: 'center', fontFamily: T.sans, color: T.ink, background: SHELL.mainGradient, minHeight: '100vh' }}>
                 ID no válido.
             </div>
         );
@@ -49,7 +50,7 @@ export default function SharedPage() {
     // Direct render of SocialView with the given ID as the target userId.
     // Shared pages are typically 'pro' features or show pro results.
     return (
-        <div style={{ background: T.paper, minHeight: '100vh' }}>
+        <div style={{ background: SHELL.mainGradient, minHeight: '100vh' }}>
             <SocialView 
                 userId={id} 
                 supabase={supabase} 
