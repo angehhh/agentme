@@ -77,12 +77,12 @@ function isSocialMission(mode: string | undefined) {
 }
 
 function missionModeLabel(mode: string | undefined) {
-  if (mode === 'social') return 'Social Â· Calendario editorial'
-  if (mode === 'social_hook') return 'Social Â· Hook Lab'
-  if (mode === 'social_video') return 'Social Â· VÃ­deo â†’ contenido'
-  if (mode === 'social_youtube_clips') return 'Social Â· YouTube clips 9:16'
-  if (mode === 'social_youtube_render') return 'Social Â· YouTube ZIP 9:16'
-  return 'Opportunity Â· BÃºsqueda empleo'
+  if (mode === 'social') return 'Social · Calendario editorial'
+  if (mode === 'social_hook') return 'Social · Hook Lab'
+  if (mode === 'social_video') return 'Social · Vídeo â†’ contenido'
+  if (mode === 'social_youtube_clips') return 'Social · YouTube clips 9:16'
+  if (mode === 'social_youtube_render') return 'Social · YouTube ZIP 9:16'
+  return 'Opportunity · Búsqueda empleo'
 }
 
 function missionStatsLine(m: Mission) {
@@ -90,7 +90,7 @@ function missionStatsLine(m: Mission) {
   if (m.mode === 'social_hook') return `${m.actions} ganchos generados`
   if (m.mode === 'social_video') return `${m.actions} piezas de contenido (hooks)`
   if (m.mode === 'social_youtube_clips') return `${m.actions} clips verticales sugeridos`
-  if (m.mode === 'social_youtube_render') return `${m.actions} vÃ­deos MP4 9:16 descargados (ZIP)`
+  if (m.mode === 'social_youtube_render') return `${m.actions} vídeos MP4 9:16 descargados (ZIP)`
   return `${m.result_count} ofertas guardadas`
 }
 
@@ -236,14 +236,14 @@ function MissionCard({
       {open && isSocialMission(mission.mode) && (
         <div style={{ padding: '16px 22px 20px', borderTop: `1px solid ${T.ink10}` }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: T.ink40, marginBottom: 10 }}>
-            QuÃ© generaste
+            Qué generaste
           </p>
           <p style={{ fontSize: 15, color: T.ink, lineHeight: 1.55, margin: '0 0 14px' }}>
-            {mission.goal || 'Sin descripciÃ³n'}
+            {mission.goal || 'Sin descripción'}
           </p>
           <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.6, margin: 0 }}>
             El contenido completo (calendario o ganchos) no se guarda en esta lista: vuelve a{' '}
-            <strong>Social Mode</strong> para verlo, copiarlo o generar otro. AquÃ­ queda el registro para tu historial y lÃ­mites.
+            <strong>Social Mode</strong> para verlo, copiarlo o generar otro. Aquí queda el registro para tu historial y límites.
           </p>
         </div>
       )}
@@ -279,7 +279,7 @@ function MissionCard({
             </div>
           ) : jobs.length === 0 ? (
             <p style={{ fontSize: 13, color: T.ink40, padding: '8px 0' }}>
-              No hay ofertas guardadas para esta bÃºsqueda.
+              No hay ofertas guardadas para esta búsqueda.
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -387,7 +387,7 @@ export default function MissionsView({
         return
       }
 
-      // Contar resultados para cada misiÃ³n en una sola query
+      // Contar resultados para cada misión en una sola query
       const missionIds = raw.map(m => m.id)
       const { data: counts } = await supabase
         .from('results')
@@ -448,7 +448,7 @@ export default function MissionsView({
             whiteSpace: 'nowrap', flexShrink: 0, transition: 'opacity .15s' }}
           onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
           onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-          {IC.plus} Nueva misiÃ³n
+          {IC.plus} Nueva misión
         </button>
       </div>
 
@@ -487,7 +487,7 @@ export default function MissionsView({
           </div>
           <h3 style={{ fontFamily: T.serif, fontSize: 20, fontWeight: 700,
             letterSpacing: '-.02em', color: T.ink, marginBottom: 10 }}>
-            Sin misiones todavÃ­a
+            Sin misiones todavía
           </h3>
           <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.65,
             marginBottom: 28, maxWidth: 320, margin: '0 auto 28px' }}>
@@ -498,7 +498,7 @@ export default function MissionsView({
               background: T.ink, color: T.white, padding: '11px 24px',
               borderRadius: 9, fontSize: 14, fontWeight: 600,
               border: 'none', fontFamily: T.sans, cursor: 'pointer' }}>
-            {IC.zap} Lanzar primera misiÃ³n
+            {IC.zap} Lanzar primera misión
           </button>
         </div>
       ) : (

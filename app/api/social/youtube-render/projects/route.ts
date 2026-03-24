@@ -10,7 +10,7 @@ const supabase = createClient(
 )
 
 /**
- * Lista renders guardados (vÃ¡lidos) del usuario; elimina filas y archivos ya caducados.
+ * Lista renders guardados (válidos) del usuario; elimina filas y archivos ya caducados.
  */
 export async function GET(req: NextRequest) {
   try {

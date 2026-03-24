@@ -30,14 +30,14 @@ export type AgentResult = {
    SECTOR KEYWORDS
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const SECTOR_KEYWORDS: Record<string, string[]> = {
-  marketing:    ['marketing', 'digital', 'seo', 'sem', 'social media', 'contenido', 'content', 'branding', 'publicidad', 'advertising', 'growth', 'crm', 'email', 'campaÃ±as', 'community'],
-  diseÃ±o:       ['diseÃ±o', 'design', 'ux', 'ui', 'figma', 'producto', 'product', 'creativo', 'creative', 'visual', 'grÃ¡fico', 'graphic'],
+  marketing:    ['marketing', 'digital', 'seo', 'sem', 'social media', 'contenido', 'content', 'branding', 'publicidad', 'advertising', 'growth', 'crm', 'email', 'campañas', 'community'],
+  diseño:       ['diseño', 'design', 'ux', 'ui', 'figma', 'producto', 'product', 'creativo', 'creative', 'visual', 'gráfico', 'graphic'],
   desarrollo:   ['developer', 'desarrollador', 'frontend', 'backend', 'fullstack', 'software', 'engineer', 'programador', 'react', 'node', 'python', 'java', 'typescript', 'devops'],
   ventas:       ['ventas', 'sales', 'comercial', 'account', 'business development', 'sdr', 'bdr', 'ejecutivo de cuentas'],
   datos:        ['data', 'datos', 'analytics', 'analyst', 'scientist', 'machine learning', 'ia', 'inteligencia artificial', 'bi', 'tableau', 'sql'],
   rrhh:         ['recursos humanos', 'rrhh', 'hr', 'talent', 'talento', 'people', 'recruiting', 'reclutamiento'],
-  finanzas:     ['finanzas', 'finance', 'contabilidad', 'accounting', 'controller', 'tesorerÃ­a', 'fiscal', 'auditor'],
-  comunicacion: ['comunicaciÃ³n', 'communication', 'prensa', 'relaciones', 'pr', 'periodista', 'redactor', 'copywriter'],
+  finanzas:     ['finanzas', 'finance', 'contabilidad', 'accounting', 'controller', 'tesorería', 'fiscal', 'auditor'],
+  comunicacion: ['comunicación', 'communication', 'prensa', 'relaciones', 'pr', 'periodista', 'redactor', 'copywriter'],
 }
 
 function getRelevantKeywords(query: string): string[] {
@@ -134,7 +134,7 @@ const EXPERIENCE_PARAM: Record<string, string> = {
 }
 
 const EXP_KEYWORDS: Record<string, string[]> = {
-  internship: ['intern', 'internship', 'prÃ¡cticas', 'becari', 'trainee', 'formaciÃ³n'],
+  internship: ['intern', 'internship', 'prácticas', 'becari', 'trainee', 'formación'],
   junior:     ['junior', 'jr', 'entry', 'entry-level', 'graduate', 'asociado', 'trainee', 'coordinator', 'coordinador', 'assistant', 'asistente'],
   mid:        [],
   senior:     ['senior', 'sr', 'lead', 'principal', 'head', 'director', 'manager', 'jefe', 'responsable', 'chief'],
@@ -191,7 +191,7 @@ export async function scrapeLinkedInJobs(
       'Upgrade-Insecure-Requests': '1',
     })
 
-    const isWide = ['spain','espaÃ±a','europe','europa','remote','worldwide'].includes(location.toLowerCase().trim())
+    const isWide = ['spain','españa','europe','europa','remote','worldwide'].includes(location.toLowerCase().trim())
     let expandedSearch = false
     let searchedIn     = location
 
@@ -203,25 +203,25 @@ export async function scrapeLinkedInJobs(
     console.log(`[Agent] Intento 1 â†’ ${raw.length} brutas, ${relevant.length} relevantes, ~${totalLinkedIn} en LinkedIn`)
 
     if (relevant.length < 3 && !isWide) {
-      console.log(`[Agent] Pocos resultados en "${location}", buscando en EspaÃ±a...`)
+      console.log(`[Agent] Pocos resultados en "${location}", buscando en España...`)
       const url2 = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=Spain&f_TPR=r604800&sortBy=DD${filterParams}`
       scrape     = await scrapeUrl(page, url2, limit)
       raw        = scrape.jobs
       if (scrape.totalLinkedIn > totalLinkedIn) totalLinkedIn = scrape.totalLinkedIn
       relevant   = raw.filter(j => isRelevant(j.title, query))
       expandedSearch = true
-      searchedIn     = 'EspaÃ±a'
-      console.log(`[Agent] Intento 2 (EspaÃ±a) â†’ ${raw.length} brutas, ${relevant.length} relevantes`)
+      searchedIn     = 'España'
+      console.log(`[Agent] Intento 2 (España) â†’ ${raw.length} brutas, ${relevant.length} relevantes`)
     }
 
     if (relevant.length < 3) {
-      console.log(`[Agent] AÃºn pocos resultados, buscando sin lÃ­mite de tiempo...`)
+      console.log(`[Agent] Aún pocos resultados, buscando sin límite de tiempo...`)
       const url3 = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=${encodeURIComponent(isWide ? location : 'Spain')}&sortBy=DD${filterParams}`
       scrape     = await scrapeUrl(page, url3, limit)
       raw        = scrape.jobs
       if (scrape.totalLinkedIn > totalLinkedIn) totalLinkedIn = scrape.totalLinkedIn
       relevant   = raw.filter(j => isRelevant(j.title, query))
-      if (!isWide) { expandedSearch = true; searchedIn = 'EspaÃ±a' }
+      if (!isWide) { expandedSearch = true; searchedIn = 'España' }
       console.log(`[Agent] Intento 3 (sin tiempo) â†’ ${raw.length} brutas, ${relevant.length} relevantes`)
     }
 
@@ -239,7 +239,7 @@ export async function scrapeLinkedInJobs(
 
     const cityDistribution: Record<string, number> = {}
     for (const job of finalJobs) {
-      const city = job.location?.split(',')[0]?.trim() || 'Sin ubicaciÃ³n'
+      const city = job.location?.split(',')[0]?.trim() || 'Sin ubicación'
       cityDistribution[city] = (cityDistribution[city] || 0) + 1
     }
 

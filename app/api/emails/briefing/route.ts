@@ -93,14 +93,14 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
           padding:36px 40px 32px;">
           <p style="font-size:12px; font-weight:700; color:#383838;
             text-transform:uppercase; letter-spacing:.09em; margin-bottom:10px;">
-            Briefing del agente Â· ${date}
+            Briefing del agente · ${date}
           </p>
           <h1 style="font-size:26px; font-weight:800; color:#FFFFFF;
             letter-spacing:-.03em; line-height:1.2; margin-bottom:6px;">
-            Buenos dÃ­as, ${name}
+            Buenos días, ${name}
           </h1>
           <p style="font-size:14px; color:#555555; line-height:1.6;">
-            Esto es lo que tu agente consiguiÃ³ mientras dormÃ­as.
+            Esto es lo que tu agente consiguió mientras dormías.
           </p>
         </td></tr>
 
@@ -157,14 +157,14 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
             style="display:inline-block; background:#0C0C0C; color:#FFFFFF;
             padding:12px 28px; border-radius:9px; font-size:14px;
             font-weight:700; text-decoration:none; letter-spacing:-.01em;">
-            Activar nueva misiÃ³n â†’
+            Activar nueva misión â†’
           </a>
         </td></tr>
 
         <!-- FOOTER -->
         <tr><td style="padding-top:32px; text-align:center;">
           <p style="font-size:12px; color:#C8C8C8; line-height:1.6;">
-            Â© 2026 AGENTME Â· Briefing diario automÃ¡tico<br/>
+            Â© 2026 AGENTME · Briefing diario automático<br/>
             <a href="#" style="color:#ABABAB; text-decoration:underline;">
               Cancelar emails
             </a>

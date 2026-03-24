@@ -44,8 +44,8 @@ export function resolveYtDlpExecutable(): string {
   if (fromPath) return fromPath
 
   throw new Error(
-    'No se encontrÃ³ yt-dlp. Opciones: (1) En la carpeta del proyecto ejecuta `npm install`. ' +
-      '(2) Instala yt-dlp en el sistema y asegÃºrate de que estÃ© en el PATH. ' +
+    'No se encontró yt-dlp. Opciones: (1) En la carpeta del proyecto ejecuta `npm install`. ' +
+      '(2) Instala yt-dlp en el sistema y asegúrate de que esté en el PATH. ' +
       '(3) Define YT_DLP_PATH con la ruta completa al ejecutable (ej. C:\\\\bin\\\\yt-dlp.exe).',
   )
 }
@@ -75,7 +75,7 @@ export function resolveFfmpegPath(): string {
   if (fromPath) return fromPath
 
   throw new Error(
-    'No se encontrÃ³ FFmpeg. Define FFMPEG_BIN, o ejecuta `npm install` en la raÃ­z del proyecto, ' +
+    'No se encontró FFmpeg. Define FFMPEG_BIN, o ejecuta `npm install` en la raíz del proyecto, ' +
       'o instala ffmpeg en el PATH.',
   )
 }

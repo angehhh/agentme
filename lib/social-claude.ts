@@ -19,7 +19,7 @@ export type EditorialPost = {
   platforms: string
   /** Solo plan Pro: hashtags sugeridos */
   hashtags?: string
-  /** Solo plan Pro: idea rÃ¡pida de plano / B-roll / ediciÃ³n */
+  /** Solo plan Pro: idea rápida de plano / B-roll / edición */
   production_tip?: string
 }
 
@@ -45,15 +45,15 @@ function parseAssistantJsonObject<T>(raw: string): T {
   const start = s.indexOf('{')
   const end = s.lastIndexOf('}')
   if (start === -1 || end <= start) {
-    throw new SyntaxError('No se encontrÃ³ un objeto JSON en la respuesta del modelo')
+    throw new SyntaxError('No se encontró un objeto JSON en la respuesta del modelo')
   }
   return JSON.parse(s.slice(start, end + 1)) as T
 }
 
-const WEEKDAYS = ['Lunes', 'Martes', 'MiÃ©rcoles', 'Jueves', 'Viernes', 'SÃ¡bado', 'Domingo']
+const WEEKDAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 
 /**
- * Calendario editorial: Free = vista previa 3 dÃ­as; Pro = semana completa + extras.
+ * Calendario editorial: Free = vista previa 3 días; Pro = semana completa + extras.
  */
 export async function generateEditorialCalendar(params: {
   niche: string
@@ -69,10 +69,10 @@ export async function generateEditorialCalendar(params: {
 
   const {
     niche,
-    audience = 'pÃºblico general interesado en el nicho',
+    audience = 'público general interesado en el nicho',
     tone = 'profesional y cercano',
     mainPlatform = 'Instagram',
-    language = 'espaÃ±ol',
+    language = 'español',
     tier,
   } = params
 
@@ -90,13 +90,13 @@ Tono: ${tone}
 Red principal: ${mainPlatform}
 Idioma del contenido: ${language}
 
-**Plan gratuito (vista previa):** genera **exactamente 3 ideas** para **Lunes, Martes y MiÃ©rcoles** solamente.
-- Rotar formatos: carrusel, reel, hilo (uno por dÃ­a).
-- **outline**: exactamente **2 viÃ±etas cortas** por post (nada de guiones largos).
-- **hook**: una lÃ­nea muy corta.
-- Sin hashtags extendidos ni notas de producciÃ³n.
+**Plan gratuito (vista previa):** genera **exactamente 3 ideas** para **Lunes, Martes y Miércoles** solamente.
+- Rotar formatos: carrusel, reel, hilo (uno por día).
+- **outline**: exactamente **2 viñetas cortas** por post (nada de guiones largos).
+- **hook**: una línea muy corta.
+- Sin hashtags extendidos ni notas de producción.
 
-Responde SOLO JSON vÃ¡lido (sin markdown):
+Responde SOLO JSON válido (sin markdown):
 {
   "week_theme": "frase muy breve (preview de la semana)",
   "posts": [
@@ -116,13 +116,13 @@ Idioma del contenido: ${language}
 **Plan Pro:** calendario de **exactamente 7 publicaciones** (Lunes â†’ Domingo).
 
 Reglas:
-- Rotar carrusel, reel, hilo (mÃ­nimo 2 de cada formato en la semana; el 7.Âº equilibra).
-- **outline**: 3 a 6 viÃ±etas Ãºtiles (diapositivas, beats de reel, orden de hilo).
+- Rotar carrusel, reel, hilo (mínimo 2 de cada formato en la semana; el 7.Âº equilibra).
+- **outline**: 3 a 6 viñetas útiles (diapositivas, beats de reel, orden de hilo).
 - **hashtags**: string con **3 a 6 hashtags** relevantes (con #), separados por espacio.
-- **production_tip**: una lÃ­nea concreta (plano sugerido, B-roll, texto en pantalla, transiciÃ³n).
-- CTA realista, sin promesas legales/mÃ©dicas/financieras garantizadas.
+- **production_tip**: una línea concreta (plano sugerido, B-roll, texto en pantalla, transición).
+- CTA realista, sin promesas legales/médicas/financieras garantizadas.
 
-Responde SOLO JSON vÃ¡lido (sin markdown):
+Responde SOLO JSON válido (sin markdown):
 {
   "week_theme": "hilo conductor de la semana",
   "posts": [
@@ -185,7 +185,7 @@ Responde SOLO JSON vÃ¡lido (sin markdown):
       const outlineCap = isPro ? outline : outline.slice(0, 2)
       const base: EditorialPost = {
         day: typeof p.day === 'number' && p.day >= 1 && p.day <= maxDay ? p.day : i + 1,
-        day_label: typeof p.day_label === 'string' && p.day_label.trim() ? p.day_label.trim() : WEEKDAYS[i] || `DÃ­a ${i + 1}`,
+        day_label: typeof p.day_label === 'string' && p.day_label.trim() ? p.day_label.trim() : WEEKDAYS[i] || `Día ${i + 1}`,
         format: formats.includes(normFormat(p.format)) ? normFormat(p.format) : 'carrusel',
         title: typeof p.title === 'string' ? p.title.trim() : `Idea ${i + 1}`,
         hook: typeof p.hook === 'string' ? p.hook.trim() : '',
@@ -194,7 +194,7 @@ Responde SOLO JSON vÃ¡lido (sin markdown):
           : isPro
             ? ['Gancho', 'Desarrollo', 'Cierre con valor']
             : ['Punto clave', 'Siguiente paso'],
-        cta: typeof p.cta === 'string' ? p.cta.trim() : 'Guarda y comparte si te sirviÃ³.',
+        cta: typeof p.cta === 'string' ? p.cta.trim() : 'Guarda y comparte si te sirvió.',
         platforms: typeof p.platforms === 'string' ? p.platforms.trim() : mainPlatform,
       }
       if (isPro) {
@@ -211,19 +211,19 @@ Responde SOLO JSON vÃ¡lido (sin markdown):
       const fmt: EditorialFormat = i % 3 === 0 ? 'carrusel' : i % 3 === 1 ? 'reel' : 'hilo'
       const pad: EditorialPost = {
         day: i + 1,
-        day_label: WEEKDAYS[i] || `DÃ­a ${i + 1}`,
+        day_label: WEEKDAYS[i] || `Día ${i + 1}`,
         format: fmt,
         title: `Idea ${fmt} sobre ${nicheTrim}`,
         hook: `Â¿Te pasa esto con ${nicheTrim}?`,
         outline: isPro
           ? ['Gancho', 'Desarrollo', 'Cierre con valor']
-          : ['Idea principal', 'QuÃ© hacer despuÃ©s'],
+          : ['Idea principal', 'Qué hacer después'],
         cta: 'Comenta si quieres parte 2.',
         platforms: mainPlatform,
       }
       if (isPro) {
         pad.hashtags = `#${nicheTrim.split(/\s+/)[0]?.replace(/\W/g, '') || 'contenido'} #tips`
-        pad.production_tip = 'Plano medio + corte rÃ¡pido al gancho.'
+        pad.production_tip = 'Plano medio + corte rápido al gancho.'
       }
       posts.push(pad)
     }
@@ -263,7 +263,7 @@ export type HookLabGenResult =
   | { ok: false; reason: 'missing_api_key' | 'api_or_parse' }
 
 /**
- * Hook Lab: Free = pocos ganchos y 1 Ã¡ngulo; Pro = pack amplio + extras de producciÃ³n.
+ * Hook Lab: Free = pocos ganchos y 1 ángulo; Pro = pack amplio + extras de producción.
  */
 export async function generateHookLab(params: {
   topic: string
@@ -279,8 +279,8 @@ export async function generateHookLab(params: {
   const {
     topic,
     audience = 'usuarios de TikTok, Reels y Shorts',
-    tone = 'directo, energÃ©tico, sin postureo',
-    language = 'espaÃ±ol',
+    tone = 'directo, energético, sin postureo',
+    language = 'español',
     tier,
   } = params
 
@@ -290,14 +290,14 @@ export async function generateHookLab(params: {
   const { hooks: nHooks, angles: nAngles } = tier === 'free' ? HOOK_LAB_COUNTS.free : HOOK_LAB_COUNTS.pro
   const isPro = tier === 'pro'
 
-  const freeContent = `Eres copywriter para vÃ­deos cortos verticales.
+  const freeContent = `Eres copywriter para vídeos cortos verticales.
 
 Tema: ${topicTrim}
 Audiencia: ${audience}
 Tono: ${tone}
 Idioma: ${language}
 
-**Vista Free:** solo **${nHooks} hooks** (muy cortos, â‰¤10 palabras si es posible) y **${nAngles} Ã¡ngulo** (un solo enfoque narrativo con tÃ­tulo + pitch breve).
+**Vista Free:** solo **${nHooks} hooks** (muy cortos, â‰¤10 palabras si es posible) y **${nAngles} ángulo** (un solo enfoque narrativo con título + pitch breve).
 Sin extras de sonido ni overlays.
 
 JSON solo (sin markdown). "hooks" debe tener exactamente ${nHooks} strings; "angles" exactamente ${nAngles} objeto(s).
@@ -307,7 +307,7 @@ JSON solo (sin markdown). "hooks" debe tener exactamente ${nHooks} strings; "ang
   "angles": [{ "title": "...", "pitch": "..." }]
 }`
 
-  const proContent = `Eres copywriter senior para TikTok, Reels y Shorts (retenciÃ³n y claridad).
+  const proContent = `Eres copywriter senior para TikTok, Reels y Shorts (retención y claridad).
 
 Tema: ${topicTrim}
 Audiencia: ${audience}
@@ -315,9 +315,9 @@ Tono: ${tone}
 Idioma: ${language}
 
 **Plan Pro:**
-- **${nHooks} hooks** variados (pregunta, POV, nÃºmero, plot twist suave, contraste, storytelling mini, etc.). Cortos y grabables. Nada de promesas prohibidas.
-- **${nAngles} Ã¡ngulos** distintos (tÃ­tulo + pitch de 2-3 frases: estructura del vÃ­deo, tono, quÃ© mostrar).
-- **sound_mood**: una lÃ­nea (tipo de audio: tendencia instrumental, voz en off seria, comedia, ASMR suaveâ€¦).
+- **${nHooks} hooks** variados (pregunta, POV, número, plot twist suave, contraste, storytelling mini, etc.). Cortos y grabables. Nada de promesas prohibidas.
+- **${nAngles} ángulos** distintos (título + pitch de 2-3 frases: estructura del vídeo, tono, qué mostrar).
+- **sound_mood**: una línea (tipo de audio: tendencia instrumental, voz en off seria, comedia, ASMR suaveâ€¦).
 - **on_screen_texts**: array de **3** frases muy cortas para texto en pantalla (palabra clave por slide).
 
 JSON solo (sin markdown):
@@ -379,7 +379,7 @@ JSON solo (sin markdown):
       }
       return {
         title: `Ãngulo ${i + 1}`,
-        pitch: `Plantea ${topicTrim} en formato vÃ­deo corto.`,
+        pitch: `Plantea ${topicTrim} en formato vídeo corto.`,
       }
     })
 
@@ -402,14 +402,14 @@ JSON solo (sin markdown):
         data.sound_mood = parsed.sound_mood.trim()
       }
       if (!data.sound_mood) {
-        data.sound_mood = 'Voz en off clara + mÃºsica tipo tendencia suave de fondo.'
+        data.sound_mood = 'Voz en off clara + música tipo tendencia suave de fondo.'
       }
       const ost = Array.isArray(parsed.on_screen_texts)
         ? parsed.on_screen_texts.filter((x): x is string => typeof x === 'string' && x.trim().length > 0).map(s => s.trim())
         : []
       const pad: string[] = [...ost]
       while (pad.length < 3) {
-        pad.push(`Idea en pantalla ${pad.length + 1} Â· ${topicTrim.slice(0, 36)}`)
+        pad.push(`Idea en pantalla ${pad.length + 1} · ${topicTrim.slice(0, 36)}`)
       }
       data.on_screen_texts = pad.slice(0, 3)
     }

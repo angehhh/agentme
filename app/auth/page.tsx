@@ -91,7 +91,7 @@ export default function AuthPage() {
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        setError('Email o contraseÃ±a incorrectos')
+        setError('Email o contraseña incorrectos')
         setLoading(false)
         return
       }
@@ -101,7 +101,7 @@ export default function AuthPage() {
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) {
         setError(error.message.includes('already')
-          ? 'Este email ya estÃ¡ registrado'
+          ? 'Este email ya está registrado'
           : 'Error al crear la cuenta')
         setLoading(false)
         return
@@ -145,16 +145,16 @@ export default function AuthPage() {
             </h2>
             <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.7,
               marginBottom: 28 }}>
-              Te hemos enviado un link de confirmaciÃ³n a{' '}
+              Te hemos enviado un link de confirmación a{' '}
               <strong style={{ color: T.ink }}>{email}</strong>.
-              TambiÃ©n te llegarÃ¡ un email de bienvenida de AGENTME.
+              También te llegará un email de bienvenida de AGENTME.
             </p>
             <button onClick={() => setMode('login')}
               style={{ background: 'none', border: 'none',
                 fontSize: 14, fontWeight: 600, color: T.ink60,
                 cursor: 'pointer', fontFamily: T.sans,
                 textDecoration: 'underline' }}>
-              Volver al inicio de sesiÃ³n
+              Volver al inicio de sesión
             </button>
           </div>
         </div>
@@ -211,8 +211,8 @@ export default function AuthPage() {
               </h1>
               <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.6 }}>
                 {mode === 'login'
-                  ? 'Inicia sesiÃ³n para acceder a tu agente'
-                  : 'Crea tu cuenta gratis â€” sin tarjeta de crÃ©dito'}
+                  ? 'Inicia sesión para acceder a tu agente'
+                  : 'Crea tu cuenta gratis â€” sin tarjeta de crédito'}
               </p>
             </div>
 
@@ -234,7 +234,7 @@ export default function AuthPage() {
                       border: 'none', cursor: 'pointer',
                       fontFamily: T.sans, transition: 'all .15s',
                       boxShadow: mode === m ? '0 1px 3px rgba(0,0,0,.08)' : 'none' }}>
-                    {m === 'login' ? 'Iniciar sesiÃ³n' : 'Crear cuenta'}
+                    {m === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
                   </button>
                 ))}
               </div>
@@ -278,7 +278,7 @@ export default function AuthPage() {
                     fontWeight: 700, color: T.ink40,
                     textTransform: 'uppercase', letterSpacing: '.08em',
                     marginBottom: 8 }}>
-                    ContraseÃ±a
+                    Contraseña
                   </label>
                   <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: 14,
@@ -290,7 +290,7 @@ export default function AuthPage() {
                       type={showPw ? 'text' : 'password'} required
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      placeholder={mode === 'signup' ? 'MÃ­nimo 6 caracteres' : 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢'}
+                      placeholder={mode === 'signup' ? 'Mínimo 6 caracteres' : 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢'}
                       minLength={6}
                       style={{ width: '100%', padding: '12px 44px 12px 42px',
                         borderRadius: 9, border: `1.5px solid ${T.ink10}`,
@@ -333,7 +333,7 @@ export default function AuthPage() {
                   {loading
                     ? 'Cargando...'
                     : mode === 'login'
-                      ? 'Iniciar sesiÃ³n'
+                      ? 'Iniciar sesión'
                       : 'Crear cuenta gratis'}
                 </button>
               </form>
@@ -358,7 +358,7 @@ export default function AuthPage() {
                         fontSize: 13, fontWeight: 600, color: T.ink,
                         cursor: 'pointer', fontFamily: T.sans,
                         textDecoration: 'underline' }}>
-                      Iniciar sesiÃ³n
+                      Iniciar sesión
                     </button>
                   </>
               }

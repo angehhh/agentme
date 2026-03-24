@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (isFree && actionsUsed >= FREE_DAILY_LIMIT) {
       return NextResponse.json({
         error: 'limit_reached',
-        message: `Has alcanzado el lÃ­mite de ${FREE_DAILY_LIMIT} bÃºsquedas diarias del plan Free.`,
+        message: `Has alcanzado el límite de ${FREE_DAILY_LIMIT} búsquedas diarias del plan Free.`,
         actionsUsed,
         actionsLimit: FREE_DAILY_LIMIT,
         actionsRemaining: 0,

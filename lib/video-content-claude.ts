@@ -5,7 +5,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-/** Salida enriquecida a partir de la transcripciÃ³n del vÃ­deo */
+/** Salida enriquecida a partir de la transcripción del vídeo */
 export type VideoContentPack = {
   summary: string
   key_takeaways: string[]
@@ -32,7 +32,7 @@ function parseAssistantJsonObject<T>(raw: string): T {
   const start = s.indexOf('{')
   const end = s.lastIndexOf('}')
   if (start === -1 || end <= start) {
-    throw new SyntaxError('No se encontrÃ³ un objeto JSON en la respuesta del modelo')
+    throw new SyntaxError('No se encontró un objeto JSON en la respuesta del modelo')
   }
   return JSON.parse(s.slice(start, end + 1)) as T
 }
@@ -49,7 +49,7 @@ export async function generateVideoContentPack(params: {
     return { ok: false, reason: 'missing_api_key' }
   }
 
-  const { tier, language = 'espaÃ±ol', nicheHint } = params
+  const { tier, language = 'español', nicheHint } = params
   let transcript = params.transcript.trim()
   if (!transcript) return { ok: false, reason: 'api_or_parse' }
 
@@ -81,24 +81,24 @@ export async function generateVideoContentPack(params: {
     ? `Contexto del creador (opcional): ${nicheHint.trim()}`
     : 'Sin contexto extra del creador.'
 
-  const prompt = `Eres editor de redes y copywriter. A partir de la TRANSCRIPCIÃ“N de un vÃ­deo (lo dicho en voz), genera material listo para publicar.
+  const prompt = `Eres editor de redes y copywriter. A partir de la TRANSCRIPCIÃ“N de un vídeo (lo dicho en voz), genera material listo para publicar.
 
 Idioma de salida: ${language}
 ${nicheLine}
-${truncated ? 'NOTA: la transcripciÃ³n estÃ¡ truncada por longitud; infiere con prudencia lo que falte.' : ''}
+${truncated ? 'NOTA: la transcripción está truncada por longitud; infiere con prudencia lo que falte.' : ''}
 
 TRANSCRIPCIÃ“N:
 ---
 ${transcript}
 ---
 
-Responde SOLO con JSON vÃ¡lido (sin markdown):
+Responde SOLO con JSON válido (sin markdown):
 {
-  "summary": "2-4 frases: de quÃ© va el vÃ­deo y por quÃ© importa",
+  "summary": "2-4 frases: de qué va el vídeo y por qué importa",
   "key_takeaways": ["punto 1", ...],
   "hook_suggestions": ["gancho corto 1", ...],
-  "caption_short": "una lÃ­nea tipo TikTok/IG (mÃ¡x ~200 caracteres)",
-  "caption_long": "pÃ¡rrafo para IG/LinkedIn con saltos de lÃ­nea \\n donde tenga sentido",
+  "caption_short": "una línea tipo TikTok/IG (máx ~200 caracteres)",
+  "caption_long": "párrafo para IG/LinkedIn con saltos de línea \\n donde tenga sentido",
   "thread_outline": ["tweet/hilo 1", "2", ...],
   "hashtags": ["#tema", ...] sin repetir,
   "cta_ideas": ["CTA 1", ...],
@@ -107,12 +107,12 @@ Responde SOLO con JSON vÃ¡lido (sin markdown):
 
 Reglas estrictas:
 - Todos los textos en el idioma indicado.
-- key_takeaways: exactamente ${counts.takeaways} Ã­tems, muy concretos.
-- hook_suggestions: exactamente ${counts.hooks} Ã­tems; primera persona o imperativo; para vÃ­deo corto vertical.
-- thread_outline: exactamente ${counts.thread} Ã­tems; cada uno autÃ³nomo (orden narrativo).
-- hashtags: exactamente ${counts.hashtags} Ã­tems; relevantes al contenido; formato #palabra o #varias_palabras.
-- cta_ideas: exactamente ${counts.cta} Ã­tems.
-- quote_cards: exactamente ${counts.quotes} Ã­tems; memorables, sin comillas externas en el string.`
+- key_takeaways: exactamente ${counts.takeaways} ítems, muy concretos.
+- hook_suggestions: exactamente ${counts.hooks} ítems; primera persona o imperativo; para vídeo corto vertical.
+- thread_outline: exactamente ${counts.thread} ítems; cada uno autónomo (orden narrativo).
+- hashtags: exactamente ${counts.hashtags} ítems; relevantes al contenido; formato #palabra o #varias_palabras.
+- cta_ideas: exactamente ${counts.cta} ítems.
+- quote_cards: exactamente ${counts.quotes} ítems; memorables, sin comillas externas en el string.`
 
   try {
     const msg = await anthropic.messages.create({

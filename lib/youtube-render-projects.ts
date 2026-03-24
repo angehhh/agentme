@@ -72,16 +72,16 @@ export function formatExpiresLabelEs(expiresAtIso: string, nowMs: number = Date.
   const ms = end - nowMs
   if (ms <= 0) return 'Caducado'
   const h = ms / (1000 * 60 * 60)
-  if (h >= 48) return `${YOUTUBE_RENDER_TTL_DAYS} dÃ­as antes de caducar`
-  if (h >= 36) return '1 dÃ­a antes de caducar'
-  if (h >= 24) return 'Caduca en 1 dÃ­a'
+  if (h >= 48) return `${YOUTUBE_RENDER_TTL_DAYS} días antes de caducar`
+  if (h >= 36) return '1 día antes de caducar'
+  if (h >= 24) return 'Caduca en 1 día'
   if (h >= 2) return `Caduca en ${Math.ceil(h)} h`
   if (h >= 1) return 'Caduca en ~1 h'
   const m = Math.max(1, Math.ceil(ms / (1000 * 60)))
   return `Caduca en ${m} min`
 }
 
-/** Reduce tamaÃ±o del JSON del pack IA para guardar en DB */
+/** Reduce tamaño del JSON del pack IA para guardar en DB */
 export function trimClipsPlanForDb(plan: unknown): unknown | null {
   if (plan == null || typeof plan !== 'object') return null
   const o = plan as { clips?: unknown[] }
@@ -152,7 +152,7 @@ export async function getOrCreateYoutubeRenderSession(params: {
       .gt('expires_at', now)
       .maybeSingle()
     if (error || !s) {
-      return { error: 'SesiÃ³n no vÃ¡lida o caducada.' }
+      return { error: 'Sesión no válida o caducada.' }
     }
     await patchFromPlan(s.id)
     const { data: refreshed } = await params.supabase
@@ -206,7 +206,7 @@ export async function getOrCreateYoutubeRenderSession(params: {
       msg.includes('schema cache')
     return {
       error: missingSessionsTable
-        ? 'Falta la tabla Â«youtube_render_sessionsÂ» en Supabase. En SQL Editor ejecuta el archivo supabase/add_youtube_render_sessions.sql (despuÃ©s de create_youtube_render_projects.sql), recarga el proyecto y vuelve a intentarlo.'
+        ? 'Falta la tabla <<youtube_render_sessions>> en Supabase. En SQL Editor ejecuta el archivo supabase/add_youtube_render_sessions.sql (después de create_youtube_render_projects.sql), recarga el proyecto y vuelve a intentarlo.'
         : 'No se pudo crear el proyecto en la nube.',
     }
   }
@@ -230,7 +230,7 @@ async function signProjectRow(
   }
 }
 
-/** Sesiones caducadas: borra Storage de todos los assets y la sesiÃ³n (CASCADE borra filas hijas). */
+/** Sesiones caducadas: borra Storage de todos los assets y la sesión (CASCADE borra filas hijas). */
 export async function cleanupExpiredYoutubeRenderSessions(
   supabase: SupabaseClient,
 ): Promise<number> {
@@ -269,7 +269,7 @@ export async function cleanupExpiredYoutubeRenderSessions(
   return removed
 }
 
-/** Filas antiguas sin sesiÃ³n (antes de la migraciÃ³n). */
+/** Filas antiguas sin sesión (antes de la migración). */
 export async function cleanupOrphanYoutubeRenderProjects(
   supabase: SupabaseClient,
 ): Promise<number> {
@@ -392,7 +392,7 @@ export async function getYoutubeRenderSessionDetail(
   return { session: card, assets: signed }
 }
 
-/** Lista plana (legacy / sin sesiÃ³n) */
+/** Lista plana (legacy / sin sesión) */
 export async function listYoutubeRenderProjectsForUser(
   supabase: SupabaseClient,
   userId: string,
@@ -442,7 +442,7 @@ export async function saveYoutubeRenderToStorage(params: {
     .maybeSingle()
 
   if (sErr || !sess) {
-    return { error: 'SesiÃ³n de proyecto no encontrada.' }
+    return { error: 'Sesión de proyecto no encontrada.' }
   }
 
   const expiresAt = sess.expires_at as string
@@ -485,7 +485,7 @@ export async function saveYoutubeRenderToStorage(params: {
   if (insErr || !inserted) {
     console.error('[youtube_render_projects] insert', insErr)
     await params.supabase.storage.from(YOUTUBE_RENDER_BUCKET).remove([storagePath])
-    return { error: 'No se pudo registrar el archivo. IntÃ©ntalo de nuevo.' }
+    return { error: 'No se pudo registrar el archivo. Inténtalo de nuevo.' }
   }
 
   await params.supabase

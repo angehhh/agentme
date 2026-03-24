@@ -305,7 +305,7 @@ function LocationInput({ value, onChange, onEnter }: {
               <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>{s.flag}</span>
               <div style={{ flexGrow: 1, minWidth: 0 }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>{s.value}</span>
-                <span style={{ fontSize: 12, color: T.ink40 }}> Â· {s.country}</span>
+                <span style={{ fontSize: 12, color: T.ink40 }}> · {s.country}</span>
               </div>
             </div>
           ))}
@@ -316,23 +316,23 @@ function LocationInput({ value, onChange, onEnter }: {
 }
 
 const CITIES: Suggestion[] = [
-  { value: 'Madrid',       country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Madrid, EspaÃ±a' },
-  { value: 'Barcelona',    country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Barcelona, EspaÃ±a' },
-  { value: 'Valencia',     country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Valencia, EspaÃ±a' },
-  { value: 'Sevilla',      country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Sevilla, EspaÃ±a' },
-  { value: 'Bilbao',       country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Bilbao, EspaÃ±a' },
-  { value: 'MÃ¡laga',       country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'MÃ¡laga, EspaÃ±a' },
-  { value: 'Zaragoza',     country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Zaragoza, EspaÃ±a' },
-  { value: 'Granada',      country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Granada, EspaÃ±a' },
-  { value: 'Alicante',     country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Alicante, EspaÃ±a' },
-  { value: 'San Fernando', country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'San Fernando, EspaÃ±a' },
+  { value: 'Madrid',       country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Madrid, España' },
+  { value: 'Barcelona',    country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Barcelona, España' },
+  { value: 'Valencia',     country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Valencia, España' },
+  { value: 'Sevilla',      country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Sevilla, España' },
+  { value: 'Bilbao',       country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Bilbao, España' },
+  { value: 'Málaga',       country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Málaga, España' },
+  { value: 'Zaragoza',     country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Zaragoza, España' },
+  { value: 'Granada',      country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Granada, España' },
+  { value: 'Alicante',     country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Alicante, España' },
+  { value: 'San Fernando', country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'San Fernando, España' },
   { value: 'London',       country: 'United Kingdom', flag: 'ðŸ‡¬ðŸ‡§', label: 'London, UK' },
   { value: 'Paris',        country: 'France',         flag: 'ðŸ‡«ðŸ‡·', label: 'Paris, France' },
   { value: 'Berlin',       country: 'Germany',        flag: 'ðŸ‡©ðŸ‡ª', label: 'Berlin, Germany' },
   { value: 'Amsterdam',    country: 'Netherlands',    flag: 'ðŸ‡³ðŸ‡±', label: 'Amsterdam, Netherlands' },
   { value: 'Lisbon',       country: 'Portugal',       flag: 'ðŸ‡µðŸ‡¹', label: 'Lisbon, Portugal' },
   { value: 'Remote',       country: 'Worldwide',      flag: 'ðŸŒ',  label: 'Remote' },
-  { value: 'Spain',        country: 'EspaÃ±a',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Spain' },
+  { value: 'Spain',        country: 'España',         flag: 'ðŸ‡ªðŸ‡¸', label: 'Spain' },
 ]
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -356,14 +356,14 @@ function SleepModal({ onClose }: { onClose: () => void }) {
             <h2 style={{ fontFamily: T.serif, fontSize: 26, fontWeight: 700,
               letterSpacing: '-.025em', color: T.ink, marginBottom: 8 }}>Sleep Mode</h2>
             <p style={{ fontSize: 14, color: T.ink60, marginBottom: 28, lineHeight: 1.6 }}>
-              Define tu objetivo antes de dormir. El agente trabajarÃ¡ a las 3 AM y recibirÃ¡s un informe a las 7 AM.
+              Define tu objetivo antes de dormir. El agente trabajará a las 3 AM y recibirás un informe a las 7 AM.
             </p>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: T.ink40,
               textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>
-              Â¿QuÃ© quieres conseguir esta noche?
+              Â¿Qué quieres conseguir esta noche?
             </label>
             <textarea value={goal} onChange={e => setGoal(e.target.value)}
-              placeholder="Ej: Encontrar 5 ofertas de trabajo de diseÃ±o UX en Madrid..."
+              placeholder="Ej: Encontrar 5 ofertas de trabajo de diseño UX en Madrid..."
               style={{ width: '100%', minHeight: 110, padding: '14px 16px', borderRadius: 10,
                 border: `1.5px solid ${T.ink10}`, fontSize: 14, fontFamily: T.sans, color: T.ink,
                 resize: 'vertical', outline: 'none', lineHeight: 1.6, background: T.paper,
@@ -396,7 +396,7 @@ function SleepModal({ onClose }: { onClose: () => void }) {
               Â¡Sleep Mode activado!
             </h3>
             <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.6 }}>
-              El agente empezarÃ¡ a las 3 AM.<br/>RecibirÃ¡s el informe a las 7 AM.
+              El agente empezará a las 3 AM.<br/>Recibirás el informe a las 7 AM.
             </p>
           </div>
         )}
@@ -416,7 +416,7 @@ const JOB_CATEGORIES = [
   { label: 'Community Manager',      icon: 'ðŸ’¬' },
   { label: 'Copywriter',             icon: 'âœï¸' },
   { label: 'UX/UI Designer',         icon: 'ðŸŽ¨' },
-  { label: 'DiseÃ±o grÃ¡fico',         icon: 'ðŸ–Œï¸' },
+  { label: 'Diseño gráfico',         icon: 'ðŸ–Œï¸' },
   { label: 'Product Designer',       icon: 'ðŸ“' },
   { label: 'Desarrollador Frontend', icon: 'ðŸ’»' },
   { label: 'Desarrollador Backend',  icon: 'âš™ï¸' },
@@ -436,9 +436,9 @@ const JOB_CATEGORIES = [
   { label: 'Contabilidad / Finanzas',icon: 'ðŸ¦' },
   { label: 'Ciberseguridad',         icon: 'ðŸ”’' },
   { label: 'QA / Testing',           icon: 'ðŸ§ª' },
-  { label: 'AdministraciÃ³n',         icon: 'ðŸ¢' },
-  { label: 'LogÃ­stica',              icon: 'ðŸšš' },
-  { label: 'AtenciÃ³n al cliente',    icon: 'ðŸ“ž' },
+  { label: 'Administración',         icon: 'ðŸ¢' },
+  { label: 'Logística',              icon: 'ðŸšš' },
+  { label: 'Atención al cliente',    icon: 'ðŸ“ž' },
 ]
 
 function QueryInput({ value, onChange, onEnter }: {
@@ -493,7 +493,7 @@ function QueryInput({ value, onChange, onEnter }: {
           onChange={e => handleChange(e.target.value)}
           onKeyDown={handleKey}
           onFocus={() => setOpen(true)}
-          placeholder="Escribe o elige una categorÃ­a..."
+          placeholder="Escribe o elige una categoría..."
           autoComplete="off"
           style={{
             width: '100%', padding: '11px 12px 11px 38px',
@@ -527,11 +527,11 @@ function QueryInput({ value, onChange, onEnter }: {
 const WORK_TYPES = [
   { id: 'onsite', label: 'Presencial' },
   { id: 'remote', label: 'Remoto' },
-  { id: 'hybrid', label: 'HÃ­brido' },
+  { id: 'hybrid', label: 'Híbrido' },
 ] as const
 
 const EXP_LEVELS = [
-  { id: 'internship', label: 'PrÃ¡cticas' },
+  { id: 'internship', label: 'Prácticas' },
   { id: 'junior',     label: 'Junior' },
   { id: 'mid',        label: 'Mid' },
   { id: 'senior',     label: 'Senior' },
@@ -666,7 +666,7 @@ function OpportunityView({ profile, onProfileUpdate }: {
         onProfileUpdate({ ...profile, actions_today: data.actionsUsed })
       }
       setRan(true)
-    } catch { setError('Error de conexiÃ³n. Intenta de nuevo.') }
+    } catch { setError('Error de conexión. Intenta de nuevo.') }
     finally { setLoading(false) }
   }
 
@@ -702,14 +702,14 @@ function OpportunityView({ profile, onProfileUpdate }: {
               background: T.paper, border: `1px solid ${T.ink10}`,
               padding: '5px 14px', borderRadius: 100 }}>
               {actionsRemaining !== null
-                ? `${actionsRemaining} de 5 bÃºsquedas restantes`
-                : `${Math.max(0, 5 - (profile.actions_today || 0))} de 5 bÃºsquedas restantes`
+                ? `${actionsRemaining} de 5 búsquedas restantes`
+                : `${Math.max(0, 5 - (profile.actions_today || 0))} de 5 búsquedas restantes`
               }
             </div>
           )}
         </div>
         <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.65 }}>
-          El agente busca ofertas en LinkedIn que encajan con tu perfil y las guarda aquÃ­.
+          El agente busca ofertas en LinkedIn que encajan con tu perfil y las guarda aquí.
         </p>
       </div>
 
@@ -719,12 +719,12 @@ function OpportunityView({ profile, onProfileUpdate }: {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
           <div>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: T.ink40,
-              textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>QuÃ© buscar</label>
+              textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>Qué buscar</label>
             <div style={{ position: 'relative' }}>
               <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
                 color: T.ink40, pointerEvents: 'none' }}>{IC.search}</span>
               <input value={query} onChange={e => setQuery(e.target.value)}
-                placeholder="diseÃ±o UX, marketing, desarrollo..."
+                placeholder="diseño UX, marketing, desarrollo..."
                 style={{ width: '100%', padding: '11px 12px 11px 38px', borderRadius: 9,
                   border: `1.5px solid ${T.ink10}`, fontSize: 14, fontFamily: T.sans, color: T.ink,
                   outline: 'none', background: T.paper, transition: 'border-color .15s' }}
@@ -735,7 +735,7 @@ function OpportunityView({ profile, onProfileUpdate }: {
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: T.ink40,
-              textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>UbicaciÃ³n</label>
+              textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 8 }}>Ubicación</label>
             <LocationInput value={location} onChange={setLocation} onEnter={runAgent} />
           </div>
         </div>
@@ -773,7 +773,7 @@ function OpportunityView({ profile, onProfileUpdate }: {
           {loading ? (
             <><div style={{ width: 14, height: 14, border: `2px solid ${T.ink20}`,
               borderTopColor: T.ink40, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-            El agente estÃ¡ buscando...</>
+            El agente está buscando...</>
           ) : (
             <>{IC.zap} Lanzar agente</>
           )}
@@ -803,7 +803,7 @@ function OpportunityView({ profile, onProfileUpdate }: {
       {limitError && (
         <div style={{ background: T.ink, borderRadius: 14, padding: '24px 28px', marginBottom: 24 }}>
           <p style={{ fontSize: 15, fontWeight: 700, color: T.white, marginBottom: 6 }}>
-            LÃ­mite diario alcanzado
+            Límite diario alcanzado
           </p>
           <p style={{ fontSize: 14, color: '#888', lineHeight: 1.6, marginBottom: 16 }}>
             {limitError}
@@ -830,8 +830,8 @@ function OpportunityView({ profile, onProfileUpdate }: {
           borderRadius: 10, padding: '11px 16px', marginBottom: 16, fontSize: 13, color: '#7A6A00' }}>
           {IC.info}
           <span>
-            No habÃ­a ofertas de <strong>{query}</strong> en <strong>{location}</strong> esta semana.
-            El agente ampliÃ³ la bÃºsqueda a <strong>{searchedIn}</strong>.
+            No había ofertas de <strong>{query}</strong> en <strong>{location}</strong> esta semana.
+            El agente amplió la búsqueda a <strong>{searchedIn}</strong>.
           </span>
         </div>
       )}
@@ -848,8 +848,8 @@ function OpportunityView({ profile, onProfileUpdate }: {
           <div>
             <p style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>
               {marketStats.totalLinkedIn > 0
-                ? `Hay ~${marketStats.totalLinkedIn.toLocaleString('es-ES')} ofertas de "${query}" en ${searchedIn || location || 'EspaÃ±a'} esta semana`
-                : `${total} ofertas encontradas para "${query}" en ${searchedIn || location || 'EspaÃ±a'}`
+                ? `Hay ~${marketStats.totalLinkedIn.toLocaleString('es-ES')} ofertas de "${query}" en ${searchedIn || location || 'España'} esta semana`
+                : `${total} ofertas encontradas para "${query}" en ${searchedIn || location || 'España'}`
               }
             </p>
             {Object.keys(marketStats.cityDistribution).length > 1 && (
@@ -858,7 +858,7 @@ function OpportunityView({ profile, onProfileUpdate }: {
                   .sort(([, a], [, b]) => b - a)
                   .slice(0, 4)
                   .map(([city, count]) => `${city} (${count})`)
-                  .join(' Â· ')
+                  .join(' · ')
                 }
               </p>
             )}
@@ -874,7 +874,7 @@ function OpportunityView({ profile, onProfileUpdate }: {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: '#7B68EE', background: 'rgba(123,104,238,.15)',
               padding: '3px 10px', borderRadius: 100, letterSpacing: '.06em', textTransform: 'uppercase' }}>
-              AnÃ¡lisis Pro
+              Análisis Pro
             </span>
           </div>
 
@@ -945,12 +945,12 @@ function OpportunityView({ profile, onProfileUpdate }: {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
             {[
-              'AnÃ¡lisis IA de cada oferta',
+              'Análisis IA de cada oferta',
               'Ranking de relevancia personalizado',
               'Rango salarial estimado',
               'Tendencias del sector',
               'Demanda por ciudad',
-              'BÃºsquedas ilimitadas',
+              'Búsquedas ilimitadas',
             ].map(f => (
               <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#888' }}>
                 <span style={{ color: '#7B68EE' }}>{IC.check}</span> {f}
@@ -1103,7 +1103,7 @@ function OpportunityView({ profile, onProfileUpdate }: {
           <h3 style={{ fontFamily: T.serif, fontSize: 20, fontWeight: 700,
             letterSpacing: '-.02em', color: T.ink, marginBottom: 10 }}>Listo para buscar</h3>
           <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.65, maxWidth: 340, margin: '0 auto' }}>
-            Escribe quÃ© buscas, selecciona la ciudad y pulsa "Lanzar agente".
+            Escribe qué buscas, selecciona la ciudad y pulsa "Lanzar agente".
           </p>
         </div>
       )}
@@ -1255,7 +1255,7 @@ export default function DashboardPage() {
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</p>
                 <p style={{ fontSize: 11, color: T.ink40 }}>Plan {profile?.plan ?? 'free'}</p>
               </div>
-              <button onClick={handleLogout} title="Cerrar sesiÃ³n"
+              <button onClick={handleLogout} title="Cerrar sesión"
                 style={{ color: T.ink40, background: 'none', border: 'none', cursor: 'pointer',
                   padding: 4, display: 'flex', alignItems: 'center', transition: 'color .15s', flexShrink: 0 }}
                 onMouseEnter={e => (e.currentTarget.style.color = T.ink)}
@@ -1291,7 +1291,7 @@ export default function DashboardPage() {
                   letterSpacing: '-.03em', color: T.ink, marginBottom: 6 }}>
                   Bienvenido, <em style={{ fontStyle: 'italic', color: T.ink60 }}>{displayName}</em>
                 </h2>
-                <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.6 }}>Tu agente estÃ¡ listo para trabajar por ti.</p>
+                <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.6 }}>Tu agente está listo para trabajar por ti.</p>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, marginBottom: 32 }}>
@@ -1348,7 +1348,7 @@ export default function DashboardPage() {
                       {!m.available
                         ? <span style={{ fontSize: 10, fontWeight: 700, color: T.ink40, background: T.paper,
                             padding: '3px 9px', borderRadius: 100, border: `1px solid ${T.ink10}`,
-                            textTransform: 'uppercase', letterSpacing: '.06em' }}>PrÃ³ximamente</span>
+                            textTransform: 'uppercase', letterSpacing: '.06em' }}>Próximamente</span>
                         : <span style={{ fontSize: 11, fontWeight: 700, color: T.green,
                             background: 'rgba(40,200,64,.1)', padding: '3px 10px',
                             borderRadius: 100, letterSpacing: '.04em' }}>Disponible</span>
@@ -1437,22 +1437,22 @@ export default function DashboardPage() {
                   </div>
                   {(!profile?.plan || profile.plan === 'free') ? (
                     <>
-                      {['5 bÃºsquedas por dÃ­a', '1 agente activo', 'EstadÃ­sticas bÃ¡sicas del mercado',
-                        'Social: 3 dÃ­as/semana + 2 Hook Labs/semana (vista Free)'].map(f => (
+                      {['5 búsquedas por día', '1 agente activo', 'Estadísticas básicas del mercado',
+                        'Social: 3 días/semana + 2 Hook Labs/semana (vista Free)'].map(f => (
                         <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: T.ink60, marginBottom: 10 }}>
                           <span style={{ color: T.ink }}>{IC.check}</span> {f}
                         </div>
                       ))}
                       <div style={{ padding: '14px 18px', borderRadius: 10, background: T.paper, border: `1px solid ${T.ink10}`, marginTop: 10 }}>
                         <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.6 }}>
-                          Actualiza a <strong style={{ color: T.ink }}>Pro ($12/mes)</strong> para bÃºsquedas ilimitadas, anÃ¡lisis IA y todos los modos.
+                          Actualiza a <strong style={{ color: T.ink }}>Pro ($12/mes)</strong> para búsquedas ilimitadas, análisis IA y todos los modos.
                         </p>
                       </div>
                     </>
                   ) : (
                     <>
-                      {['BÃºsquedas ilimitadas', 'AnÃ¡lisis IA de ofertas', 'Ranking de relevancia personalizado', 'Tendencias y salarios del mercado', 'Demanda por ciudad', 'Todos los modos disponibles',
-                        'Social Pro: 7 dÃ­as, hashtags & producciÃ³n, Hook Lab completo (80/dÃ­a)'].map(f => (
+                      {['Búsquedas ilimitadas', 'Análisis IA de ofertas', 'Ranking de relevancia personalizado', 'Tendencias y salarios del mercado', 'Demanda por ciudad', 'Todos los modos disponibles',
+                        'Social Pro: 7 días, hashtags & producción, Hook Lab completo (80/día)'].map(f => (
                         <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: T.ink60, marginBottom: 10 }}>
                           <span style={{ color: T.green }}>{IC.check}</span> {f}
                         </div>
@@ -1467,12 +1467,12 @@ export default function DashboardPage() {
                 </div>
 
                 <div style={{ background: T.white, borderRadius: 16, padding: 28, border: `1px solid ${T.ink10}` }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: T.ink, marginBottom: 16 }}>SesiÃ³n</h3>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: T.ink, marginBottom: 16 }}>Sesión</h3>
                   <button onClick={handleLogout}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent',
                       color: '#C0392B', padding: '10px 0', border: 'none', fontSize: 14,
                       fontWeight: 600, fontFamily: T.sans, cursor: 'pointer' }}>
-                    {IC.logout} Cerrar sesiÃ³n
+                    {IC.logout} Cerrar sesión
                   </button>
                 </div>
               </div>

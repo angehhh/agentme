@@ -29,5 +29,5 @@ export async function GET(req: NextRequest) {
   }
 
   await runFullYoutubeRenderCleanup(supabase)
-  return NextResponse.json({ success: true, message: 'Limpieza de sesiones y huÃ©rfanos ejecutada' })
+  return NextResponse.json({ success: true, message: 'Limpieza de sesiones y huérfanos ejecutada' })
 }

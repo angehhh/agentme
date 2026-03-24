@@ -9,7 +9,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
-/** Lista proyectos (sesiones por vÃ­deo) con conteo de archivos listos. */
+/** Lista proyectos (sesiones por vídeo) con conteo de archivos listos. */
 export async function GET(req: NextRequest) {
   try {
     const userId = req.nextUrl.searchParams.get('userId')?.trim()

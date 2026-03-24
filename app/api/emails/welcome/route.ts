@@ -49,12 +49,12 @@ function welcomeTemplate(name: string): string {
           </p>
           <h1 style="font-size:32px; font-weight:800; color:#FFFFFF;
             letter-spacing:-.03em; line-height:1.15; margin-bottom:16px;">
-            Tu agente estÃ¡<br/>listo para trabajar
+            Tu agente está<br/>listo para trabajar
           </h1>
           <p style="font-size:15px; color:#555555; line-height:1.7; margin-bottom:32px;">
             Hola <strong style="color:#D0D0D0;">${name}</strong>, tu cuenta
-            en AGENTME ya estÃ¡ activa. Define tu primer objetivo y el agente
-            lo ejecutarÃ¡ mientras tÃº vives tu vida.
+            en AGENTME ya está activa. Define tu primer objetivo y el agente
+            lo ejecutará mientras tú vives tu vida.
           </p>
           <a href="https://agentme.app/dashboard"
             style="display:inline-block; background:#FFFFFF; color:#0C0C0C;
@@ -122,9 +122,9 @@ function welcomeTemplate(name: string): string {
         <!-- FOOTER -->
         <tr><td style="padding-top:36px; text-align:center;">
           <p style="font-size:12px; color:#C8C8C8; line-height:1.6;">
-            Â© 2026 AGENTME Â· Todos los derechos reservados<br/>
+            Â© 2026 AGENTME · Todos los derechos reservados<br/>
             <a href="#" style="color:#ABABAB; text-decoration:underline;">
-              Cancelar suscripciÃ³n
+              Cancelar suscripción
             </a>
           </p>
         </td></tr>
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
     const { data, error } = await resend.emails.send({
       from:    FROM_EMAIL,
       to:      email,
-      subject: `Bienvenido a ${APP_NAME}, ${displayName} â€” Tu agente estÃ¡ listo`,
+      subject: `Bienvenido a ${APP_NAME}, ${displayName} â€” Tu agente está listo`,
       html:    welcomeTemplate(displayName),
     })
 
