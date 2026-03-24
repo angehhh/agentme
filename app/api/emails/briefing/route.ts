@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resend, FROM_EMAIL, APP_NAME } from '@/lib/resend';
+import {
+    emailMatchesSessionUser,
+    isInternalEmailRouteAuthorized,
+    requireSessionUser,
+} from '@/lib/require-session-user';
 type Mission = {
     title: string;
     result: string;
@@ -174,6 +179,19 @@ export async function POST(req: NextRequest) {
         const { email, name, missions } = await req.json();
         if (!email) {
             return NextResponse.json({ error: 'Email requerido' }, { status: 400 });
+        }
+        const internalOk = isInternalEmailRouteAuthorized(req);
+        if (!internalOk) {
+            const auth = await requireSessionUser();
+            if (!auth.ok)
+                return auth.response;
+            if (!emailMatchesSessionUser(auth.user, email)) {
+                return NextResponse.json({
+                    error: 'No autorizado',
+                    code: 'email_mismatch',
+                    message: 'Solo puedes enviar el briefing al email de tu sesión.',
+                }, { status: 403 });
+            }
         }
         const displayName = name || email.split('@')[0];
         const today = new Date().toLocaleDateString('es-ES', {

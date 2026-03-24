@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import useSWR from 'swr';
 import { createClient } from '@/lib/supabase';
 import { generateTips } from '@/lib/tips';
 import { IC, T, LocationInput, EXP_LEVELS, RELEVANCE_COLORS } from './DashboardCommon';
@@ -64,7 +65,6 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
     const [searchedIn, setSearchedIn] = useState('');
     const [aiSummary, setAiSummary] = useState('');
     const [actionsRemaining, setActionsRemaining] = useState<number | null>(null);
-    const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const [marketStats, setMarketStats] = useState<{
         totalLinkedIn: number;
         cityDistribution: Record<string, number>;
@@ -86,17 +86,20 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
     const isFree = !profile.plan || profile.plan === 'free';
     const primaryCompanyNames = useMemo(() => new Set(companiesFiltered.filter(c => c.focus === 'primary').map(c => c.name.trim().toLowerCase())), [companiesFiltered]);
 
-    useEffect(() => {
-        const loadFavorites = async () => {
-            const { data } = await supabase
+    const { data: favoriteUrls = [], mutate: mutateFavorites } = useSWR(
+        profile.id ? ['opportunity-favorites', profile.id] as const : null,
+        async () => {
+            const { data, error } = await supabase
                 .from('favorites')
                 .select('url')
                 .eq('user_id', profile.id);
-            if (data)
-                setFavorites(new Set(data.map(f => f.url)));
-        };
-        loadFavorites();
-    }, [profile.id]);
+            if (error)
+                throw error;
+            return (data ?? []).map(r => r.url);
+        },
+        { dedupingInterval: 5000 },
+    );
+    const favorites = useMemo(() => new Set(favoriteUrls), [favoriteUrls]);
 
     const handleShare = async () => {
         if (sharing || !jobs.length)
@@ -127,16 +130,27 @@ export default function OpportunityView({ profile, onProfileUpdate }: {
 
     const toggleFavorite = async (job: JobResult) => {
         const isFav = favorites.has(job.url);
-        if (isFav) {
-            await supabase.from('favorites').delete().eq('user_id', profile.id).eq('url', job.url);
-            setFavorites(prev => { const n = new Set(prev); n.delete(job.url); return n; });
+        try {
+            if (isFav) {
+                await supabase.from('favorites').delete().eq('user_id', profile.id).eq('url', job.url);
+                await mutateFavorites(
+                    (prev = []) => prev.filter(u => u !== job.url),
+                    { revalidate: false },
+                );
+            }
+            else {
+                await supabase.from('favorites').insert({
+                    user_id: profile.id, title: job.title, company: job.company,
+                    location: job.location, url: job.url, posted: job.posted,
+                });
+                await mutateFavorites(
+                    (prev = []) => (prev.includes(job.url) ? prev : [...prev, job.url]),
+                    { revalidate: false },
+                );
+            }
         }
-        else {
-            await supabase.from('favorites').insert({
-                user_id: profile.id, title: job.title, company: job.company,
-                location: job.location, url: job.url, posted: job.posted,
-            });
-            setFavorites(prev => new Set(prev).add(job.url));
+        catch {
+            await mutateFavorites();
         }
     };
 

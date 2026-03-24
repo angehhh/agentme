@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SHELL } from '@/lib/app-shell';
-import { Calendar, CirclePlay, Clapperboard, Download, Zap } from 'lucide-react';
+import { Calendar, Clapperboard, Zap } from 'lucide-react';
 const T = {
     ink: '#0C0C0C', ink60: '#606060', ink40: '#909090',
     ink20: '#C8C8C8', ink10: '#E8E8E8', paper: '#F5F4F1',
@@ -54,9 +55,7 @@ function formatDate(iso: string) {
 function isSocialMission(mode: string | undefined) {
     return (mode === 'social' ||
         mode === 'social_hook' ||
-        mode === 'social_video' ||
-        mode === 'social_youtube_clips' ||
-        mode === 'social_youtube_render');
+        mode === 'social_video');
 }
 function missionModeLabel(mode: string | undefined) {
     if (mode === 'social')
@@ -65,12 +64,49 @@ function missionModeLabel(mode: string | undefined) {
         return 'Social · Hook Lab';
     if (mode === 'social_video')
         return 'Social · Vídeo → contenido';
-    if (mode === 'social_youtube_clips')
-        return 'Social · YouTube clips 9:16';
-    if (mode === 'social_youtube_render')
-        return 'Social · YouTube ZIP 9:16';
     return 'Opportunity · Búsqueda empleo';
 }
+async function fetchMissionsWithCounts(supabase: SupabaseClient, userId: string): Promise<Mission[]> {
+    type Row = {
+        id: string;
+        goal: string;
+        mode: string;
+        status: string;
+        actions: number;
+        created_at: string;
+        results: { count: number }[] | null;
+    };
+    const { data: raw, error } = await supabase
+        .from('missions')
+        .select(`
+      id,
+      goal,
+      mode,
+      status,
+      actions,
+      created_at,
+      results (count)
+    `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(100);
+    if (error)
+        throw error;
+    if (!raw?.length)
+        return [];
+    return (raw as Row[]).map(m => ({
+        id: m.id,
+        goal: m.goal,
+        mode: m.mode,
+        status: m.status,
+        actions: m.actions,
+        created_at: m.created_at,
+        result_count: Array.isArray(m.results) && m.results[0] != null
+            ? Number((m.results[0] as { count: number }).count) || 0
+            : 0,
+    }));
+}
+
 function missionStatsLine(m: Mission) {
     if (m.mode === 'social')
         return `${m.actions} ideas en el calendario`;
@@ -78,10 +114,6 @@ function missionStatsLine(m: Mission) {
         return `${m.actions} ganchos generados`;
     if (m.mode === 'social_video')
         return `${m.actions} piezas de contenido (hooks)`;
-    if (m.mode === 'social_youtube_clips')
-        return `${m.actions} clips verticales sugeridos`;
-    if (m.mode === 'social_youtube_render')
-        return `${m.actions} vídeos MP4 9:16 descargados (ZIP)`;
     return `${m.result_count} ofertas guardadas`;
 }
 function MissionCard({ mission, userId, supabase }: {
@@ -155,7 +187,7 @@ function MissionCard({ mission, userId, supabase }: {
         <div style={{ width: 38, height: 38, borderRadius: 10, background: T.ink,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: T.white, flexShrink: 0 }}>
-          {mission.mode === 'social' ? (<Calendar size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : mission.mode === 'social_hook' ? (<Zap size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : mission.mode === 'social_video' ? (<Clapperboard size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : mission.mode === 'social_youtube_clips' ? (<CirclePlay size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : mission.mode === 'social_youtube_render' ? (<Download size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : (IC.target)}
+          {mission.mode === 'social' ? (<Calendar size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : mission.mode === 'social_hook' ? (<Zap size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : mission.mode === 'social_video' ? (<Clapperboard size={20} strokeWidth={1.75} color="#fff" aria-hidden/>) : (IC.target)}
         </div>
 
         <div style={{ flexGrow: 1, minWidth: 0 }}>
@@ -285,45 +317,15 @@ export default function MissionsView({ userId, supabase, onNewMission, }: {
     supabase: SupabaseClient;
     onNewMission: () => void;
 }) {
-    const [missions, setMissions] = useState<Mission[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: missions = [], isLoading: loading, error: missionsError } = useSWR(
+        userId ? ['missions-with-counts', userId] : null,
+        () => fetchMissionsWithCounts(supabase, userId),
+        { dedupingInterval: 5000 },
+    );
     useEffect(() => {
-        const load = async () => {
-            setLoading(true);
-            const { data: raw, error } = await supabase
-                .from('missions')
-                .select('id, goal, mode, status, actions, created_at')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: false })
-                .limit(100);
-            if (error) {
-                console.error('Missions error:', error);
-                setLoading(false);
-                return;
-            }
-            if (!raw || raw.length === 0) {
-                setMissions([]);
-                setLoading(false);
-                return;
-            }
-            const missionIds = raw.map(m => m.id);
-            const { data: counts } = await supabase
-                .from('results')
-                .select('mission_id')
-                .in('mission_id', missionIds);
-            const countMap: Record<string, number> = {};
-            for (const r of counts || []) {
-                countMap[r.mission_id] = (countMap[r.mission_id] || 0) + 1;
-            }
-            const withCount: Mission[] = raw.map(m => ({
-                ...m,
-                result_count: countMap[m.id] || 0,
-            }));
-            setMissions(withCount);
-            setLoading(false);
-        };
-        load();
-    }, [userId]);
+        if (missionsError)
+            console.error('Missions error:', missionsError);
+    }, [missionsError]);
     if (loading)
         return (<div style={{ padding: SHELL.pagePadding, display: 'flex', alignItems: 'center',
                 gap: 10, fontSize: 14, color: T.ink40, fontFamily: T.sans }}>

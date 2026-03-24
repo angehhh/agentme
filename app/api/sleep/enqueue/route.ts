@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { createRouteHandlerClient } from '@/lib/supabase-server';
+import { requireSessionUser } from '@/lib/require-session-user';
 import { enqueueSleepJob } from '@/lib/modes/sleep';
 
 export const runtime = 'nodejs';
@@ -9,10 +9,10 @@ const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, proces
 
 export async function POST(req: NextRequest) {
     try {
-        const supabase = await createRouteHandlerClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user)
-            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        const auth = await requireSessionUser();
+        if (!auth.ok)
+            return auth.response;
+        const user = auth.user;
         const body = await req.json().catch(() => ({}));
         const goal = typeof body.goal === 'string' ? body.goal : '';
         if (!goal.trim())

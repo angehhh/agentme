@@ -1,7 +1,7 @@
 'use client';
-import { Layers, Calendar, ArrowRight, Zap, CirclePlay, Moon } from 'lucide-react';
+import { Layers, Calendar, ArrowRight, Zap, Moon } from 'lucide-react';
 import { T, SHADOW, IconTile, SocialSection } from './SocialCommon';
-import { EDITORIAL_DAYS, HOOK_LAB_COUNTS, SOCIAL_LIMITS } from '@/lib/social-limits';
+import { EDITORIAL_DAYS, HOOK_LAB_COUNTS } from '@/lib/social-limits';
 import type { SocialPlanTier } from '@/lib/social-limits';
 
 interface SocialHubProps {
@@ -39,8 +39,7 @@ export default function SocialHub({ planTier, isPro, setSection }: SocialHubProp
                     )}
                 </div>
                 <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.65, maxWidth: 720 }}>
-                    <strong>Genera contenido como un pro:</strong> calendario de publicaciones, ganchos para reels y{' '}
-                    <strong>Shorts listos</strong> desde URL (YouTube hoy): la IA analiza el vídeo, corta los mejores momentos en <strong>9:16</strong> y organiza copy para TikTok, Reels y Shorts.{' '}
+                    <strong>Genera contenido como un pro:</strong> calendario de publicaciones y ganchos para reels con IA.{' '}
                     Pensado para creadores que quieren publicar más sin partir de cero. Sin conectar OAuth.
                 </p>
             </div>
@@ -51,7 +50,7 @@ export default function SocialHub({ planTier, isPro, setSection }: SocialHubProp
                     padding: '14px 18px', marginBottom: 22, fontSize: 13, color: '#6B5A2E', lineHeight: 1.55,
                 }}>
                     Estás en <strong>plan Free</strong> (salida reducida y límites por semana). Sube a <strong>Pro</strong> para calendario de 7 días,
-                    Hook Lab completo y más <strong>Shorts listos</strong> (YouTube) al día.
+                    Hook Lab completo y más análisis de vídeo a la semana.
                 </div>
             )}
 
@@ -84,21 +83,6 @@ export default function SocialHub({ planTier, isPro, setSection }: SocialHubProp
                         <p style={hubDescStyle}>
                             Abre reels con ideas fuertes: {hl.hooks} ganchos y {hl.angles} {hl.angles === 1 ? 'ángulo' : 'ángulos'}
                             {isPro ? ' + audio y textos en pantalla.' : '.'} Ideal antes de grabar.
-                        </p>
-                    </div>
-                </button>
-
-                <button type="button" onClick={() => setSection('ytclips')} style={hubButtonStyle}
-                    onMouseEnter={handleHubMouseEnter} onMouseLeave={handleHubMouseLeave}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
-                        <IconTile icon={CirclePlay} background="#FDEDED" iconColor="#C41E3A" />
-                        <ArrowRight size={20} strokeWidth={1.75} color={T.ink40} aria-hidden />
-                    </div>
-                    <div>
-                        <p style={hubTitleStyle}>Shorts listos</p>
-                        <span style={{ ...hubLabelStyle, color: T.coral, background: 'rgba(232,93,76,.1)' }}>URL → IA → proyecto · estilo Opus</span>
-                        <p style={hubDescStyle}>
-                            Pega un enlace, analizamos el vídeo y generamos clips 9:16 con toda la info. Proyectos en la nube que caducan solos a los 2 días. {isPro ? 'Pro: pack completo (~12 momentos), sin límite de usos.' : 'Free: hasta ~4 momentos por análisis.'}
                         </p>
                     </div>
                 </button>

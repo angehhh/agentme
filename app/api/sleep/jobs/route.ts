@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@/lib/supabase-server';
+import { requireSessionUser } from '@/lib/require-session-user';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
     try {
-        const supabase = await createRouteHandlerClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user)
-            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        const auth = await requireSessionUser();
+        if (!auth.ok)
+            return auth.response;
+        const { user, supabase } = auth;
         const { data, error } = await supabase
             .from('sleep_jobs')
             .select('id, status, goal, state, created_at, updated_at')

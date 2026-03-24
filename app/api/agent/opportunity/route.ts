@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { createRouteHandlerClient } from '@/lib/supabase-server';
+import { requireSessionUser } from '@/lib/require-session-user';
 import { runOpportunityAgent } from '@/lib/modes/opportunity';
 
 const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 const FREE_DAILY_LIMIT = 5;
 export async function POST(req: NextRequest) {
     try {
-        const supabase = await createRouteHandlerClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            return NextResponse.json({ error: 'Usuario no autenticado' }, { status: 401 });
-        }
-        const userId = user.id;
+        const auth = await requireSessionUser();
+        if (!auth.ok)
+            return auth.response;
+        const userId = auth.user.id;
 
         const { query, location, workType, experience } = await req.json();
         if (!query) {

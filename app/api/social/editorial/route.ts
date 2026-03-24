@@ -2,19 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { runSocialEditorialAgent } from '@/lib/modes/social';
 import { SOCIAL_LIMITS, tierFromPlan, utcStartOfIsoWeekIso, } from '@/lib/social-limits';
-import { createRouteHandlerClient } from '@/lib/supabase-server';
+import { requireSessionUser } from '@/lib/require-session-user';
 
 const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 export async function POST(req: NextRequest) {
     try {
-        const supabase = await createRouteHandlerClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-        }
-
-        const userId = user.id;
+        const auth = await requireSessionUser();
+        if (!auth.ok)
+            return auth.response;
+        const userId = auth.user.id;
         const body = await req.json();
         const { niche, audience, tone, mainPlatform, language, } = body as {
             niche?: string;

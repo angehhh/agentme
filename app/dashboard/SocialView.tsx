@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { EditorialCalendarResult, EditorialPost, HookLabResult } from '@/lib/social-claude';
-import type { YoutubeVerticalClip } from '@/lib/youtube-clips-claude';
 import type { SocialPlanTier } from '@/lib/social-limits';
 import { EDITORIAL_DAYS, HOOK_LAB_COUNTS } from '@/lib/social-limits';
 
@@ -10,14 +10,9 @@ import EditorialSection from './social/EditorialSection';
 import HookLabSection from './social/HookLabSection';
 import SleepSection from './social/SleepSection';
 import { labelsForEditorialSteps } from '@/lib/user-facing-agent-steps';
-import YoutubeClipsSection from './social/YoutubeClipsSection';
 import { SHELL } from '@/lib/app-shell';
-import {
-    ensureYoutubeClipShape, sessionClipProgressFromDetail,
-    postToText, clipsToText, buildClipsPlanPayload,
-    OpusProgressOverlay, YtProjectVideoGridGateOverlay, YoutubeClipAutoPreviewObserver
-} from './social/SocialCommon';
-import type { SocialSection, YtCloudSession, YtCloudRenderProject } from './social/SocialCommon';
+import { postToText } from './social/SocialCommon';
+import type { SocialSection } from './social/SocialCommon';
 
 export default function SocialView({ userId, supabase, planTier, }: {
     userId: string;
@@ -28,13 +23,11 @@ export default function SocialView({ userId, supabase, planTier, }: {
     const calDays = EDITORIAL_DAYS[planTier];
     const hl = HOOK_LAB_COUNTS[planTier];
 
-    // --- State ---
     const [niche, setNiche] = useState('');
     const [audience, setAudience] = useState('');
     const [tone, setTone] = useState('profesional y cercano');
     const [mainPlatform, setMainPlatform] = useState('Instagram');
     const [language, setLanguage] = useState('español');
-    const [settingsLoading, setSettingsLoading] = useState(true);
     const [settingsErr, setSettingsErr] = useState<string | null>(null);
     const [savingPrefs, setSavingPrefs] = useState(false);
 
@@ -58,106 +51,10 @@ export default function SocialView({ userId, supabase, planTier, }: {
 
     const [section, setSection] = useState<SocialSection>('hub');
 
-    const [ytUrl, setYtUrl] = useState('');
-    const [ytCaptionLang, setYtCaptionLang] = useState('');
-    const [ytVideoId, setYtVideoId] = useState('');
-    const [ytVideoTitle, setYtVideoTitle] = useState<string | null>(null);
-    const [ytClips, setYtClips] = useState<YoutubeVerticalClip[]>([]);
-    const [ytTitleHint, setYtTitleHint] = useState<string | null>(null);
-    const [ytLoading, setYtLoading] = useState(false);
-    const [ytAnalysisFakeProgress, setYtAnalysisFakeProgress] = useState(0);
-    const [ytErr, setYtErr] = useState<string | null>(null);
-    const [ytCopied, setYtCopied] = useState(false);
-
-    const [ytRenderingClipIndex, setYtRenderingClipIndex] = useState<number | null>(null);
-    const [ytRenderZipLoading, setYtRenderZipLoading] = useState(false);
-    const [ytRenderErr, setYtRenderErr] = useState<string | null>(null);
-
-    const [ytSessions, setYtSessions] = useState<YtCloudSession[]>([]);
-    const [ytSessionsLoading, setYtSessionsLoading] = useState(false);
-    const [ytSessionsFetchedOnce, setYtSessionsFetchedOnce] = useState(false);
-    const [ytOpenSessionId, setYtOpenSessionId] = useState<string | null>(null);
-    const [ytSessionDetail, setYtSessionDetail] = useState<{
-        session: YtCloudSession;
-        assets: YtCloudRenderProject[];
-    } | null>(null);
-    const [ytSessionDetailLoading, setYtSessionDetailLoading] = useState(false);
-    const [ytRenderSessionId, setYtRenderSessionId] = useState<string | null>(null);
-    const [ytRenderFakeProgress, setYtRenderFakeProgress] = useState(0);
-    const [ytBypassProjectClipsGate, setYtBypassProjectClipsGate] = useState(false);
-
-    const [ytCloudMp4UrlByClip, setYtCloudMp4UrlByClip] = useState<Record<number, string>>({});
-    const [ytAutomatedPreviewByClip, setYtAutomatedPreviewByClip] = useState<Record<number, string>>({});
-
-    // --- Refs ---
-    const ytAutomatedPreviewRef = useRef<Record<number, string>>({});
-    const aliveRef = useRef(true);
-    const editorialAbortRef = useRef<AbortController | null>(null);
-    const hookAbortRef = useRef<AbortController | null>(null);
-    const ytAbortRef = useRef<AbortController | null>(null);
-    const ytRenderAbortRef = useRef<AbortController | null>(null);
-    const ytOpenSessionIdRef = useRef<string | null>(null);
-    const ytAutoPreviewPendingRef = useRef<Set<number>>(new Set());
-    const ytClipsPackId = 0;
-    const [ytPreviewKick, setYtPreviewKick] = useState(0);
-    const [ytCloudClipInfoModal, setYtCloudClipInfoModal] = useState<null | {
-        title: string;
-        clipNum: number;
-        clipTiming?: { start_sec: number; end_sec: number };
-        premiumClip?: YoutubeVerticalClip;
-        fallbackDesc?: string;
-        downloadUrl?: string | null;
-        filenameHint?: string;
-    }>(null);
-
-    const [ytEmbedOrigin, setYtEmbedOrigin] = useState('');
-
     const storageCal = `agentme_social_calendar_${userId}`;
     const storageHook = `agentme_social_hooklab_${userId}`;
-    const storageYt = `agentme_social_ytclips_${userId}`;
-
-    // --- Synchronize Refs ---
-    ytAutomatedPreviewRef.current = ytAutomatedPreviewByClip;
-    ytOpenSessionIdRef.current = ytOpenSessionId;
-
-    // --- Effects ---
-    useEffect(() => {
-        return () => {
-            Object.values(ytAutomatedPreviewRef.current).forEach(u => {
-                try { URL.revokeObjectURL(u); } catch { }
-            });
-        };
-    }, []);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') setYtEmbedOrigin(window.location.origin);
-    }, []);
-
-    // Session status fake progress
-    useEffect(() => {
-        const busy = ytRenderingClipIndex !== null || ytRenderZipLoading;
-        if (!busy) { setYtRenderFakeProgress(0); return; }
-        const t0 = Date.now();
-        const id = setInterval(() => {
-            const elapsed = Date.now() - t0;
-            setYtRenderFakeProgress(Math.min(91, (elapsed / 200000) * 91));
-        }, 600);
-        return () => clearInterval(id);
-    }, [ytRenderingClipIndex, ytRenderZipLoading]);
-
-    useEffect(() => {
-        if (!ytLoading) { setYtAnalysisFakeProgress(0); return; }
-        const t0 = Date.now();
-        const id = setInterval(() => {
-            const elapsed = Date.now() - t0;
-            setYtAnalysisFakeProgress(Math.min(88, (elapsed / 100000) * 88));
-        }, 450);
-        return () => clearInterval(id);
-    }, [ytLoading]);
-
-    // Load persisted data
-    useEffect(() => {
-        aliveRef.current = true;
         try {
             const cal = sessionStorage.getItem(storageCal);
             if (cal) {
@@ -186,59 +83,64 @@ export default function SocialView({ userId, supabase, planTier, }: {
                     setHookLabMeta(null);
                 }
             }
-            const ys = sessionStorage.getItem(storageYt);
-            if (ys) {
-                const parsed = JSON.parse(ys);
-                if (parsed?.videoId && parsed.clips?.length) {
-                    setYtVideoId(parsed.videoId);
-                    setYtVideoTitle(parsed.videoTitle ?? null);
-                    setYtClips(parsed.clips.map((c: any) => ensureYoutubeClipShape(c)));
-                    setYtTitleHint(parsed.video_title_hint ?? null);
-                }
-            }
-        } catch { }
-
-        return () => {
-            aliveRef.current = false;
-            editorialAbortRef.current?.abort();
-            hookAbortRef.current?.abort();
-            ytAbortRef.current?.abort();
-            ytRenderAbortRef.current?.abort();
-        };
-    }, [userId, storageCal, storageHook, storageYt]);
-
-    // Load Settings
-    const loadSettings = useCallback(async () => {
-        setSettingsLoading(true);
-        const { data, error } = await supabase.from('social_settings').select('*').eq('user_id', userId).maybeSingle();
-        if (data) {
-            setNiche(data.niche ?? '');
-            setAudience(data.audience ?? '');
-            setTone(data.tone ?? 'profesional y cercano');
-            setMainPlatform(data.main_platform ?? 'Instagram');
-            if (!hookTopic.trim()) setHookTopic(data.niche ?? '');
         }
-        setSettingsLoading(false);
-    }, [supabase, userId, hookTopic]);
+        catch { /* ignore */ }
+    }, [userId, storageCal, storageHook]);
 
-    useEffect(() => { 
-        loadSettings(); 
-    }, [loadSettings]);
+    const { data: settingsData, mutate: mutateSettings } = useSWR(
+        userId ? ['social_settings', userId] : null,
+        async () => {
+            const { data, error } = await supabase.from('social_settings').select('*').eq('user_id', userId).maybeSingle();
+            if (error)
+                throw error;
+            return data;
+        },
+        {
+            dedupingInterval: 8000,
+            revalidateOnFocus: false,
+            onError: (e: Error) => setSettingsErr(e.message || 'Error al cargar preferencias'),
+            onSuccess: () => setSettingsErr(null),
+        },
+    );
 
+    useEffect(() => {
+        if (settingsData === undefined || settingsData === null)
+            return;
+        setNiche(settingsData.niche ?? '');
+        setAudience(settingsData.audience ?? '');
+        setTone(settingsData.tone ?? 'profesional y cercano');
+        setMainPlatform(settingsData.main_platform ?? 'Instagram');
+        setHookTopic(prev => (prev.trim() ? prev : (settingsData.niche ?? '')));
+    }, [settingsData]);
 
-    // --- Handlers ---
     const savePreferences = async () => {
         setSavingPrefs(true);
-        const { error } = await supabase.from('social_settings').upsert({
+        const row = {
             user_id: userId,
             niche: niche.trim(),
             audience: audience.trim(),
             tone: tone.trim(),
             main_platform: mainPlatform.trim(),
-            updated_at: new Date().toISOString()
-        });
+            updated_at: new Date().toISOString(),
+        };
+        const { error } = await supabase.from('social_settings').upsert(row);
         setSavingPrefs(false);
-        if (error) setSettingsErr(error.message);
+        if (error) {
+            setSettingsErr(error.message);
+            return;
+        }
+        setSettingsErr(null);
+        await mutateSettings(
+            {
+                user_id: userId,
+                niche: row.niche,
+                audience: row.audience,
+                tone: row.tone,
+                main_platform: row.main_platform,
+                updated_at: row.updated_at,
+            },
+            { revalidate: false },
+        );
     };
 
     const generate = async () => {
@@ -250,7 +152,7 @@ export default function SocialView({ userId, supabase, planTier, }: {
             const res = await fetch('/api/social/editorial', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ niche, audience, tone, mainPlatform, language })
+                body: JSON.stringify({ niche, audience, tone, mainPlatform, language }),
             });
             const data = await res.json();
             if (data.calendar) {
@@ -263,10 +165,12 @@ export default function SocialView({ userId, supabase, planTier, }: {
                     calendar: data.calendar,
                     editorialAssistantLabels: labels,
                 }));
-            } else {
+            }
+            else {
                 setGenErr(data.message || 'Error al generar calendario');
             }
-        } catch { setGenErr('Error de conexión'); }
+        }
+        catch { setGenErr('Error de conexión'); }
         finally { setGenLoading(false); }
     };
 
@@ -279,7 +183,7 @@ export default function SocialView({ userId, supabase, planTier, }: {
             const res = await fetch('/api/social/hook-lab', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ topic: hookTopic, audience, tone, language })
+                body: JSON.stringify({ topic: hookTopic, audience, tone, language }),
             });
             const data = await res.json();
             if (data.hookLab) {
@@ -294,163 +198,15 @@ export default function SocialView({ userId, supabase, planTier, }: {
                     : null;
                 setHookLabMeta(meta);
                 sessionStorage.setItem(storageHook, JSON.stringify({ hookLab: data.hookLab, meta }));
-            } else {
+            }
+            else {
                 setHookErr(data.message || 'Error al generar Hook Lab');
             }
-        } catch { setHookErr('Error de conexión'); }
+        }
+        catch { setHookErr('Error de conexión'); }
         finally { setHookLoading(false); }
     };
 
-    const runYoutubeClips = async () => {
-        if (!ytUrl.trim()) return;
-        setYtLoading(true);
-        setYtClips([]);
-        try {
-            const res = await fetch('/api/social/youtube-clips', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ youtubeUrl: ytUrl, captionLang: ytCaptionLang, language })
-            });
-            const data = await res.json();
-            if (data.clips && data.videoId) {
-                const clips = data.clips.map((c: any) => ensureYoutubeClipShape(c));
-                setYtClips(clips);
-                setYtVideoId(data.videoId);
-                setYtVideoTitle(data.videoTitle || null);
-                sessionStorage.setItem(storageYt, JSON.stringify({ videoId: data.videoId, clips, videoTitle: data.videoTitle || '' }));
-            } else {
-                setYtErr(data.message || 'No se pudieron extraer clips');
-            }
-        } catch { setYtErr('Error de conexión'); }
-        finally { setYtLoading(false); }
-    };
-
-    const loadYtRenderSessions = useCallback(async () => {
-        setYtSessionsLoading(true);
-        try {
-            const res = await fetch('/api/social/youtube-render/sessions');
-            const data = await res.json();
-            if (Array.isArray(data.sessions)) setYtSessions(data.sessions);
-        } catch { }
-        finally { setYtSessionsLoading(false); setYtSessionsFetchedOnce(true); }
-    }, []);
-
-    // --- Reset ytClips cuando el usuario entra en la sección de Shorts ---
-    useEffect(() => {
-        if (section === 'ytclips') {
-            setYtClips([]);
-            setYtVideoId('');
-            setYtVideoTitle(null);
-            setYtUrl('');
-            setYtOpenSessionId(null);
-            setYtSessionDetail(null);
-            sessionStorage.removeItem(storageYt);
-            loadYtRenderSessions();
-        }
-    }, [section, storageYt, loadYtRenderSessions]);
-
-    // --- Procesar cola de auto-previsualización ---
-    useEffect(() => {
-        if (ytPreviewKick === 0 || ytRenderingClipIndex !== null) return;
-        const pending = Array.from(ytAutoPreviewPendingRef.current);
-        const idx = pending.find(i => !ytAutomatedPreviewByClip[i] && !ytCloudMp4UrlByClip[i]);
-        if (idx !== undefined) {
-            ytAutoPreviewPendingRef.current.delete(idx);
-            void generateYoutubeRenderClipPreview(idx);
-        }
-    }, [ytPreviewKick, ytRenderingClipIndex, ytAutomatedPreviewByClip, ytCloudMp4UrlByClip]);
-
-    const loadYtSessionDetail = useCallback(async (sessionId: string) => {
-        setYtOpenSessionId(sessionId);
-        setYtSessionDetailLoading(true);
-        try {
-            const res = await fetch(`/api/social/youtube-render/sessions/${sessionId}`);
-            const data = await res.json();
-            if (data.success) setYtSessionDetail({ session: data.session, assets: data.assets });
-        } catch { }
-        finally { setYtSessionDetailLoading(false); }
-    }, []);
-
-    const downloadCloudSessionMp4 = useCallback((url: string, filename: string) => {
-        void (async () => {
-            try {
-                const r = await fetch(url);
-                const b = await r.blob();
-                const u = URL.createObjectURL(b);
-                const a = document.createElement('a');
-                a.href = u;
-                a.download = filename;
-                a.click();
-                setTimeout(() => URL.revokeObjectURL(u), 5000);
-            } catch { setYtRenderErr('Error al descargar'); }
-        })();
-    }, []);
-
-    const generateYoutubeRenderClipPreview = async (clipIndex: number, opts?: { alsoDownload?: boolean }) => {
-        if (!ytVideoId || !ytClips.length) return;
-        const c = ytClips[clipIndex];
-        if (!c) return;
-        setYtRenderingClipIndex(clipIndex);
-        try {
-            const res = await fetch('/api/social/youtube-render', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    youtubeUrl: ytUrl,
-                    output: 'mp4',
-                    store: true,
-                    clipIndex,
-                    sessionId: ytRenderSessionId ?? undefined,
-                    videoTitle: ytVideoTitle || ytTitleHint || undefined,
-                    clipsPlan: buildClipsPlanPayload(ytClips),
-                    clips: [{ start_sec: c.start_sec, end_sec: c.end_sec, title: c.title }]
-                })
-            });
-            const data = await res.json();
-            if (data.success && data.project?.download_url) {
-                const u = data.project.download_url;
-                setYtAutomatedPreviewByClip(prev => ({ ...prev, [clipIndex]: u }));
-                if (opts?.alsoDownload) {
-                   downloadCloudSessionMp4(u, data.project.filename || `clip-${clipIndex + 1}.mp4`);
-                }
-                if (data.session?.id) setYtRenderSessionId(data.session.id);
-            }
-        } catch { setYtRenderErr('Error al generar render'); }
-        finally { setYtRenderingClipIndex(null); }
-    };
-
-    const downloadYoutubeRenderZip = async () => {
-        if (!ytVideoId || !ytClips.length) return;
-        setYtRenderZipLoading(true);
-        try {
-            const res = await fetch('/api/social/youtube-render', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    youtubeUrl: ytUrl,
-                    output: 'zip',
-                    store: true,
-                    sessionId: ytRenderSessionId ?? undefined,
-                    videoTitle: ytVideoTitle || ytTitleHint || undefined,
-                    clipsPlan: buildClipsPlanPayload(ytClips),
-                    clips: ytClips.map(c => ({ start_sec: c.start_sec, end_sec: c.end_sec, title: c.title }))
-                })
-            });
-            const data = await res.json();
-            if (data.success && data.project?.download_url) {
-                downloadCloudSessionMp4(data.project.download_url, data.project.filename || 'clips.zip');
-            }
-        } catch { setYtRenderErr('Error al generar ZIP'); }
-        finally { setYtRenderZipLoading(false); }
-    };
-
-    const downloadOrRenderYoutubeClipMp4 = (idx: number) => {
-        const u = ytAutomatedPreviewByClip[idx] || ytCloudMp4UrlByClip[idx];
-        if (u) downloadCloudSessionMp4(u, `clip-${idx+1}.mp4`);
-        else generateYoutubeRenderClipPreview(idx, { alsoDownload: true });
-    };
-
-    // Helper functions
     const flashCopy = (id: string) => {
         setCopiedFlash(id);
         setTimeout(() => setCopiedFlash(null), 2000);
@@ -480,25 +236,6 @@ export default function SocialView({ userId, supabase, planTier, }: {
         flashCopy('hooklab');
     };
 
-    const copyYtClipsAll = async () => {
-        if (!ytVideoId || !ytClips.length) return;
-        await navigator.clipboard.writeText(clipsToText(ytVideoId, ytVideoTitle, ytClips));
-        flashCopy('ytclips');
-    };
-
-    const requestAutoPreviewClip = useCallback((idx: number) => {
-        ytAutoPreviewPendingRef.current.add(idx);
-        setYtPreviewKick(k => k + 1);
-    }, []);
-
-    const ytSessionClipProgress = useMemo(() => {
-        if (!ytSessionDetail) return null;
-        return sessionClipProgressFromDetail(ytSessionDetail);
-    }, [ytSessionDetail]);
-
-    const ytProjectClipsGateActive = Boolean(ytOpenSessionId && ytSessionDetail && ytSessionClipProgress && !ytSessionClipProgress.complete && !ytBypassProjectClipsGate);
-
-    // --- Render ---
     return (
         <div style={{ padding: SHELL.pagePadding, maxWidth: SHELL.contentMax, margin: '0 auto', width: '100%' }}>
             {settingsErr && (
@@ -521,7 +258,7 @@ export default function SocialView({ userId, supabase, planTier, }: {
                     savingPrefs={savingPrefs} savePrefs={savePreferences}
                     generate={generate} genLoading={genLoading}
                     calDays={calDays} isPro={isPro} genErr={genErr}
-                    calendar={calendar}                     copyWeek={copyWeek} copiedFlash={copiedFlash}
+                    calendar={calendar} copyWeek={copyWeek} copiedFlash={copiedFlash}
                     copyOne={copyOne}
                     editorialAssistantLabels={editorialAssistantLabels}
                 />
@@ -540,44 +277,6 @@ export default function SocialView({ userId, supabase, planTier, }: {
                     hookLab={hookLab} hookLabMeta={hookLabMeta}
                     copyHookLabAll={copyHookLabAll}
                     copiedFlash={copiedFlash} copySingleHook={copySingleHook}
-                />
-            )}
-
-            {section === 'ytclips' && (
-                <YoutubeClipsSection
-                    isPro={isPro}
-                    ytUrl={ytUrl} setYtUrl={setYtUrl}
-                    ytCaptionLang={ytCaptionLang} setYtCaptionLang={setYtCaptionLang}
-                    language={language} setLanguage={setLanguage}
-                    ytLoading={ytLoading} runYoutubeClips={runYoutubeClips}
-                    ytAnalysisFakeProgress={ytAnalysisFakeProgress}
-                    ytErr={ytErr} ytRenderErr={ytRenderErr}
-                    ytSessions={ytSessions} ytSessionsLoading={ytSessionsLoading}
-                    loadYtRenderSessions={loadYtRenderSessions}
-                    ytOpenSessionId={ytOpenSessionId} setYtOpenSessionId={setYtOpenSessionId}
-                    ytSessionDetail={ytSessionDetail} ytSessionDetailLoading={ytSessionDetailLoading}
-                    loadYtSessionDetail={loadYtSessionDetail} setYtSessionDetail={setYtSessionDetail}
-                    ytRenderingClipIndex={ytRenderingClipIndex}
-                    ytRenderFakeProgress={ytRenderFakeProgress}
-                    ytRenderZipLoading={ytRenderZipLoading}
-                    ytVideoId={ytVideoId}
-                    ytBypassProjectClipsGate={ytBypassProjectClipsGate}
-                    setYtBypassProjectClipsGate={setYtBypassProjectClipsGate}
-                    ytProjectClipsGateActive={ytProjectClipsGateActive}
-                    ytSessionClipProgress={ytSessionClipProgress}
-                    ytClips={ytClips} ytVideoTitle={ytVideoTitle || ''}
-                    ytTitleHint={ytTitleHint || ''}
-                    copyYtClipsAll={copyYtClipsAll} ytCopied={ytCopied}
-                    copiedFlash={copiedFlash}
-                    downloadYoutubeRenderZip={downloadYoutubeRenderZip}
-                    ytAutomatedPreviewByClip={ytAutomatedPreviewByClip}
-                    ytCloudMp4UrlByClip={ytCloudMp4UrlByClip}
-                    requestAutoPreviewClip={requestAutoPreviewClip}
-                    downloadOrRenderYoutubeClipMp4={downloadOrRenderYoutubeClipMp4}
-                    setYtCloudClipInfoModal={setYtCloudClipInfoModal}
-                    setSection={setSection}
-                    downloadCloudSessionMp4={downloadCloudSessionMp4}
-                    ytClipsPackId={String(ytClipsPackId)}
                 />
             )}
         </div>

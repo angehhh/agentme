@@ -86,7 +86,8 @@ export default function AuthPage() {
                 setLoading(false);
                 return;
             }
-            if (data.user) {
+            // Bienvenida solo con sesión: la API exige cookie + email = usuario (evita abuso de Resend).
+            if (data.user && data.session) {
                 await sendWelcomeEmail(email);
             }
             if (data.session) {
