@@ -22,13 +22,13 @@ import {
   Download,
   ExternalLink,
   LayoutGrid,
+  Info,
   Layers,
   List,
   Music,
   Paperclip,
   Smartphone,
   Sparkles,
-  Star,
   Video,
   Zap,
 } from 'lucide-react'
@@ -143,11 +143,58 @@ type YtCloudRenderProject = {
   filename: string
   /** Índice del clip en el plan IA (solo MP4); alinea plan ↔ archivo */
   clip_index?: number | null
+  created_at?: string
   duration_sec: number | null
   expires_at: string
   expires_label: string
   thumbnail_url: string
   download_url: string | null
+}
+
+/** clip_index en API/JSON a veces viene como string; null = sin índice (huérfano). */
+function parseClipIndex(v: unknown): number | null {
+  if (v === null || v === undefined) return null
+  if (typeof v === 'number' && Number.isFinite(v)) return Math.floor(v)
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v)
+    if (Number.isFinite(n)) return Math.floor(n)
+  }
+  return null
+}
+
+/**
+ * Alinea MP4s con cada fila del plan: primero por clip_index, luego huecos con archivos sin índice (orden created_at).
+ * Evita quedarse en 10/12 por `clip_index ===` fallando entre número y string.
+ */
+function assignMp4sToPlanSlots(
+  planClips: Array<Record<string, unknown>>,
+  assets: YtCloudRenderProject[],
+): (YtCloudRenderProject | undefined)[] {
+  const rawMp4s = assets.filter(a => a.kind === 'mp4' && a.download_url)
+  const indexed = new Map<number, YtCloudRenderProject>()
+  const orphans: YtCloudRenderProject[] = []
+  for (const a of rawMp4s) {
+    const pi = parseClipIndex(a.clip_index)
+    if (pi !== null && pi >= 0) {
+      if (!indexed.has(pi)) indexed.set(pi, a)
+    } else {
+      orphans.push(a)
+    }
+  }
+  orphans.sort((a, b) => String(a.created_at ?? a.id).localeCompare(String(b.created_at ?? b.id)))
+  let oi = 0
+  const out: (YtCloudRenderProject | undefined)[] = []
+  for (let i = 0; i < planClips.length; i++) {
+    const row = planClips[i]
+    const idx = parseClipIndex(row?.clip_index) ?? i
+    const hit = indexed.get(idx)
+    if (hit) {
+      out.push(hit)
+      continue
+    }
+    out.push(orphans[oi++] ?? undefined)
+  }
+  return out
 }
 
 function formatYtDurationBadge(sec: number | null | undefined): string {
@@ -168,8 +215,17 @@ function buildClipsPlanPayload(clips: YoutubeVerticalClip[]) {
       hook_overlay: c.hook_overlay,
       why_stops_scroll: c.why_stops_scroll,
       nine_sixteen_framing: c.nine_sixteen_framing,
+      safe_zones_caption: c.safe_zones_caption,
+      on_screen_text_suggestions: c.on_screen_text_suggestions,
+      sound_hook: c.sound_hook,
+      cta_end: c.cta_end,
+      estimated_virality_1_10: c.estimated_virality_1_10,
       publish_description: c.publish_description,
       suggested_hashtags: c.suggested_hashtags,
+      best_platforms: c.best_platforms,
+      thumbnail_cover_idea: c.thumbnail_cover_idea,
+      edit_checklist: c.edit_checklist,
+      dynamic_caption_style: c.dynamic_caption_style,
     })),
   }
 }
@@ -323,10 +379,17 @@ function YtProjectVideoGridGateOverlay({
       }}
     >
       <OpusClipProgressPill pct={pct} etaLabel={eta} />
-      <p style={{ margin: 0, fontSize: 13, color: '#6b7280', lineHeight: 1.55, maxWidth: 420 }}>
+      <p style={{ margin: 0, fontSize: 13, color: '#6b7280', lineHeight: 1.55, maxWidth: 440 }}>
         Creando los clips en la nube: <strong style={{ color: '#374151' }}>{progress.ready}</strong> de{' '}
         <strong style={{ color: '#374151' }}>{progress.required}</strong> con MP4 listo. Tiempo estimado según los que faltan.
         Actualizamos cada pocos segundos.
+        {progress.ready < progress.required ? (
+          <>
+            {' '}
+            Si el contador no sube, faltan generaciones desde el análisis (o hay retraso en el servidor). Puedes usar{' '}
+            <strong style={{ color: '#374151' }}>Ver proyecto igualmente</strong> para ver los que ya están listos.
+          </>
+        ) : null}
       </p>
       <button
         type="button"
@@ -366,13 +429,8 @@ function sessionClipProgressFromDetail(detail: {
   const planClips = Array.isArray(plan?.clips) ? plan.clips : []
   const mp4s = detail.assets.filter(a => a.kind === 'mp4')
   if (planClips.length > 0) {
-    let ready = 0
-    for (let i = 0; i < planClips.length; i++) {
-      const row = planClips[i]
-      const idx = typeof row?.clip_index === 'number' ? row.clip_index : i
-      const mp4 = mp4s.find(x => x.clip_index === idx)
-      if (mp4?.download_url) ready++
-    }
+    const slots = assignMp4sToPlanSlots(planClips, detail.assets)
+    const ready = slots.filter(s => s?.download_url).length
     return { required: planClips.length, ready, complete: ready >= planClips.length }
   }
   const withUrl = mp4s.filter(a => a.download_url).length
@@ -391,8 +449,6 @@ type YtCloudSession = {
   expires_at: string
   ready_assets: number
   total_assets: number
-  /** Pestaña Guardados (requiere columna is_saved en Supabase). */
-  is_saved?: boolean
   clips_plan?: unknown
 }
 
@@ -417,6 +473,116 @@ function ensureYoutubeClipShape(c: Partial<YoutubeVerticalClip>): YoutubeVertica
     edit_checklist: arr(c.edit_checklist),
     dynamic_caption_style: String(c.dynamic_caption_style ?? ''),
   }
+}
+
+/** Copy, hashtags, checklist y metadatos del clip (modal «INFORMACIÓN» Pro). */
+function YoutubeClipPremiumInfoContent({ c }: { c: YoutubeVerticalClip }) {
+  return (
+    <>
+      <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
+        <strong style={{ color: T.ink }}>Hook overlay:</strong> {c.hook_overlay}
+      </p>
+      <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
+        <strong style={{ color: T.ink }}>Scroll-stop:</strong> {c.why_stops_scroll}
+      </p>
+
+      {c.publish_description.trim() ? (
+        <div style={{
+          marginBottom: 14, padding: '14px 16px', borderRadius: 12, background: T.paper,
+          border: `1px solid ${T.ink10}`,
+        }}>
+          <SectionLabel color={T.blue} style={{ marginBottom: 6 }}>Descripción para publicar</SectionLabel>
+          <p style={{ fontSize: 14, color: T.ink60, margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            {c.publish_description}
+          </p>
+        </div>
+      ) : null}
+
+      {(c.suggested_hashtags.length > 0 || c.best_platforms.length > 0) && (
+        <div style={{ marginBottom: 14 }}>
+          {c.best_platforms.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>PLATAFORMAS</span>
+              {c.best_platforms.map((p, j) => (
+                <span
+                  key={j}
+                  style={{
+                    fontSize: 11, fontWeight: 700, color: T.ink, background: T.white,
+                    padding: '4px 10px', borderRadius: 100, border: `1px solid ${T.ink10}`,
+                  }}
+                >
+                  {p}
+                </span>
+              ))}
+            </div>
+          )}
+          {c.suggested_hashtags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em', marginRight: 4 }}>HASHTAGS</span>
+              {c.suggested_hashtags.map((h, j) => (
+                <span
+                  key={j}
+                  style={{
+                    fontSize: 12, fontWeight: 600, color: T.violet, background: 'rgba(123,104,238,.08)',
+                    padding: '4px 10px', borderRadius: 8,
+                  }}
+                >
+                  {h.startsWith('#') ? h : `#${h.replace(/^#/, '')}`}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {c.thumbnail_cover_idea.trim() ? (
+        <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
+          <strong style={{ color: T.ink }}>Miniatura / primer frame:</strong> {c.thumbnail_cover_idea}
+        </p>
+      ) : null}
+
+      {c.dynamic_caption_style.trim() ? (
+        <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
+          <strong style={{ color: T.ink }}>Subtítulos dinámicos (estilo viral):</strong> {c.dynamic_caption_style}
+        </p>
+      ) : null}
+
+      <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
+        <strong style={{ color: T.ink }}>Encuadre 9:16:</strong> {c.nine_sixteen_framing}
+      </p>
+      <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
+        <strong style={{ color: T.ink }}>Zona captions:</strong> {c.safe_zones_caption}
+      </p>
+      <div style={{ marginBottom: 10 }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>TEXTO EN PANTALLA</span>
+        <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 13, color: T.ink60, lineHeight: 1.5 }}>
+          {c.on_screen_text_suggestions.map((t, j) => (
+            <li key={j}>{t}</li>
+          ))}
+        </ul>
+      </div>
+      {c.edit_checklist.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>CHECKLIST DE EDICIÓN</span>
+          <ol style={{ margin: '8px 0 0', paddingLeft: 20, fontSize: 13, color: T.ink60, lineHeight: 1.55 }}>
+            {c.edit_checklist.map((step, j) => (
+              <li key={j} style={{ marginBottom: 4 }}>{step}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 6px', lineHeight: 1.55 }}>
+        <strong style={{ color: T.ink }}>Sonido:</strong> {c.sound_hook}
+      </p>
+      <p style={{ fontSize: 13, color: T.ink60, margin: 0, lineHeight: 1.55 }}>
+        <strong style={{ color: T.ink }}>CTA cierre:</strong> {c.cta_end}
+      </p>
+      <p style={{ fontSize: 11, color: T.ink40, marginTop: 10, marginBottom: 0 }}>
+        Potencial estimado: <strong>{c.estimated_virality_1_10}</strong>/10
+      </p>
+    </>
+  )
 }
 
 function postToText(p: EditorialPost): string {
@@ -543,7 +709,6 @@ export default function SocialView({
   const [ytSessionsLoading, setYtSessionsLoading] = useState(false)
   /** Tras el primer fetch de la lista nube en esta vista (evita limpiar borrador antes de saber si hay proyectos). */
   const [ytSessionsFetchedOnce, setYtSessionsFetchedOnce] = useState(false)
-  const [ytRenderTab, setYtRenderTab] = useState<'all' | 'saved'>('all')
   const [ytOpenSessionId, setYtOpenSessionId] = useState<string | null>(null)
   const [ytSessionDetail, setYtSessionDetail] = useState<{
     session: YtCloudSession
@@ -577,6 +742,21 @@ export default function SocialView({
   const [ytPreviewKick, setYtPreviewKick] = useState(0)
   /** Se incrementa al terminar un pack nuevo (resetea observers de scroll) */
   const [ytClipsPackId, setYtClipsPackId] = useState(0)
+  /** Modal «INFORMACIÓN» (contenido premium por clip) */
+  const [ytClipInfoModalIndex, setYtClipInfoModalIndex] = useState<number | null>(null)
+  /** Modal «INFORMACIÓN» en la rejilla del proyecto en la nube (Pro: guía completa si el plan lo trae) */
+  const [ytCloudClipInfoModal, setYtCloudClipInfoModal] = useState<null | {
+    clipNum: number
+    title: string
+    downloadUrl: string | null
+    filenameHint: string
+    /** Pack con plan IA guardado en sesión: guía completa solo se muestra a Pro */
+    premiumClip: YoutubeVerticalClip | null
+    /** Solo MP4 sin plan en la sesión (solo se muestra a Pro) */
+    fallbackDesc?: string
+    /** Rango temporal del clip (cabecera para todos si hay plan) */
+    clipTiming?: { start_sec: number; end_sec: number } | null
+  }>(null)
   /**
    * Origen del pack de clips en pantalla: `analysis` = último “Analizar” (persistido así en sessionStorage);
    * `storage` = borrador antiguo sin marca; se descarta si la API dice 0 proyectos y no hay sesión abierta.
@@ -609,6 +789,24 @@ export default function SocialView({
   useEffect(() => {
     if (typeof window !== 'undefined') setYtEmbedOrigin(window.location.origin)
   }, [])
+
+  useEffect(() => {
+    const clipOpen = ytClipInfoModalIndex !== null
+    const cloudOpen = ytCloudClipInfoModal !== null
+    if (!clipOpen && !cloudOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setYtClipInfoModalIndex(null)
+      setYtCloudClipInfoModal(null)
+    }
+    window.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [ytClipInfoModalIndex, ytCloudClipInfoModal])
 
   useEffect(() => {
     aliveRef.current = true
@@ -739,9 +937,9 @@ export default function SocialView({
       const next: Record<number, string> = {}
       for (const a of detail.assets) {
         if (a.kind !== 'mp4' || !a.download_url) continue
-        const idx = a.clip_index
-        if (typeof idx !== 'number' || idx < 0) continue
-        next[idx] = a.download_url
+        const idx = parseClipIndex(a.clip_index)
+        if (idx === null || idx < 0) continue
+        if (next[idx] == null) next[idx] = a.download_url
       }
       setYtCloudMp4UrlByClip(next)
     } catch {
@@ -771,39 +969,6 @@ export default function SocialView({
       finally {
         if (aliveRef.current) setYtSessionDetailLoading(false)
       }
-    },
-    [userId],
-  )
-
-  const patchYtSessionSaved = useCallback(
-    async (sessionId: string, is_saved: boolean) => {
-      try {
-        const res = await fetch(
-          `/api/social/youtube-render/sessions/${encodeURIComponent(sessionId)}?userId=${encodeURIComponent(userId)}`,
-          {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ is_saved }),
-          },
-        )
-        const data = (await res.json()) as { success?: boolean; error?: string; message?: string }
-        if (!res.ok) {
-          if (data.error === 'schema' && typeof data.message === 'string') {
-            alert(data.message)
-          }
-          return
-        }
-        if (data.success) {
-          setYtSessions(prev =>
-            prev.map(x => (x.id === sessionId ? { ...x, is_saved } : x)),
-          )
-          setYtSessionDetail(d =>
-            d && d.session.id === sessionId
-              ? { ...d, session: { ...d.session, is_saved } }
-              : d,
-          )
-        }
-      } catch { /* ignore */ }
     },
     [userId],
   )
@@ -1371,40 +1536,95 @@ export default function SocialView({
     }
   }
 
-  /** Descarga el MP4 ya generado (blob local o URL firmada en la nube). */
+  /** Descarga el MP4 ya generado (blob local o URL firmada en la nube) como archivo en disco. */
   const downloadYoutubeClipFromPreview = (clipIndex: number) => {
     const blobUrl = ytAutomatedPreviewByClip[clipIndex]
     const cloudUrl = ytCloudMp4UrlByClip[clipIndex]
     const fname =
       ytAutomatedFilenameByClip[clipIndex] ?? `clip-${clipIndex + 1}-9-16-${ytVideoId}.mp4`
-    if (blobUrl) {
+    const trigger = (href: string, revokeAfterMs?: number) => {
       const a = document.createElement('a')
-      a.href = blobUrl
-      a.download = fname
+      a.href = href
+      a.setAttribute('download', fname)
+      a.style.display = 'none'
       document.body.appendChild(a)
       a.click()
       a.remove()
+      if (revokeAfterMs != null && href.startsWith('blob:')) {
+        window.setTimeout(() => {
+          try {
+            URL.revokeObjectURL(href)
+          } catch { /* ignore */ }
+        }, revokeAfterMs)
+      }
+    }
+    if (blobUrl) {
+      trigger(blobUrl)
       return
     }
     if (cloudUrl) {
       void (async () => {
         try {
           const r = await fetch(cloudUrl)
+          if (!r.ok) throw new Error('fetch')
           const b = await r.blob()
+          const cd = r.headers.get('Content-Disposition')
+          const m = cd?.match(/filename="?([^";]+)"?/i)
+          const nameFromServer = m?.[1]?.trim()
+          const finalName = nameFromServer || fname
           const u = URL.createObjectURL(b)
           const a = document.createElement('a')
           a.href = u
-          a.download = fname
+          a.setAttribute('download', finalName)
+          a.style.display = 'none'
           document.body.appendChild(a)
           a.click()
           a.remove()
-          URL.revokeObjectURL(u)
+          window.setTimeout(() => {
+            try {
+              URL.revokeObjectURL(u)
+            } catch { /* ignore */ }
+          }, 4000)
         } catch {
-          window.open(cloudUrl, '_blank', 'noopener,noreferrer')
+          setYtRenderErr(
+            'No se pudo descargar el MP4 (red o CORS). Prueba otro navegador o vuelve a generar el clip.',
+          )
         }
       })()
     }
   }
+
+  /** Descarga directa de un MP4 por URL firmada (proyecto en la nube), sin abrir pestaña. */
+  const downloadCloudSessionMp4 = useCallback((url: string, filename: string) => {
+    void (async () => {
+      try {
+        const r = await fetch(url)
+        if (!r.ok) throw new Error('fetch')
+        const b = await r.blob()
+        const cd = r.headers.get('Content-Disposition')
+        const m = cd?.match(/filename="?([^";]+)"?/i)
+        const nameFromServer = m?.[1]?.trim()
+        const finalName = nameFromServer || filename
+        const u = URL.createObjectURL(b)
+        const a = document.createElement('a')
+        a.href = u
+        a.setAttribute('download', finalName)
+        a.style.display = 'none'
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        window.setTimeout(() => {
+          try {
+            URL.revokeObjectURL(u)
+          } catch { /* ignore */ }
+        }, 4000)
+      } catch {
+        setYtRenderErr(
+          'No se pudo descargar el MP4 (red o CORS). Prueba otro navegador o vuelve a generar el clip.',
+        )
+      }
+    })()
+  }, [])
 
   /** 1.ª vez: render + descarga; si ya hay MP4 (local o nube), solo descarga. */
   const downloadOrRenderYoutubeClipMp4 = (clipIndex: number) => {
@@ -1449,16 +1669,6 @@ export default function SocialView({
         !ytBypassProjectClipsGate,
     )
 
-  const ytSavedSessionsCount = useMemo(
-    () => ytSessions.filter(s => s.is_saved).length,
-    [ytSessions],
-  )
-
-  const ytDisplaySessions = useMemo(() => {
-    if (ytRenderTab === 'saved') return ytSessions.filter(s => s.is_saved)
-    return ytSessions
-  }, [ytRenderTab, ytSessions])
-
   useEffect(() => {
     if (!ytOpenSessionId || !ytSessionDetail || ytSessionDetailLoading) return
     if (ytBypassProjectClipsGate) return
@@ -1466,7 +1676,7 @@ export default function SocialView({
     if (prog.complete || prog.required === 0) return
     const id = setInterval(() => {
       void loadYtSessionDetail(ytOpenSessionId)
-    }, 5000)
+    }, 4000)
     return () => clearInterval(id)
   }, [
     ytOpenSessionId,
@@ -2460,7 +2670,8 @@ export default function SocialView({
         }}>
           <div>
             <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, letterSpacing: '-.02em', color: '#fff' }}>
-              Tus proyectos (como en Opus)
+              Tus proyectos (como en Opus){' '}
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#888' }}>({ytSessions.length})</span>
             </h3>
             <p style={{ margin: '6px 0 0', fontSize: 12, color: '#9a9a9a', lineHeight: 1.5, maxWidth: 560 }}>
               Cada tarjeta es un vídeo analizado: entra para ver <strong style={{ color: '#cfcfcf' }}>todos los clips 9:16</strong> con vista previa. La barra verde mientras se generan MP4/ZIP. Caducidad automática a los{' '}
@@ -2487,69 +2698,24 @@ export default function SocialView({
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 18, borderBottom: '1px solid #2a2a2a', paddingBottom: 10 }}>
-          <button
-            type="button"
-            onClick={() => setYtRenderTab('all')}
-            style={{
-              padding: '8px 14px',
-              borderRadius: 8,
-              border: 'none',
-              background: ytRenderTab === 'all' ? '#2d2d2d' : 'transparent',
-              color: ytRenderTab === 'all' ? '#fff' : '#888',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: T.sans,
-            }}
-          >
-            Todos los proyectos ({ytSessions.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setYtRenderTab('saved')}
-            style={{
-              padding: '8px 14px',
-              borderRadius: 8,
-              border: 'none',
-              background: ytRenderTab === 'saved' ? '#2d2d2d' : 'transparent',
-              color: ytRenderTab === 'saved' ? '#fff' : '#888',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: T.sans,
-            }}
-          >
-            Guardados ({ytSavedSessionsCount})
-          </button>
-        </div>
-
         {ytSessionsLoading && ytSessions.length === 0 ? (
           <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Cargando proyectos…</p>
         ) : null}
 
-        {!ytSessionsLoading && ytDisplaySessions.length === 0 ? (
+        {!ytSessionsLoading && ytSessions.length === 0 ? (
           <p style={{ margin: 0, fontSize: 13, color: '#888', lineHeight: 1.55 }}>
-            {ytSessions.length === 0 ? (
-              <>
-                Aún no hay proyectos. <strong style={{ color: '#bbb' }}>Descarga un MP4 9:16</strong> o un{' '}
-                <strong style={{ color: '#bbb' }}>ZIP</strong> desde los clips de abajo y se creará un proyecto agrupado.
-              </>
-            ) : ytRenderTab === 'saved' ? (
-              <>
-                No hay proyectos en <strong style={{ color: '#bbb' }}>Guardados</strong>. Pulsa la estrella ★ en la tarjeta de un proyecto (pestaña Todos) para añadirlo aquí.
-              </>
-            ) : null}
+            Aún no hay proyectos. <strong style={{ color: '#bbb' }}>Descarga un MP4 9:16</strong> o un{' '}
+            <strong style={{ color: '#bbb' }}>ZIP</strong> desde los clips de abajo y se creará un proyecto agrupado.
           </p>
         ) : null}
 
-        {!ytSessionsLoading && ytDisplaySessions.length > 0 ? (
+        {!ytSessionsLoading && ytSessions.length > 0 ? (
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
             gap: 16,
           }}>
-            {ytDisplaySessions.map(s => {
+            {ytSessions.map(s => {
               const showProgress =
                 (ytRenderingClipIndex !== null || ytRenderZipLoading) &&
                 s.youtube_video_id === ytVideoId
@@ -2565,8 +2731,8 @@ export default function SocialView({
                   )
                   : null
               return (
-                <div key={s.id} style={{ position: 'relative' }}>
                 <button
+                  key={s.id}
                   type="button"
                   onClick={() => {
                     setYtBypassProjectClipsGate(false)
@@ -2581,7 +2747,6 @@ export default function SocialView({
                     border: ytOpenSessionId === s.id ? '1px solid #4ade80' : '1px solid #333',
                     padding: 0,
                     fontFamily: T.sans,
-                    width: '100%',
                   }}
                 >
                   <div style={{ position: 'relative', aspectRatio: '16/9', background: '#000' }}>
@@ -2676,41 +2841,6 @@ export default function SocialView({
                     </p>
                   </div>
                 </button>
-                <button
-                  type="button"
-                  title={s.is_saved ? 'Quitar de Guardados' : 'Guardar en Guardados'}
-                  aria-label={s.is_saved ? 'Quitar de Guardados' : 'Guardar en Guardados'}
-                  onClick={e => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    void patchYtSessionSaved(s.id, !s.is_saved)
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: 6,
-                    left: 6,
-                    zIndex: 5,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    border: '1px solid rgba(255,255,255,.25)',
-                    background: 'rgba(0,0,0,.55)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
-                >
-                  <Star
-                    size={22}
-                    strokeWidth={2}
-                    color="#fbbf24"
-                    fill={s.is_saved ? '#fbbf24' : 'transparent'}
-                    aria-hidden
-                  />
-                </button>
-                </div>
               )
             })}
           </div>
@@ -2740,58 +2870,29 @@ export default function SocialView({
                   </p>
                 ) : null}
               </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flexShrink: 0 }}>
-                {ytSessionDetail?.session?.id ? (
-                  <button
-                    type="button"
-                    title={ytSessionDetail.session.is_saved ? 'Quitar de Guardados' : 'Guardar en Guardados'}
-                    aria-label={ytSessionDetail.session.is_saved ? 'Quitar de Guardados' : 'Guardar en Guardados'}
-                    onClick={() => {
-                      void patchYtSessionSaved(ytSessionDetail.session.id, !ytSessionDetail.session.is_saved)
-                    }}
-                    style={{
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      border: '1px solid #444',
-                      background: '#252525',
-                      color: '#ddd',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Star
-                      size={20}
-                      strokeWidth={2}
-                      color="#fbbf24"
-                      fill={ytSessionDetail.session.is_saved ? '#fbbf24' : 'transparent'}
-                      aria-hidden
-                    />
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setYtOpenSessionId(null)
-                    setYtSessionDetail(null)
-                    setYtBypassProjectClipsGate(false)
-                  }}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    border: '1px solid #444',
-                    background: '#252525',
-                    color: '#ddd',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontFamily: T.sans,
-                  }}
-                >
-                  Cerrar
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setYtOpenSessionId(null)
+                  setYtSessionDetail(null)
+                  setYtBypassProjectClipsGate(false)
+                  setYtCloudClipInfoModal(null)
+                }}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid #444',
+                  background: '#252525',
+                  color: '#ddd',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: T.sans,
+                  flexShrink: 0,
+                }}
+              >
+                Cerrar
+              </button>
             </div>
 
             {ytSessionDetailLoading ? (
@@ -2843,13 +2944,6 @@ export default function SocialView({
                     background: '#000',
                     display: 'block',
                   }
-                  const dlStyle: CSSProperties = {
-                    display: 'inline-block',
-                    marginTop: 8,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: '#7dd3a0',
-                  }
                   const gateOverlay =
                     ytProjectClipsGateActive && ytSessionClipProgress ? (
                       <YtProjectVideoGridGateOverlay
@@ -2880,52 +2974,138 @@ export default function SocialView({
                           gridTemplateColumns: 'repeat(auto-fill, minmax(168px, 1fr))',
                           gap: 14,
                         }}>
-                          {assets.map(a => (
-                            <div
-                              key={a.id}
-                              style={{
-                                borderRadius: 12,
-                                overflow: 'hidden',
-                                background: '#222',
-                                border: '1px solid #333',
-                                display: 'flex',
-                                flexDirection: 'column',
-                              }}
-                            >
-                              <div style={{ aspectRatio: '9/16', background: '#000' }}>
-                                {a.download_url ? (
-                                  <video src={a.download_url} controls playsInline style={vidStyle} />
-                                ) : (
-                                  <div style={{
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    padding: 12,
-                                    textAlign: 'center',
-                                    fontSize: 11,
-                                    color: '#666',
-                                  }}>
-                                    Sin vista previa
+                          {assets.map((a, assetIdx) => {
+                            const title = String(a.title ?? `Clip ${assetIdx + 1}`)
+                            const slug =
+                              title
+                                .replace(/[^\w\s-àáéíóúñü]/gi, '')
+                                .replace(/\s+/g, '-')
+                                .slice(0, 48) || `clip-${assetIdx + 1}`
+                            const fname = `clip-${assetIdx + 1}-9-16-${slug}.mp4`
+                            const openCloudInfo = () => {
+                              setYtCloudClipInfoModal({
+                                clipNum: assetIdx + 1,
+                                title,
+                                downloadUrl: a.download_url ?? null,
+                                filenameHint: fname,
+                                premiumClip: null,
+                                clipTiming: null,
+                                fallbackDesc: isPro
+                                  ? 'Solo hay archivo MP4 en este proyecto (sin plan de copy guardado).'
+                                  : undefined,
+                              })
+                            }
+                            return (
+                              <div
+                                key={a.id}
+                                style={{
+                                  borderRadius: 12,
+                                  overflow: 'hidden',
+                                  background: '#222',
+                                  border: '1px solid #333',
+                                }}
+                              >
+                                <div style={{ position: 'relative', aspectRatio: '9/16', background: '#000', flexShrink: 0 }}>
+                                  {a.download_url ? (
+                                    <video src={a.download_url} controls playsInline style={vidStyle} />
+                                  ) : (
+                                    <div style={{
+                                      height: '100%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      padding: 12,
+                                      textAlign: 'center',
+                                      fontSize: 11,
+                                      color: '#666',
+                                    }}>
+                                      Sin vista previa
+                                    </div>
+                                  )}
+                                  <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                                    <div
+                                      style={{
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        zIndex: 5,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 6,
+                                        alignItems: 'flex-end',
+                                        pointerEvents: 'auto',
+                                      }}
+                                    >
+                                      <button
+                                        type="button"
+                                        onClick={e => {
+                                          e.stopPropagation()
+                                          openCloudInfo()
+                                        }}
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: 6,
+                                          padding: '6px 10px',
+                                          borderRadius: 8,
+                                          border: isPro ? '1px solid rgba(255,255,255,.4)' : '1px dashed rgba(255,255,255,.35)',
+                                          background: 'rgba(0,0,0,.58)',
+                                          color: isPro ? '#fff' : 'rgba(255,255,255,.65)',
+                                          fontWeight: 800,
+                                          fontSize: 9,
+                                          letterSpacing: '.1em',
+                                          fontFamily: T.sans,
+                                          cursor: 'pointer',
+                                          textTransform: 'uppercase',
+                                        }}
+                                      >
+                                        <Info size={14} strokeWidth={2} aria-hidden />
+                                        INFORMACIÓN
+                                        {!isPro ? (
+                                          <span style={{ fontSize: 8, fontWeight: 800, opacity: 0.9 }}>+P</span>
+                                        ) : null}
+                                      </button>
+                                    </div>
+                                    {a.download_url ? (
+                                      <button
+                                        type="button"
+                                        onClick={e => {
+                                          e.stopPropagation()
+                                          downloadCloudSessionMp4(a.download_url!, fname)
+                                        }}
+                                        style={{
+                                          position: 'absolute',
+                                          bottom: 10,
+                                          left: 8,
+                                          zIndex: 5,
+                                          pointerEvents: 'auto',
+                                          margin: 0,
+                                          padding: '6px 10px',
+                                          borderRadius: 8,
+                                          border: 'none',
+                                          background: 'rgba(0,0,0,.5)',
+                                          color: '#7dd3a0',
+                                          fontSize: 11,
+                                          fontWeight: 700,
+                                          fontFamily: T.sans,
+                                          cursor: 'pointer',
+                                          backdropFilter: 'blur(6px)',
+                                        }}
+                                      >
+                                        Descargar MP4
+                                      </button>
+                                    ) : null}
                                   </div>
-                                )}
+                                </div>
                               </div>
-                              <div style={{ padding: 10 }}>
-                                <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#fff', fontSize: 13, lineHeight: 1.3 }}>
-                                  {a.title}
-                                </p>
-                                {a.download_url ? (
-                                  <a href={a.download_url} target="_blank" rel="noopener noreferrer" style={dlStyle}>
-                                    Descargar MP4
-                                  </a>
-                                ) : null}
-                              </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       </div>
                     )
                   }
+
+                  const slotMp4s = assignMp4sToPlanSlots(planClips, ytSessionDetail.assets)
 
                   return (
                     <div style={gridWrapStyle}>
@@ -2945,11 +3125,32 @@ export default function SocialView({
                         gap: 14,
                       }}>
                         {planClips.map((row, i) => {
-                          const idx = typeof row.clip_index === 'number' ? row.clip_index : i
-                          const mp4 = assets.find(x => x.clip_index === idx)
+                          const idx = parseClipIndex(row.clip_index) ?? i
+                          const mp4 = slotMp4s[i]
                           const title = String(row.title ?? `Clip ${idx + 1}`)
-                          const hook = String(row.hook_overlay ?? '')
-                          const desc = String(row.publish_description ?? '')
+                          const slug =
+                            title
+                              .replace(/[^\w\s-àáéíóúñü]/gi, '')
+                              .replace(/\s+/g, '-')
+                              .slice(0, 48) || `clip-${idx + 1}`
+                          const fname = `clip-${idx + 1}-9-16-${slug}.mp4`
+                          const openCloudInfo = () => {
+                            const shaped = ensureYoutubeClipShape(
+                              row as Partial<YoutubeVerticalClip>,
+                            )
+                            const timing =
+                              shaped.end_sec > shaped.start_sec
+                                ? { start_sec: shaped.start_sec, end_sec: shaped.end_sec }
+                                : null
+                            setYtCloudClipInfoModal({
+                              clipNum: idx + 1,
+                              title,
+                              downloadUrl: mp4?.download_url ?? null,
+                              filenameHint: fname,
+                              premiumClip: isPro ? shaped : null,
+                              clipTiming: timing,
+                            })
+                          }
                           return (
                             <div
                               key={`plan-${idx}-${i}`}
@@ -2958,11 +3159,9 @@ export default function SocialView({
                                 overflow: 'hidden',
                                 background: '#222',
                                 border: '1px solid #333',
-                                display: 'flex',
-                                flexDirection: 'column',
                               }}
                             >
-                              <div style={{ aspectRatio: '9/16', background: '#000', flexShrink: 0 }}>
+                              <div style={{ position: 'relative', aspectRatio: '9/16', background: '#000', flexShrink: 0 }}>
                                 {mp4?.download_url ? (
                                   <video src={mp4.download_url} controls playsInline style={vidStyle} />
                                 ) : (
@@ -2980,41 +3179,80 @@ export default function SocialView({
                                     MP4 aún no en la nube. Usa <strong style={{ color: '#aaa' }}>Descargar MP4 9:16</strong> abajo.
                                   </div>
                                 )}
-                              </div>
-                              <div style={{ padding: 10, flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: '#f87171' }}>
-                                  CLIP {idx + 1}
-                                </p>
-                                <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
-                                  {title}
-                                </p>
-                                {hook ? (
-                                  <p style={{ margin: 0, fontSize: 11, color: '#bbb', lineHeight: 1.45 }}>
-                                    <strong style={{ color: '#ddd' }}>Hook:</strong> {hook}
-                                  </p>
-                                ) : null}
-                                {desc ? (
-                                  <p style={{
-                                    margin: 0,
-                                    fontSize: 11,
-                                    color: '#888',
-                                    lineHeight: 1.45,
-                                    whiteSpace: 'pre-wrap',
-                                    flex: 1,
-                                  }}>
-                                    {desc}
-                                  </p>
-                                ) : null}
-                                {mp4?.download_url ? (
-                                  <a
-                                    href={mp4.download_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={dlStyle}
+                                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                                  <div
+                                    style={{
+                                      position: 'absolute',
+                                      top: 8,
+                                      right: 8,
+                                      zIndex: 5,
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: 6,
+                                      alignItems: 'flex-end',
+                                      pointerEvents: 'auto',
+                                    }}
                                   >
-                                    Descargar MP4
-                                  </a>
-                                ) : null}
+                                    <button
+                                      type="button"
+                                      onClick={e => {
+                                        e.stopPropagation()
+                                        openCloudInfo()
+                                      }}
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                        padding: '6px 10px',
+                                        borderRadius: 8,
+                                        border: isPro ? '1px solid rgba(255,255,255,.4)' : '1px dashed rgba(255,255,255,.35)',
+                                        background: 'rgba(0,0,0,.58)',
+                                        color: isPro ? '#fff' : 'rgba(255,255,255,.85)',
+                                        fontWeight: 800,
+                                        fontSize: 9,
+                                        letterSpacing: '.1em',
+                                        fontFamily: T.sans,
+                                        cursor: 'pointer',
+                                        textTransform: 'uppercase',
+                                      }}
+                                    >
+                                      <Info size={14} strokeWidth={2} aria-hidden />
+                                      INFORMACIÓN
+                                      {!isPro ? (
+                                        <span style={{ fontSize: 8, fontWeight: 800, opacity: 0.9 }}>+P</span>
+                                      ) : null}
+                                    </button>
+                                  </div>
+                                  {mp4?.download_url ? (
+                                    <button
+                                      type="button"
+                                      onClick={e => {
+                                        e.stopPropagation()
+                                        downloadCloudSessionMp4(mp4.download_url!, fname)
+                                      }}
+                                      style={{
+                                        position: 'absolute',
+                                        bottom: 10,
+                                        left: 8,
+                                        zIndex: 5,
+                                        pointerEvents: 'auto',
+                                        margin: 0,
+                                        padding: '6px 10px',
+                                        borderRadius: 8,
+                                        border: 'none',
+                                        background: 'rgba(0,0,0,.5)',
+                                        color: '#7dd3a0',
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        fontFamily: T.sans,
+                                        cursor: 'pointer',
+                                        backdropFilter: 'blur(6px)',
+                                      }}
+                                    >
+                                      Descargar MP4
+                                    </button>
+                                  ) : null}
+                                </div>
                               </div>
                             </div>
                           )
@@ -3421,113 +3659,354 @@ export default function SocialView({
                   </div>
                 </div>
 
-                <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
-                  <strong style={{ color: T.ink }}>Hook overlay:</strong> {c.hook_overlay}
-                </p>
-                <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
-                  <strong style={{ color: T.ink }}>Scroll-stop:</strong> {c.why_stops_scroll}
-                </p>
-
-                {c.publish_description.trim() ? (
-                  <div style={{
-                    marginBottom: 14, padding: '14px 16px', borderRadius: 12, background: T.paper,
-                    border: `1px solid ${T.ink10}`,
-                  }}>
-                    <SectionLabel color={T.blue} style={{ marginBottom: 6 }}>Descripción para publicar</SectionLabel>
-                    <p style={{ fontSize: 14, color: T.ink60, margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                      {c.publish_description}
-                    </p>
-                  </div>
-                ) : null}
-
-                {(c.suggested_hashtags.length > 0 || c.best_platforms.length > 0) && (
-                  <div style={{ marginBottom: 14 }}>
-                    {c.best_platforms.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10, alignItems: 'center' }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>PLATAFORMAS</span>
-                        {c.best_platforms.map((p, j) => (
-                          <span
-                            key={j}
-                            style={{
-                              fontSize: 11, fontWeight: 700, color: T.ink, background: T.white,
-                              padding: '4px 10px', borderRadius: 100, border: `1px solid ${T.ink10}`,
-                            }}
-                          >
-                            {p}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {c.suggested_hashtags.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em', marginRight: 4 }}>HASHTAGS</span>
-                        {c.suggested_hashtags.map((h, j) => (
-                          <span
-                            key={j}
-                            style={{
-                              fontSize: 12, fontWeight: 600, color: T.violet, background: 'rgba(123,104,238,.08)',
-                              padding: '4px 10px', borderRadius: 8,
-                            }}
-                          >
-                            {h.startsWith('#') ? h : `#${h.replace(/^#/, '')}`}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {c.thumbnail_cover_idea.trim() ? (
-                  <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
-                    <strong style={{ color: T.ink }}>Miniatura / primer frame:</strong> {c.thumbnail_cover_idea}
-                  </p>
-                ) : null}
-
-                {c.dynamic_caption_style.trim() ? (
-                  <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
-                    <strong style={{ color: T.ink }}>Subtítulos dinámicos (estilo viral):</strong> {c.dynamic_caption_style}
-                  </p>
-                ) : null}
-
-                <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
-                  <strong style={{ color: T.ink }}>Encuadre 9:16:</strong> {c.nine_sixteen_framing}
-                </p>
-                <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
-                  <strong style={{ color: T.ink }}>Zona captions:</strong> {c.safe_zones_caption}
-                </p>
-                <div style={{ marginBottom: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>TEXTO EN PANTALLA</span>
-                  <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 13, color: T.ink60, lineHeight: 1.5 }}>
-                    {c.on_screen_text_suggestions.map((t, j) => (
-                      <li key={j}>{t}</li>
-                    ))}
-                  </ul>
+                <div style={{
+                  marginTop: 14,
+                  paddingTop: 14,
+                  borderTop: `1px solid ${T.ink10}`,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 10,
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setYtClipInfoModalIndex(i)
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '10px 18px',
+                      borderRadius: 10,
+                      border: isPro ? '2px solid #0C0C0C' : `1px solid ${T.ink20}`,
+                      background: isPro ? T.ink : T.paper,
+                      color: isPro ? T.white : T.ink,
+                      fontWeight: 800,
+                      fontSize: 12,
+                      letterSpacing: '.1em',
+                      fontFamily: T.sans,
+                      cursor: 'pointer',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    <Info size={18} strokeWidth={2} aria-hidden />
+                    INFORMACIÓN
+                    {!isPro ? (
+                      <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.85 }}>+ Pro</span>
+                    ) : null}
+                  </button>
+                  {!isPro ? (
+                    <span style={{ fontSize: 12, color: T.ink40, lineHeight: 1.45 }}>
+                      Ver el título del short en el modal; copy, hashtags y checklist con Pro.
+                    </span>
+                  ) : null}
                 </div>
-                {c.edit_checklist.length > 0 && (
-                  <div style={{ marginBottom: 14 }}>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>CHECKLIST DE EDICIÓN</span>
-                    <ol style={{ margin: '8px 0 0', paddingLeft: 20, fontSize: 13, color: T.ink60, lineHeight: 1.55 }}>
-                      {c.edit_checklist.map((step, j) => (
-                        <li key={j} style={{ marginBottom: 4 }}>{step}</li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
-
-                <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 6px', lineHeight: 1.55 }}>
-                  <strong style={{ color: T.ink }}>Sonido:</strong> {c.sound_hook}
-                </p>
-                <p style={{ fontSize: 13, color: T.ink60, margin: 0, lineHeight: 1.55 }}>
-                  <strong style={{ color: T.ink }}>CTA cierre:</strong> {c.cta_end}
-                </p>
-                <p style={{ fontSize: 11, color: T.ink40, marginTop: 10, marginBottom: 0 }}>
-                  Potencial estimado: <strong>{c.estimated_virality_1_10}</strong>/10
-                </p>
               </article>
             ))}
           </div>
         </section>
       )}
+
+      {ytClipInfoModalIndex !== null && ytClips[ytClipInfoModalIndex] ? (
+        <div
+          role="presentation"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10040,
+            background: 'rgba(12,12,12,.55)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+          onClick={() => setYtClipInfoModalIndex(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="yt-clip-info-title"
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 560,
+              maxHeight: 'min(88vh, 720px)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              borderRadius: 16,
+              background: T.white,
+              border: `1px solid ${T.ink10}`,
+              boxShadow: '0 24px 60px rgba(0,0,0,.2)',
+            }}
+          >
+            <div style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: 12,
+              padding: '16px 18px',
+              borderBottom: `1px solid ${T.ink10}`,
+              background: T.paper,
+            }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{
+                  margin: 0,
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: '.12em',
+                  color: isPro ? T.violet : T.ink40,
+                  textTransform: 'uppercase',
+                }}>
+                  {isPro ? 'Pro · guía del clip' : 'Información del clip'}
+                </p>
+                <h3
+                  id="yt-clip-info-title"
+                  style={{
+                    margin: '6px 0 0',
+                    fontFamily: T.serif,
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: T.ink,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {ytClips[ytClipInfoModalIndex].title}
+                </h3>
+                <p style={{ margin: '6px 0 0', fontSize: 12, color: T.ink40 }}>
+                  Clip {ytClipInfoModalIndex + 1} · {formatMmSs(ytClips[ytClipInfoModalIndex].start_sec)} –{' '}
+                  {formatMmSs(ytClips[ytClipInfoModalIndex].end_sec)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setYtClipInfoModalIndex(null)}
+                style={{
+                  flexShrink: 0,
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: `1px solid ${T.ink10}`,
+                  background: T.white,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: T.sans,
+                }}
+              >
+                Cerrar
+              </button>
+            </div>
+            <div style={{
+              overflowY: 'auto',
+              padding: '18px 20px 22px',
+              WebkitOverflowScrolling: 'touch',
+            }}>
+              {isPro ? (
+                <YoutubeClipPremiumInfoContent c={ytClips[ytClipInfoModalIndex]} />
+              ) : (
+                <div style={{
+                  padding: '16px 18px',
+                  borderRadius: 12,
+                  background: T.paper,
+                  border: `1px dashed ${T.ink20}`,
+                }}>
+                  <p style={{ margin: 0, fontSize: 14, color: T.ink60, lineHeight: 1.6 }}>
+                    <strong style={{ color: T.ink }}>Plan Pro:</strong> desbloquea la guía completa de este short
+                    (hook, descripción para publicar, hashtags, plataformas, checklist de edición, textos en pantalla,
+                    etc.).
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {ytCloudClipInfoModal ? (
+        <div
+          role="presentation"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10041,
+            background: 'rgba(12,12,12,.65)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+          onClick={() => setYtCloudClipInfoModal(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="yt-cloud-clip-info-title"
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth:
+                ytCloudClipInfoModal.premiumClip ||
+                (isPro && ytCloudClipInfoModal.fallbackDesc)
+                  ? 560
+                  : 520,
+              maxHeight:
+                ytCloudClipInfoModal.premiumClip ||
+                (isPro && ytCloudClipInfoModal.fallbackDesc)
+                  ? 'min(90vh, 820px)'
+                  : 'min(88vh, 680px)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              borderRadius: 16,
+              background: '#1a1a1a',
+              border: '1px solid #333',
+              boxShadow: '0 24px 60px rgba(0,0,0,.45)',
+            }}
+          >
+            <div style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: 12,
+              padding: '16px 18px',
+              borderBottom: '1px solid #333',
+              background: '#141414',
+            }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{
+                  margin: 0,
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: '.12em',
+                  color: ytCloudClipInfoModal.premiumClip ? T.violet : '#9ca3af',
+                  textTransform: 'uppercase',
+                }}>
+                  {ytCloudClipInfoModal.premiumClip ? 'Pro · guía del clip' : 'Información del clip'}
+                </p>
+                <h3
+                  id="yt-cloud-clip-info-title"
+                  style={{
+                    margin: '6px 0 0',
+                    fontFamily: T.serif,
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: '#fff',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {ytCloudClipInfoModal.title}
+                </h3>
+                <p style={{ margin: '6px 0 0', fontSize: 12, color: '#9ca3af' }}>
+                  {ytCloudClipInfoModal.clipTiming ? (
+                    <>
+                      Clip {ytCloudClipInfoModal.clipNum} ·{' '}
+                      {formatMmSs(ytCloudClipInfoModal.clipTiming.start_sec)} –{' '}
+                      {formatMmSs(ytCloudClipInfoModal.clipTiming.end_sec)} · proyecto en la nube
+                    </>
+                  ) : (
+                    <>Clip {ytCloudClipInfoModal.clipNum} · proyecto en la nube</>
+                  )}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setYtCloudClipInfoModal(null)}
+                style={{
+                  flexShrink: 0,
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid #444',
+                  background: '#252525',
+                  color: '#ddd',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: T.sans,
+                }}
+              >
+                Cerrar
+              </button>
+            </div>
+            <div style={{
+              overflowY: 'auto',
+              padding: '18px 20px 22px',
+              WebkitOverflowScrolling: 'touch',
+            }}>
+              {ytCloudClipInfoModal.premiumClip ? (
+                <div style={{
+                  marginBottom: 16,
+                  padding: '16px 18px 18px',
+                  borderRadius: 12,
+                  background: T.paper,
+                  border: `1px solid ${T.ink10}`,
+                }}>
+                  <YoutubeClipPremiumInfoContent c={ytCloudClipInfoModal.premiumClip} />
+                </div>
+              ) : null}
+              {!isPro ? (
+                <div style={{
+                  marginBottom: 16,
+                  padding: '14px 16px',
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,.06)',
+                  border: '1px dashed rgba(255,255,255,.22)',
+                }}>
+                  <p style={{ margin: 0, fontSize: 13, color: '#d1d5db', lineHeight: 1.55 }}>
+                    <strong style={{ color: '#fff' }}>Plan Pro:</strong> desbloquea la guía completa (hook, copy para
+                    publicar, hashtags, plataformas, checklist de edición, textos en pantalla…).
+                  </p>
+                </div>
+              ) : null}
+              {isPro && ytCloudClipInfoModal.fallbackDesc ? (
+                <p style={{
+                  margin: '0 0 16px',
+                  fontSize: 13,
+                  color: '#9ca3af',
+                  lineHeight: 1.55,
+                }}>
+                  {ytCloudClipInfoModal.fallbackDesc}
+                </p>
+              ) : null}
+              {ytCloudClipInfoModal.downloadUrl ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    downloadCloudSessionMp4(
+                      ytCloudClipInfoModal.downloadUrl!,
+                      ytCloudClipInfoModal.filenameHint,
+                    )
+                  }}
+                  style={{
+                    marginTop: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '10px 16px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(125,211,160,.45)',
+                    background: 'rgba(34,197,94,.12)',
+                    color: '#7dd3a0',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontFamily: T.sans,
+                  }}
+                >
+                  <Download size={18} strokeWidth={1.75} aria-hidden />
+                  Descargar MP4
+                </button>
+              ) : (
+                <p style={{ margin: '16px 0 0', fontSize: 12, color: '#6b7280', lineHeight: 1.5 }}>
+                  Aún no hay MP4 en la nube para este clip.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
       </>
       )}
     </div>

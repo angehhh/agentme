@@ -34,8 +34,6 @@ export type YoutubeRenderSessionRow = {
   youtube_url: string
   video_title: string
   clips_plan: unknown | null
-  /** Pestaña «Guardados» (columna opcional hasta migrar SQL). */
-  is_saved?: boolean | null
   expires_at: string
   created_at: string
   updated_at: string
@@ -102,6 +100,15 @@ export function trimClipsPlanForDb(plan: unknown): unknown | null {
       suggested_hashtags: arr(c.suggested_hashtags),
       why_stops_scroll: String(c.why_stops_scroll ?? '').slice(0, 500),
       nine_sixteen_framing: String(c.nine_sixteen_framing ?? '').slice(0, 400),
+      safe_zones_caption: String(c.safe_zones_caption ?? '').slice(0, 400),
+      on_screen_text_suggestions: arr(c.on_screen_text_suggestions).slice(0, 10),
+      sound_hook: String(c.sound_hook ?? '').slice(0, 300),
+      cta_end: String(c.cta_end ?? '').slice(0, 300),
+      estimated_virality_1_10: Math.min(10, Math.max(1, Math.round(Number(c.estimated_virality_1_10) || 5))),
+      best_platforms: arr(c.best_platforms).slice(0, 8),
+      thumbnail_cover_idea: String(c.thumbnail_cover_idea ?? '').slice(0, 500),
+      edit_checklist: arr(c.edit_checklist).slice(0, 12),
+      dynamic_caption_style: String(c.dynamic_caption_style ?? '').slice(0, 500),
     }
   })
   return { clips }
@@ -295,20 +302,16 @@ export async function runFullYoutubeRenderCleanup(supabase: SupabaseClient): Pro
 export async function listYoutubeRenderSessionsForUser(
   supabase: SupabaseClient,
   userId: string,
-  options?: { savedOnly?: boolean },
 ): Promise<YoutubeRenderSessionCard[]> {
   await runFullYoutubeRenderCleanup(supabase)
 
   const now = new Date().toISOString()
-  let q = supabase
+  const { data: sessions, error } = await supabase
     .from('youtube_render_sessions')
     .select('*')
     .eq('user_id', userId)
     .gt('expires_at', now)
-  if (options?.savedOnly) {
-    q = q.eq('is_saved', true)
-  }
-  const { data: sessions, error } = await q.order('created_at', { ascending: false })
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.error('[youtube_render_sessions] list', error)
@@ -338,7 +341,6 @@ export async function listYoutubeRenderSessionsForUser(
     const c = counts.get(s.id) ?? { total: 0, ready: 0 }
     return {
       ...s,
-      is_saved: Boolean(s.is_saved),
       thumbnail_url: youtubeThumbUrl(s.youtube_video_id),
       expires_label: formatExpiresLabelEs(s.expires_at),
       ready_assets: c.ready,
@@ -381,7 +383,6 @@ export async function getYoutubeRenderSessionDetail(
   const c = { total: signed.length, ready: signed.length }
   const card: YoutubeRenderSessionCard = {
     ...s,
-    is_saved: Boolean(s.is_saved),
     thumbnail_url: youtubeThumbUrl(s.youtube_video_id),
     expires_label: formatExpiresLabelEs(s.expires_at),
     ready_assets: c.ready,

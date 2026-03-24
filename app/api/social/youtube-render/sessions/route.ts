@@ -17,9 +17,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Falta userId' }, { status: 400 })
     }
 
-    const rawSaved = req.nextUrl.searchParams.get('savedOnly')?.toLowerCase() ?? ''
-    const savedOnly = rawSaved === '1' || rawSaved === 'true' || rawSaved === 'yes'
-    const sessions = await listYoutubeRenderSessionsForUser(supabase, userId, { savedOnly })
+    const sessions = await listYoutubeRenderSessionsForUser(supabase, userId)
     return NextResponse.json({ success: true, sessions })
   } catch (e) {
     console.error('[social/youtube-render/sessions]', e)
