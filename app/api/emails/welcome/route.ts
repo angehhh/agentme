@@ -1,9 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { resend, FROM_EMAIL, APP_NAME } from '@/lib/resend'
-
-/* â”€â”€ HTML template â”€â”€ */
+import { NextRequest, NextResponse } from 'next/server';
+import { resend, FROM_EMAIL, APP_NAME } from '@/lib/resend';
 function welcomeTemplate(name: string): string {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
@@ -60,7 +58,7 @@ function welcomeTemplate(name: string): string {
             style="display:inline-block; background:#FFFFFF; color:#0C0C0C;
             padding:14px 32px; border-radius:9px; font-size:15px;
             font-weight:700; text-decoration:none; letter-spacing:-.01em;">
-            Ir al dashboard â†’
+            Ir al dashboard →
           </a>
         </td></tr>
 
@@ -122,7 +120,7 @@ function welcomeTemplate(name: string): string {
         <!-- FOOTER -->
         <tr><td style="padding-top:36px; text-align:center;">
           <p style="font-size:12px; color:#C8C8C8; line-height:1.6;">
-            Â© 2026 AGENTME · Todos los derechos reservados<br/>
+            © 2026 AGENTME · Todos los derechos reservados<br/>
             <a href="#" style="color:#ABABAB; text-decoration:underline;">
               Cancelar suscripción
             </a>
@@ -134,36 +132,29 @@ function welcomeTemplate(name: string): string {
   </table>
 
 </body>
-</html>`
+</html>`;
 }
-
-/* â”€â”€ API Route â”€â”€ */
 export async function POST(req: NextRequest) {
-  try {
-    const { email, name } = await req.json()
-
-    if (!email) {
-      return NextResponse.json({ error: 'Email requerido' }, { status: 400 })
+    try {
+        const { email, name } = await req.json();
+        if (!email) {
+            return NextResponse.json({ error: 'Email requerido' }, { status: 400 });
+        }
+        const displayName = name || email.split('@')[0];
+        const { data, error } = await resend.emails.send({
+            from: FROM_EMAIL,
+            to: email,
+            subject: `Bienvenido a ${APP_NAME}, ${displayName} — Tu agente está listo`,
+            html: welcomeTemplate(displayName),
+        });
+        if (error) {
+            console.error('Resend error:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ success: true, id: data?.id });
     }
-
-    const displayName = name || email.split('@')[0]
-
-    const { data, error } = await resend.emails.send({
-      from:    FROM_EMAIL,
-      to:      email,
-      subject: `Bienvenido a ${APP_NAME}, ${displayName} â€” Tu agente está listo`,
-      html:    welcomeTemplate(displayName),
-    })
-
-    if (error) {
-      console.error('Resend error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    catch (err) {
+        console.error('Welcome email error:', err);
+        return NextResponse.json({ error: 'Error interno' }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true, id: data?.id })
-
-  } catch (err) {
-    console.error('Welcome email error:', err)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
-  }
 }

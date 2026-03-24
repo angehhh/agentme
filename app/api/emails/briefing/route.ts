@@ -1,29 +1,21 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { resend, FROM_EMAIL, APP_NAME } from '@/lib/resend'
-
-/* â”€â”€ Types â”€â”€ */
+import { NextRequest, NextResponse } from 'next/server';
+import { resend, FROM_EMAIL, APP_NAME } from '@/lib/resend';
 type Mission = {
-  title:   string
-  result:  string
-  actions: number
-  status:  'completed' | 'partial' | 'failed'
-}
-
-/* â”€â”€ HTML template â”€â”€ */
+    title: string;
+    result: string;
+    actions: number;
+    status: 'completed' | 'partial' | 'failed';
+};
 function briefingTemplate(name: string, missions: Mission[], date: string): string {
-  const total  = missions.reduce((s, m) => s + m.actions, 0)
-  const done   = missions.filter(m => m.status === 'completed').length
-
-  const missionRows = missions.length > 0
-    ? missions.map(m => {
-        const statusColor =
-          m.status === 'completed' ? '#28C840' :
-          m.status === 'partial'   ? '#E8E350' : '#C0392B'
-        const statusLabel =
-          m.status === 'completed' ? 'Completada' :
-          m.status === 'partial'   ? 'Parcial'    : 'Fallida'
-
-        return `
+    const total = missions.reduce((s, m) => s + m.actions, 0);
+    const done = missions.filter(m => m.status === 'completed').length;
+    const missionRows = missions.length > 0
+        ? missions.map(m => {
+            const statusColor = m.status === 'completed' ? '#28C840' :
+                m.status === 'partial' ? '#E8E350' : '#C0392B';
+            const statusLabel = m.status === 'completed' ? 'Completada' :
+                m.status === 'partial' ? 'Parcial' : 'Fallida';
+            return `
           <tr>
             <td style="padding:16px 0; border-bottom:1px solid #E8E8E8;">
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
@@ -46,18 +38,17 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
                 </tr>
               </table>
             </td>
-          </tr>`
-      }).join('')
-    : `<tr><td style="padding:32px 0; text-align:center; color:#ABABAB; font-size:14px;">
+          </tr>`;
+        }).join('')
+        : `<tr><td style="padding:32px 0; text-align:center; color:#ABABAB; font-size:14px;">
         No hubo misiones esta noche.
-      </td></tr>`
-
-  return `<!DOCTYPE html>
+      </td></tr>`;
+    return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Briefing diario â€” AGENTME</title>
+  <title>Briefing diario — AGENTME</title>
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body { background:#F5F4F1; font-family:'DM Sans',Helvetica,sans-serif; -webkit-font-smoothing:antialiased; }
@@ -151,20 +142,20 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
         <tr><td style="background:#FFFFFF; border-radius:14px;
           padding:24px 28px; border:1px solid #E8E8E8; text-align:center;">
           <p style="font-size:14px; color:#606060; margin-bottom:18px; line-height:1.65;">
-            Â¿Quieres que el agente trabaje esta noche?
+            ¿Quieres que el agente trabaje esta noche?
           </p>
           <a href="https://agentme.app/dashboard"
             style="display:inline-block; background:#0C0C0C; color:#FFFFFF;
             padding:12px 28px; border-radius:9px; font-size:14px;
             font-weight:700; text-decoration:none; letter-spacing:-.01em;">
-            Activar nueva misión â†’
+            Activar nueva misión →
           </a>
         </td></tr>
 
         <!-- FOOTER -->
         <tr><td style="padding-top:32px; text-align:center;">
           <p style="font-size:12px; color:#C8C8C8; line-height:1.6;">
-            Â© 2026 AGENTME · Briefing diario automático<br/>
+            © 2026 AGENTME · Briefing diario automático<br/>
             <a href="#" style="color:#ABABAB; text-decoration:underline;">
               Cancelar emails
             </a>
@@ -176,43 +167,34 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
   </table>
 
 </body>
-</html>`
+</html>`;
 }
-
-/* â”€â”€ API Route â”€â”€ */
 export async function POST(req: NextRequest) {
-  try {
-    const { email, name, missions } = await req.json()
-
-    if (!email) {
-      return NextResponse.json({ error: 'Email requerido' }, { status: 400 })
+    try {
+        const { email, name, missions } = await req.json();
+        if (!email) {
+            return NextResponse.json({ error: 'Email requerido' }, { status: 400 });
+        }
+        const displayName = name || email.split('@')[0];
+        const today = new Date().toLocaleDateString('es-ES', {
+            weekday: 'long', day: 'numeric', month: 'long'
+        });
+        const dateStr = today.charAt(0).toUpperCase() + today.slice(1);
+        const missionList: Mission[] = missions || [];
+        const { data, error } = await resend.emails.send({
+            from: FROM_EMAIL,
+            to: email,
+            subject: `Tu briefing del agente — ${dateStr}`,
+            html: briefingTemplate(displayName, missionList, dateStr),
+        });
+        if (error) {
+            console.error('Resend error:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ success: true, id: data?.id });
     }
-
-    const displayName = name || email.split('@')[0]
-    const today = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    })
-    // Capitalize first letter
-    const dateStr = today.charAt(0).toUpperCase() + today.slice(1)
-
-    const missionList: Mission[] = missions || []
-
-    const { data, error } = await resend.emails.send({
-      from:    FROM_EMAIL,
-      to:      email,
-      subject: `Tu briefing del agente â€” ${dateStr}`,
-      html:    briefingTemplate(displayName, missionList, dateStr),
-    })
-
-    if (error) {
-      console.error('Resend error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    catch (err) {
+        console.error('Briefing email error:', err);
+        return NextResponse.json({ error: 'Error interno' }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true, id: data?.id })
-
-  } catch (err) {
-    console.error('Briefing email error:', err)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
-  }
 }
