@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateVideoContentPack } from '@/lib/video-content-claude'
 import { transcribeAudioBuffer } from '@/lib/transcribe-openai'
@@ -35,7 +35,7 @@ async function parseRequest(req: NextRequest): Promise<ParsedInput> {
       return {
         ok: false,
         status: 413,
-        message: 'Archivo demasiado grande o formulario inválido. Prueba un vídeo más pequeño (máx. ~24 MB).',
+        message: 'Archivo demasiado grande o formulario invÃ¡lido. Prueba un vÃ­deo mÃ¡s pequeÃ±o (mÃ¡x. ~24 MB).',
       }
     }
 
@@ -43,7 +43,7 @@ async function parseRequest(req: NextRequest): Promise<ParsedInput> {
     const userId = typeof uid === 'string' ? uid : ''
     if (!userId) return { ok: false, status: 400, message: 'Falta userId.' }
 
-    let language = 'español'
+    let language = 'espaÃ±ol'
     const lang = form.get('language')
     if (typeof lang === 'string' && lang.trim()) language = lang.trim()
 
@@ -57,7 +57,7 @@ async function parseRequest(req: NextRequest): Promise<ParsedInput> {
 
     const file = form.get('file')
     if (!file || typeof file === 'string') {
-      return { ok: false, status: 400, message: 'Falta el archivo de vídeo (campo file).' }
+      return { ok: false, status: 400, message: 'Falta el archivo de vÃ­deo (campo file).' }
     }
 
     const f = file as File
@@ -65,7 +65,7 @@ async function parseRequest(req: NextRequest): Promise<ParsedInput> {
       return {
         ok: false,
         status: 400,
-        message: `El archivo supera ${VIDEO_UPLOAD_MAX_MB} MB (límite para transcripción).`,
+        message: `El archivo supera ${VIDEO_UPLOAD_MAX_MB} MB (lÃ­mite para transcripciÃ³n).`,
       }
     }
 
@@ -86,7 +86,7 @@ async function parseRequest(req: NextRequest): Promise<ParsedInput> {
   try {
     body = await req.json()
   } catch {
-    return { ok: false, status: 400, message: 'JSON inválido.' }
+    return { ok: false, status: 400, message: 'JSON invÃ¡lido.' }
   }
 
   const userId = typeof body.userId === 'string' ? body.userId : ''
@@ -94,10 +94,10 @@ async function parseRequest(req: NextRequest): Promise<ParsedInput> {
 
   const videoUrl = typeof body.videoUrl === 'string' ? body.videoUrl.trim() : ''
   if (!videoUrl) {
-    return { ok: false, status: 400, message: 'Falta videoUrl o sube el vídeo como multipart (campo file).' }
+    return { ok: false, status: 400, message: 'Falta videoUrl o sube el vÃ­deo como multipart (campo file).' }
   }
 
-  let language = 'español'
+  let language = 'espaÃ±ol'
   if (typeof body.language === 'string' && body.language.trim()) language = body.language.trim()
 
   let whisperLang: string | undefined
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error: 'limit_reached',
-            message: `Plan Free: ${SOCIAL_LIMITS.videoContent.freePerWeek} análisis de vídeo por semana (lunes UTC). Pro: sin límite en la app.`,
+            message: `Plan Free: ${SOCIAL_LIMITS.videoContent.freePerWeek} anÃ¡lisis de vÃ­deo por semana (lunes UTC). Pro: sin lÃ­mite en la app.`,
             limit: SOCIAL_LIMITS.videoContent.freePerWeek,
           },
           { status: 429 },
@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
           {
             error: 'missing_openai_key',
             message:
-              'Falta OPENAI_API_KEY en el servidor para transcribir el audio del vídeo (Whisper). Añádela en .env.local y reinicia.',
+              'Falta OPENAI_API_KEY en el servidor para transcribir el audio del vÃ­deo (Whisper). AÃ±Ã¡dela en .env.local y reinicia.',
           },
           { status: 503 },
         )
@@ -187,8 +187,8 @@ export async function POST(req: NextRequest) {
           error: 'transcription_failed',
           message:
             tr.reason === 'empty'
-              ? 'No se obtuvo texto del vídeo (¿sin audio o silencio?).'
-              : 'Error al transcribir con Whisper. Revisa formato, tamaño y que el vídeo tenga pista de audio.',
+              ? 'No se obtuvo texto del vÃ­deo (Â¿sin audio o silencio?).'
+              : 'Error al transcribir con Whisper. Revisa formato, tamaÃ±o y que el vÃ­deo tenga pista de audio.',
         },
         { status: 502 },
       )
@@ -217,7 +217,7 @@ export async function POST(req: NextRequest) {
       user_id: userId,
       mode: 'social_video',
       status: 'completed',
-      goal: `Vídeo → contenido [${tier}]: ${label}`,
+      goal: `VÃ­deo â†’ contenido [${tier}]: ${label}`,
       actions: gen.pack.hook_suggestions.length,
       created_at: new Date().toISOString(),
     })
@@ -226,7 +226,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       pack: gen.pack,
-      transcriptPreview: tr.text.slice(0, 400) + (tr.text.length > 400 ? '…' : ''),
+      transcriptPreview: tr.text.slice(0, 400) + (tr.text.length > 400 ? 'â€¦' : ''),
       tier,
       limit: isFree ? SOCIAL_LIMITS.videoContent.freePerWeek : null,
       limitWindow: isFree ? 'week' : null,

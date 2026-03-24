@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Rutas a yt-dlp y FFmpeg resueltas con process.cwd() para que funcionen
- * cuando Next/Turbopack empaqueta dependencias (evita __dirname → \\ROOT\\… y ENOENT).
+ * cuando Next/Turbopack empaqueta dependencias (evita __dirname â†’ \\ROOT\\â€¦ y ENOENT).
  */
 
 import { execSync } from 'child_process'
@@ -23,7 +23,7 @@ function findOnPath(executable: string): string | null {
 
 /**
  * Ruta al ejecutable yt-dlp (o youtube-dl).
- * Prioridad: YT_DLP_PATH → node_modules/youtube-dl-exec/bin → PATH.
+ * Prioridad: YT_DLP_PATH â†’ node_modules/youtube-dl-exec/bin â†’ PATH.
  */
 export function resolveYtDlpExecutable(): string {
   const fromEnv = process.env.YT_DLP_PATH?.trim() || process.env.YOUTUBE_DL_PATH?.trim()
@@ -44,15 +44,15 @@ export function resolveYtDlpExecutable(): string {
   if (fromPath) return fromPath
 
   throw new Error(
-    'No se encontró yt-dlp. Opciones: (1) En la carpeta del proyecto ejecuta `npm install`. ' +
-      '(2) Instala yt-dlp en el sistema y asegúrate de que esté en el PATH. ' +
+    'No se encontrÃ³ yt-dlp. Opciones: (1) En la carpeta del proyecto ejecuta `npm install`. ' +
+      '(2) Instala yt-dlp en el sistema y asegÃºrate de que estÃ© en el PATH. ' +
       '(3) Define YT_DLP_PATH con la ruta completa al ejecutable (ej. C:\\\\bin\\\\yt-dlp.exe).',
   )
 }
 
 /**
  * Ruta al binario FFmpeg.
- * Prioridad: FFMPEG_BIN → node_modules/ffmpeg-static → import del paquete.
+ * Prioridad: FFMPEG_BIN â†’ node_modules/ffmpeg-static â†’ import del paquete.
  */
 export function resolveFfmpegPath(): string {
   const fromEnv = process.env.FFMPEG_BIN?.trim()
@@ -75,7 +75,7 @@ export function resolveFfmpegPath(): string {
   if (fromPath) return fromPath
 
   throw new Error(
-    'No se encontró FFmpeg. Define FFMPEG_BIN, o ejecuta `npm install` en la raíz del proyecto, ' +
+    'No se encontrÃ³ FFmpeg. Define FFMPEG_BIN, o ejecuta `npm install` en la raÃ­z del proyecto, ' +
       'o instala ffmpeg en el PATH.',
   )
 }

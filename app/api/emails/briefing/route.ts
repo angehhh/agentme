@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { resend, FROM_EMAIL, APP_NAME } from '@/lib/resend'
 
-/* ── Types ── */
+/* â”€â”€ Types â”€â”€ */
 type Mission = {
   title:   string
   result:  string
@@ -9,7 +9,7 @@ type Mission = {
   status:  'completed' | 'partial' | 'failed'
 }
 
-/* ── HTML template ── */
+/* â”€â”€ HTML template â”€â”€ */
 function briefingTemplate(name: string, missions: Mission[], date: string): string {
   const total  = missions.reduce((s, m) => s + m.actions, 0)
   const done   = missions.filter(m => m.status === 'completed').length
@@ -57,7 +57,7 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Briefing diario — AGENTME</title>
+  <title>Briefing diario â€” AGENTME</title>
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body { background:#F5F4F1; font-family:'DM Sans',Helvetica,sans-serif; -webkit-font-smoothing:antialiased; }
@@ -93,14 +93,14 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
           padding:36px 40px 32px;">
           <p style="font-size:12px; font-weight:700; color:#383838;
             text-transform:uppercase; letter-spacing:.09em; margin-bottom:10px;">
-            Briefing del agente · ${date}
+            Briefing del agente Â· ${date}
           </p>
           <h1 style="font-size:26px; font-weight:800; color:#FFFFFF;
             letter-spacing:-.03em; line-height:1.2; margin-bottom:6px;">
-            Buenos días, ${name}
+            Buenos dÃ­as, ${name}
           </h1>
           <p style="font-size:14px; color:#555555; line-height:1.6;">
-            Esto es lo que tu agente consiguió mientras dormías.
+            Esto es lo que tu agente consiguiÃ³ mientras dormÃ­as.
           </p>
         </td></tr>
 
@@ -151,20 +151,20 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
         <tr><td style="background:#FFFFFF; border-radius:14px;
           padding:24px 28px; border:1px solid #E8E8E8; text-align:center;">
           <p style="font-size:14px; color:#606060; margin-bottom:18px; line-height:1.65;">
-            ¿Quieres que el agente trabaje esta noche?
+            Â¿Quieres que el agente trabaje esta noche?
           </p>
           <a href="https://agentme.app/dashboard"
             style="display:inline-block; background:#0C0C0C; color:#FFFFFF;
             padding:12px 28px; border-radius:9px; font-size:14px;
             font-weight:700; text-decoration:none; letter-spacing:-.01em;">
-            Activar nueva misión →
+            Activar nueva misiÃ³n â†’
           </a>
         </td></tr>
 
         <!-- FOOTER -->
         <tr><td style="padding-top:32px; text-align:center;">
           <p style="font-size:12px; color:#C8C8C8; line-height:1.6;">
-            © 2026 AGENTME · Briefing diario automático<br/>
+            Â© 2026 AGENTME Â· Briefing diario automÃ¡tico<br/>
             <a href="#" style="color:#ABABAB; text-decoration:underline;">
               Cancelar emails
             </a>
@@ -179,7 +179,7 @@ function briefingTemplate(name: string, missions: Mission[], date: string): stri
 </html>`
 }
 
-/* ── API Route ── */
+/* â”€â”€ API Route â”€â”€ */
 export async function POST(req: NextRequest) {
   try {
     const { email, name, missions } = await req.json()
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
     const { data, error } = await resend.emails.send({
       from:    FROM_EMAIL,
       to:      email,
-      subject: `Tu briefing del agente — ${dateStr}`,
+      subject: `Tu briefing del agente â€” ${dateStr}`,
       html:    briefingTemplate(displayName, missionList, dateStr),
     })
 

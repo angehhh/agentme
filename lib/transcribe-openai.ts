@@ -1,6 +1,6 @@
-/**
- * Transcripción de audio/vídeo vía OpenAI Whisper (requiere OPENAI_API_KEY).
- * Formatos típicos: mp4, mp3, webm, m4a, wav (límite ~25 MB en la API).
+﻿/**
+ * TranscripciÃ³n de audio/vÃ­deo vÃ­a OpenAI Whisper (requiere OPENAI_API_KEY).
+ * Formatos tÃ­picos: mp4, mp3, webm, m4a, wav (lÃ­mite ~25 MB en la API).
  */
 
 const WHISPER_URL = 'https://api.openai.com/v1/audio/transcriptions'

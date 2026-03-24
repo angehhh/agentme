@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateEditorialCalendar } from '@/lib/social-claude'
 import {
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       if (used >= SOCIAL_LIMITS.editorial.freePerWeek) {
         return NextResponse.json({
           error: 'limit_reached',
-          message: `Plan Free: ${SOCIAL_LIMITS.editorial.freePerWeek} calendario por semana (lunes UTC), solo vista previa de 3 días. Pro: semana completa (7) y sin límite de generaciones en la app.`,
+          message: `Plan Free: ${SOCIAL_LIMITS.editorial.freePerWeek} calendario por semana (lunes UTC), solo vista previa de 3 dÃ­as. Pro: semana completa (7) y sin lÃ­mite de generaciones en la app.`,
           limit: SOCIAL_LIMITS.editorial.freePerWeek,
         }, { status: 429 })
       }
@@ -80,8 +80,8 @@ export async function POST(req: NextRequest) {
     if (!gen.ok) {
       const message =
         gen.reason === 'missing_api_key'
-          ? 'Falta ANTHROPIC_API_KEY en el servidor (p. ej. .env.local). Añádela y reinicia `next dev`.'
-          : 'No se pudo generar el calendario (API de Anthropic o respuesta inesperada). Revisa la consola del servidor, créditos de la cuenta e inténtalo de nuevo.'
+          ? 'Falta ANTHROPIC_API_KEY en el servidor (p. ej. .env.local). AÃ±Ã¡dela y reinicia `next dev`.'
+          : 'No se pudo generar el calendario (API de Anthropic o respuesta inesperada). Revisa la consola del servidor, crÃ©ditos de la cuenta e intÃ©ntalo de nuevo.'
       return NextResponse.json(
         {
           error: gen.reason === 'missing_api_key' ? 'missing_api_key' : 'ia_no_disponible',

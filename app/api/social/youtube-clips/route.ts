@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateYoutubeVerticalClips } from '@/lib/youtube-clips-claude'
 import { fetchYoutubeTranscript } from '@/lib/youtube-fetch-transcript'
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     const videoId = extractYoutubeVideoId(youtubeUrl.trim())
     if (!videoId) {
       return NextResponse.json(
-        { error: 'URL inválida', message: 'Pega un enlace de youtube.com, youtu.be o Shorts.' },
+        { error: 'URL invÃ¡lida', message: 'Pega un enlace de youtube.com, youtu.be o Shorts.' },
         { status: 400 },
       )
     }
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error: 'limit_reached',
-            message: `Plan Free: ${SOCIAL_LIMITS.youtubeClips.freePerWeek} análisis YouTube/semana (lun UTC). Pro: sin límite en la app.`,
+            message: `Plan Free: ${SOCIAL_LIMITS.youtubeClips.freePerWeek} anÃ¡lisis YouTube/semana (lun UTC). Pro: sin lÃ­mite en la app.`,
             limit: SOCIAL_LIMITS.youtubeClips.freePerWeek,
           },
           { status: 429 },
@@ -99,12 +99,12 @@ export async function POST(req: NextRequest) {
     if (timed.length > MAX_TIMED_CHARS) {
       timed =
         timed.slice(0, MAX_TIMED_CHARS) +
-        '\n\n… [Transcripción truncada: el vídeo es muy largo; los clips se basan en la parte inicial.]'
+        '\n\nâ€¦ [TranscripciÃ³n truncada: el vÃ­deo es muy largo; los clips se basan en la parte inicial.]'
     }
 
     const durationSec = totalDurationSec(tr.segments)
     const oEmbedTitle = await fetchYoutubeOEmbedTitle(videoId)
-    const outLang = typeof language === 'string' && language.trim() ? language.trim() : 'español'
+    const outLang = typeof language === 'string' && language.trim() ? language.trim() : 'espaÃ±ol'
 
     const gen = await generateYoutubeVerticalClips({
       timedTranscript: timed,

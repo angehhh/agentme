@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { runFullYoutubeRenderCleanup } from '@/lib/youtube-render-projects'
 
@@ -10,7 +10,7 @@ const supabase = createClient(
 )
 
 /**
- * Limpia proyectos caducados (Storage + DB). Protege con CRON_SECRET en Authorization: Bearer …
+ * Limpia proyectos caducados (Storage + DB). Protege con CRON_SECRET en Authorization: Bearer â€¦
  * o query ?secret= (Vercel Cron puede usar header).
  */
 export async function GET(req: NextRequest) {
@@ -29,5 +29,5 @@ export async function GET(req: NextRequest) {
   }
 
   await runFullYoutubeRenderCleanup(supabase)
-  return NextResponse.json({ success: true, message: 'Limpieza de sesiones y huérfanos ejecutada' })
+  return NextResponse.json({ success: true, message: 'Limpieza de sesiones y huÃ©rfanos ejecutada' })
 }

@@ -1,8 +1,8 @@
-import { chromium, Browser, Page } from 'playwright'
+﻿import { chromium, Browser, Page } from 'playwright'
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    TYPES
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export type JobResult = {
   title:    string
   company:  string
@@ -26,18 +26,18 @@ export type AgentResult = {
   error?:         string
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    SECTOR KEYWORDS
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const SECTOR_KEYWORDS: Record<string, string[]> = {
-  marketing:    ['marketing', 'digital', 'seo', 'sem', 'social media', 'contenido', 'content', 'branding', 'publicidad', 'advertising', 'growth', 'crm', 'email', 'campañas', 'community'],
-  diseño:       ['diseño', 'design', 'ux', 'ui', 'figma', 'producto', 'product', 'creativo', 'creative', 'visual', 'gráfico', 'graphic'],
+  marketing:    ['marketing', 'digital', 'seo', 'sem', 'social media', 'contenido', 'content', 'branding', 'publicidad', 'advertising', 'growth', 'crm', 'email', 'campaÃ±as', 'community'],
+  diseÃ±o:       ['diseÃ±o', 'design', 'ux', 'ui', 'figma', 'producto', 'product', 'creativo', 'creative', 'visual', 'grÃ¡fico', 'graphic'],
   desarrollo:   ['developer', 'desarrollador', 'frontend', 'backend', 'fullstack', 'software', 'engineer', 'programador', 'react', 'node', 'python', 'java', 'typescript', 'devops'],
   ventas:       ['ventas', 'sales', 'comercial', 'account', 'business development', 'sdr', 'bdr', 'ejecutivo de cuentas'],
   datos:        ['data', 'datos', 'analytics', 'analyst', 'scientist', 'machine learning', 'ia', 'inteligencia artificial', 'bi', 'tableau', 'sql'],
   rrhh:         ['recursos humanos', 'rrhh', 'hr', 'talent', 'talento', 'people', 'recruiting', 'reclutamiento'],
-  finanzas:     ['finanzas', 'finance', 'contabilidad', 'accounting', 'controller', 'tesorería', 'fiscal', 'auditor'],
-  comunicacion: ['comunicación', 'communication', 'prensa', 'relaciones', 'pr', 'periodista', 'redactor', 'copywriter'],
+  finanzas:     ['finanzas', 'finance', 'contabilidad', 'accounting', 'controller', 'tesorerÃ­a', 'fiscal', 'auditor'],
+  comunicacion: ['comunicaciÃ³n', 'communication', 'prensa', 'relaciones', 'pr', 'periodista', 'redactor', 'copywriter'],
 }
 
 function getRelevantKeywords(query: string): string[] {
@@ -56,9 +56,9 @@ function isRelevant(title: string, query: string): boolean {
   return false
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    SCRAPE una URL
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 type ScrapeResult = { jobs: JobResult[]; totalLinkedIn: number }
 
 async function scrapeUrl(page: Page, url: string, limit: number): Promise<ScrapeResult> {
@@ -112,9 +112,9 @@ async function scrapeUrl(page: Page, url: string, limit: number): Promise<Scrape
   return data
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    FILTERS
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export type SearchFilters = {
   workType?:   string | null   // 'remote' | 'hybrid' | 'onsite'
   experience?: string | null   // 'internship' | 'junior' | 'mid' | 'senior'
@@ -134,7 +134,7 @@ const EXPERIENCE_PARAM: Record<string, string> = {
 }
 
 const EXP_KEYWORDS: Record<string, string[]> = {
-  internship: ['intern', 'internship', 'prácticas', 'becari', 'trainee', 'formación'],
+  internship: ['intern', 'internship', 'prÃ¡cticas', 'becari', 'trainee', 'formaciÃ³n'],
   junior:     ['junior', 'jr', 'entry', 'entry-level', 'graduate', 'asociado', 'trainee', 'coordinator', 'coordinador', 'assistant', 'asistente'],
   mid:        [],
   senior:     ['senior', 'sr', 'lead', 'principal', 'head', 'director', 'manager', 'jefe', 'responsable', 'chief'],
@@ -161,9 +161,9 @@ function buildFilterParams(filters: SearchFilters): string {
   return parts.length > 0 ? '&' + parts.join('&') : ''
 }
 
-/* ─────────────────────────────────────────
-   LINKEDIN JOB SCRAPER — con fallback
-───────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   LINKEDIN JOB SCRAPER â€” con fallback
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export async function scrapeLinkedInJobs(
   query:    string,
   location: string = 'Spain',
@@ -191,7 +191,7 @@ export async function scrapeLinkedInJobs(
       'Upgrade-Insecure-Requests': '1',
     })
 
-    const isWide = ['spain','españa','europe','europa','remote','worldwide'].includes(location.toLowerCase().trim())
+    const isWide = ['spain','espaÃ±a','europe','europa','remote','worldwide'].includes(location.toLowerCase().trim())
     let expandedSearch = false
     let searchedIn     = location
 
@@ -200,29 +200,29 @@ export async function scrapeLinkedInJobs(
     let raw        = scrape.jobs
     let totalLinkedIn = scrape.totalLinkedIn
     let relevant   = raw.filter(j => isRelevant(j.title, query))
-    console.log(`[Agent] Intento 1 → ${raw.length} brutas, ${relevant.length} relevantes, ~${totalLinkedIn} en LinkedIn`)
+    console.log(`[Agent] Intento 1 â†’ ${raw.length} brutas, ${relevant.length} relevantes, ~${totalLinkedIn} en LinkedIn`)
 
     if (relevant.length < 3 && !isWide) {
-      console.log(`[Agent] Pocos resultados en "${location}", buscando en España...`)
+      console.log(`[Agent] Pocos resultados en "${location}", buscando en EspaÃ±a...`)
       const url2 = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=Spain&f_TPR=r604800&sortBy=DD${filterParams}`
       scrape     = await scrapeUrl(page, url2, limit)
       raw        = scrape.jobs
       if (scrape.totalLinkedIn > totalLinkedIn) totalLinkedIn = scrape.totalLinkedIn
       relevant   = raw.filter(j => isRelevant(j.title, query))
       expandedSearch = true
-      searchedIn     = 'España'
-      console.log(`[Agent] Intento 2 (España) → ${raw.length} brutas, ${relevant.length} relevantes`)
+      searchedIn     = 'EspaÃ±a'
+      console.log(`[Agent] Intento 2 (EspaÃ±a) â†’ ${raw.length} brutas, ${relevant.length} relevantes`)
     }
 
     if (relevant.length < 3) {
-      console.log(`[Agent] Aún pocos resultados, buscando sin límite de tiempo...`)
+      console.log(`[Agent] AÃºn pocos resultados, buscando sin lÃ­mite de tiempo...`)
       const url3 = `https://www.linkedin.com/jobs/search?keywords=${encodeURIComponent(query)}&location=${encodeURIComponent(isWide ? location : 'Spain')}&sortBy=DD${filterParams}`
       scrape     = await scrapeUrl(page, url3, limit)
       raw        = scrape.jobs
       if (scrape.totalLinkedIn > totalLinkedIn) totalLinkedIn = scrape.totalLinkedIn
       relevant   = raw.filter(j => isRelevant(j.title, query))
-      if (!isWide) { expandedSearch = true; searchedIn = 'España' }
-      console.log(`[Agent] Intento 3 (sin tiempo) → ${raw.length} brutas, ${relevant.length} relevantes`)
+      if (!isWide) { expandedSearch = true; searchedIn = 'EspaÃ±a' }
+      console.log(`[Agent] Intento 3 (sin tiempo) â†’ ${raw.length} brutas, ${relevant.length} relevantes`)
     }
 
     let pool = relevant.length > 0 ? relevant : raw
@@ -231,15 +231,15 @@ export async function scrapeLinkedInJobs(
       const matched   = pool.filter(j => matchesExperience(j.title, filters.experience!))
       const unmatched = pool.filter(j => !matchesExperience(j.title, filters.experience!))
       pool = [...matched, ...unmatched]
-      console.log(`[Agent] Filtro experiencia "${filters.experience}" → ${matched.length} coinciden, ${unmatched.length} resto`)
+      console.log(`[Agent] Filtro experiencia "${filters.experience}" â†’ ${matched.length} coinciden, ${unmatched.length} resto`)
     }
 
     const finalJobs = pool.slice(0, 10)
-    console.log(`[Agent] ✓ ${finalJobs.length} ofertas finales para "${query}"`)
+    console.log(`[Agent] âœ“ ${finalJobs.length} ofertas finales para "${query}"`)
 
     const cityDistribution: Record<string, number> = {}
     for (const job of finalJobs) {
-      const city = job.location?.split(',')[0]?.trim() || 'Sin ubicación'
+      const city = job.location?.split(',')[0]?.trim() || 'Sin ubicaciÃ³n'
       cityDistribution[city] = (cityDistribution[city] || 0) + 1
     }
 
@@ -262,9 +262,9 @@ export async function scrapeLinkedInJobs(
   }
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    GENERIC PAGE SCRAPER
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export async function scrapePage(url: string): Promise<{
   title: string; text: string; links: string[]; success: boolean; error?: string
 }> {

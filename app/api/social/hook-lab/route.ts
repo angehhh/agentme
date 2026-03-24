@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateHookLab } from '@/lib/social-claude'
 import {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           {
             error: 'limit_reached',
-            message: `Plan Free: ${SOCIAL_LIMITS.hookLab.freePerWeek} Hook Labs por semana (lunes UTC), salida reducida. Pro: pack completo y sin límite de uso en la app.`,
+            message: `Plan Free: ${SOCIAL_LIMITS.hookLab.freePerWeek} Hook Labs por semana (lunes UTC), salida reducida. Pro: pack completo y sin lÃ­mite de uso en la app.`,
             limit: SOCIAL_LIMITS.hookLab.freePerWeek,
           },
           { status: 429 },
@@ -74,8 +74,8 @@ export async function POST(req: NextRequest) {
     if (!gen.ok) {
       const message =
         gen.reason === 'missing_api_key'
-          ? 'Falta ANTHROPIC_API_KEY en el servidor (p. ej. .env.local). Añádela y reinicia `next dev`.'
-          : 'No se pudo generar Hook Lab (API de Anthropic o respuesta inesperada). Revisa la consola del servidor e inténtalo de nuevo.'
+          ? 'Falta ANTHROPIC_API_KEY en el servidor (p. ej. .env.local). AÃ±Ã¡dela y reinicia `next dev`.'
+          : 'No se pudo generar Hook Lab (API de Anthropic o respuesta inesperada). Revisa la consola del servidor e intÃ©ntalo de nuevo.'
       return NextResponse.json(
         {
           error: gen.reason === 'missing_api_key' ? 'missing_api_key' : 'ia_no_disponible',

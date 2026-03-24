@@ -1,12 +1,12 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Calendar, CirclePlay, Clapperboard, Download, Zap } from 'lucide-react'
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    TOKENS
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const T = {
   ink:   '#0C0C0C', ink60: '#606060', ink40: '#909090',
   ink20: '#C8C8C8', ink10: '#E8E8E8', paper: '#F5F4F1',
@@ -15,9 +15,9 @@ const T = {
   sans:  "'DM Sans', 'Helvetica Neue', sans-serif",
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    ICONS
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const IC = {
   target: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>),
   externalLink: (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>),
@@ -32,9 +32,9 @@ const IC = {
   check: (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>),
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    TYPES
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 type Mission = {
   id:          string
   goal:        string
@@ -54,9 +54,9 @@ type JobResult = {
   posted:   string
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    HELPERS
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleDateString('es-ES', {
@@ -77,12 +77,12 @@ function isSocialMission(mode: string | undefined) {
 }
 
 function missionModeLabel(mode: string | undefined) {
-  if (mode === 'social') return 'Social · Calendario editorial'
-  if (mode === 'social_hook') return 'Social · Hook Lab'
-  if (mode === 'social_video') return 'Social · Vídeo → contenido'
-  if (mode === 'social_youtube_clips') return 'Social · YouTube clips 9:16'
-  if (mode === 'social_youtube_render') return 'Social · YouTube ZIP 9:16'
-  return 'Opportunity · Búsqueda empleo'
+  if (mode === 'social') return 'Social Â· Calendario editorial'
+  if (mode === 'social_hook') return 'Social Â· Hook Lab'
+  if (mode === 'social_video') return 'Social Â· VÃ­deo â†’ contenido'
+  if (mode === 'social_youtube_clips') return 'Social Â· YouTube clips 9:16'
+  if (mode === 'social_youtube_render') return 'Social Â· YouTube ZIP 9:16'
+  return 'Opportunity Â· BÃºsqueda empleo'
 }
 
 function missionStatsLine(m: Mission) {
@@ -90,13 +90,13 @@ function missionStatsLine(m: Mission) {
   if (m.mode === 'social_hook') return `${m.actions} ganchos generados`
   if (m.mode === 'social_video') return `${m.actions} piezas de contenido (hooks)`
   if (m.mode === 'social_youtube_clips') return `${m.actions} clips verticales sugeridos`
-  if (m.mode === 'social_youtube_render') return `${m.actions} vídeos MP4 9:16 descargados (ZIP)`
+  if (m.mode === 'social_youtube_render') return `${m.actions} vÃ­deos MP4 9:16 descargados (ZIP)`
   return `${m.result_count} ofertas guardadas`
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    MISSION CARD
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function MissionCard({
   mission, userId, supabase
 }: {
@@ -236,14 +236,14 @@ function MissionCard({
       {open && isSocialMission(mission.mode) && (
         <div style={{ padding: '16px 22px 20px', borderTop: `1px solid ${T.ink10}` }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: T.ink40, marginBottom: 10 }}>
-            Qué generaste
+            QuÃ© generaste
           </p>
           <p style={{ fontSize: 15, color: T.ink, lineHeight: 1.55, margin: '0 0 14px' }}>
-            {mission.goal || 'Sin descripción'}
+            {mission.goal || 'Sin descripciÃ³n'}
           </p>
           <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.6, margin: 0 }}>
             El contenido completo (calendario o ganchos) no se guarda en esta lista: vuelve a{' '}
-            <strong>Social Mode</strong> para verlo, copiarlo o generar otro. Aquí queda el registro para tu historial y límites.
+            <strong>Social Mode</strong> para verlo, copiarlo o generar otro. AquÃ­ queda el registro para tu historial y lÃ­mites.
           </p>
         </div>
       )}
@@ -279,7 +279,7 @@ function MissionCard({
             </div>
           ) : jobs.length === 0 ? (
             <p style={{ fontSize: 13, color: T.ink40, padding: '8px 0' }}>
-              No hay ofertas guardadas para esta búsqueda.
+              No hay ofertas guardadas para esta bÃºsqueda.
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -348,9 +348,9 @@ function MissionCard({
   )
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    MISSIONS VIEW
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function MissionsView({
   userId,
   supabase,
@@ -367,7 +367,7 @@ export default function MissionsView({
     const load = async () => {
       setLoading(true)
 
-      // Query directa — sin RPC
+      // Query directa â€” sin RPC
       const { data: raw, error } = await supabase
         .from('missions')
         .select('id, goal, mode, status, actions, created_at')
@@ -387,7 +387,7 @@ export default function MissionsView({
         return
       }
 
-      // Contar resultados para cada misión en una sola query
+      // Contar resultados para cada misiÃ³n en una sola query
       const missionIds = raw.map(m => m.id)
       const { data: counts } = await supabase
         .from('results')
@@ -448,7 +448,7 @@ export default function MissionsView({
             whiteSpace: 'nowrap', flexShrink: 0, transition: 'opacity .15s' }}
           onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
           onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-          {IC.plus} Nueva misión
+          {IC.plus} Nueva misiÃ³n
         </button>
       </div>
 
@@ -487,7 +487,7 @@ export default function MissionsView({
           </div>
           <h3 style={{ fontFamily: T.serif, fontSize: 20, fontWeight: 700,
             letterSpacing: '-.02em', color: T.ink, marginBottom: 10 }}>
-            Sin misiones todavía
+            Sin misiones todavÃ­a
           </h3>
           <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.65,
             marginBottom: 28, maxWidth: 320, margin: '0 auto 28px' }}>
@@ -498,7 +498,7 @@ export default function MissionsView({
               background: T.ink, color: T.white, padding: '11px 24px',
               borderRadius: 9, fontSize: 14, fontWeight: 600,
               border: 'none', fontFamily: T.sans, cursor: 'pointer' }}>
-            {IC.zap} Lanzar primera misión
+            {IC.zap} Lanzar primera misiÃ³n
           </button>
         </div>
       ) : (

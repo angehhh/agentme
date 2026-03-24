@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-/* ── ICONS ── */
+/* â”€â”€ ICONS â”€â”€ */
 const IC = {
   logo: (
     <svg width="32" height="32" viewBox="0 0 30 30" fill="none">
@@ -91,7 +91,7 @@ export default function AuthPage() {
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        setError('Email o contraseña incorrectos')
+        setError('Email o contraseÃ±a incorrectos')
         setLoading(false)
         return
       }
@@ -101,7 +101,7 @@ export default function AuthPage() {
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) {
         setError(error.message.includes('already')
-          ? 'Este email ya está registrado'
+          ? 'Este email ya estÃ¡ registrado'
           : 'Error al crear la cuenta')
         setLoading(false)
         return
@@ -119,7 +119,7 @@ export default function AuthPage() {
     setLoading(false)
   }
 
-  /* ── Email confirmation screen ── */
+  /* â”€â”€ Email confirmation screen â”€â”€ */
   if (done) {
     return (
       <>
@@ -145,16 +145,16 @@ export default function AuthPage() {
             </h2>
             <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.7,
               marginBottom: 28 }}>
-              Te hemos enviado un link de confirmación a{' '}
+              Te hemos enviado un link de confirmaciÃ³n a{' '}
               <strong style={{ color: T.ink }}>{email}</strong>.
-              También te llegará un email de bienvenida de AGENTME.
+              TambiÃ©n te llegarÃ¡ un email de bienvenida de AGENTME.
             </p>
             <button onClick={() => setMode('login')}
               style={{ background: 'none', border: 'none',
                 fontSize: 14, fontWeight: 600, color: T.ink60,
                 cursor: 'pointer', fontFamily: T.sans,
                 textDecoration: 'underline' }}>
-              Volver al inicio de sesión
+              Volver al inicio de sesiÃ³n
             </button>
           </div>
         </div>
@@ -162,7 +162,7 @@ export default function AuthPage() {
     )
   }
 
-  /* ── Main auth form ── */
+  /* â”€â”€ Main auth form â”€â”€ */
   return (
     <>
       <style>{`
@@ -211,8 +211,8 @@ export default function AuthPage() {
               </h1>
               <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.6 }}>
                 {mode === 'login'
-                  ? 'Inicia sesión para acceder a tu agente'
-                  : 'Crea tu cuenta gratis — sin tarjeta de crédito'}
+                  ? 'Inicia sesiÃ³n para acceder a tu agente'
+                  : 'Crea tu cuenta gratis â€” sin tarjeta de crÃ©dito'}
               </p>
             </div>
 
@@ -234,7 +234,7 @@ export default function AuthPage() {
                       border: 'none', cursor: 'pointer',
                       fontFamily: T.sans, transition: 'all .15s',
                       boxShadow: mode === m ? '0 1px 3px rgba(0,0,0,.08)' : 'none' }}>
-                    {m === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+                    {m === 'login' ? 'Iniciar sesiÃ³n' : 'Crear cuenta'}
                   </button>
                 ))}
               </div>
@@ -278,7 +278,7 @@ export default function AuthPage() {
                     fontWeight: 700, color: T.ink40,
                     textTransform: 'uppercase', letterSpacing: '.08em',
                     marginBottom: 8 }}>
-                    Contraseña
+                    ContraseÃ±a
                   </label>
                   <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: 14,
@@ -290,7 +290,7 @@ export default function AuthPage() {
                       type={showPw ? 'text' : 'password'} required
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      placeholder={mode === 'signup' ? 'Mínimo 6 caracteres' : '••••••••'}
+                      placeholder={mode === 'signup' ? 'MÃ­nimo 6 caracteres' : 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢'}
                       minLength={6}
                       style={{ width: '100%', padding: '12px 44px 12px 42px',
                         borderRadius: 9, border: `1.5px solid ${T.ink10}`,
@@ -333,7 +333,7 @@ export default function AuthPage() {
                   {loading
                     ? 'Cargando...'
                     : mode === 'login'
-                      ? 'Iniciar sesión'
+                      ? 'Iniciar sesiÃ³n'
                       : 'Crear cuenta gratis'}
                 </button>
               </form>
@@ -343,7 +343,7 @@ export default function AuthPage() {
             <p style={{ textAlign: 'center', fontSize: 13,
               color: T.ink40, marginTop: 20, lineHeight: 1.6 }}>
               {mode === 'login'
-                ? <>¿No tienes cuenta?{' '}
+                ? <>Â¿No tienes cuenta?{' '}
                     <button onClick={() => { setMode('signup'); setError('') }}
                       style={{ background: 'none', border: 'none',
                         fontSize: 13, fontWeight: 600, color: T.ink,
@@ -352,13 +352,13 @@ export default function AuthPage() {
                       Crear cuenta gratis
                     </button>
                   </>
-                : <>¿Ya tienes cuenta?{' '}
+                : <>Â¿Ya tienes cuenta?{' '}
                     <button onClick={() => { setMode('login'); setError('') }}
                       style={{ background: 'none', border: 'none',
                         fontSize: 13, fontWeight: 600, color: T.ink,
                         cursor: 'pointer', fontFamily: T.sans,
                         textDecoration: 'underline' }}>
-                      Iniciar sesión
+                      Iniciar sesiÃ³n
                     </button>
                   </>
               }

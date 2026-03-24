@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { listYoutubeRenderProjectsForUser } from '@/lib/youtube-render-projects'
 
@@ -10,7 +10,7 @@ const supabase = createClient(
 )
 
 /**
- * Lista renders guardados (válidos) del usuario; elimina filas y archivos ya caducados.
+ * Lista renders guardados (vÃ¡lidos) del usuario; elimina filas y archivos ya caducados.
  */
 export async function GET(req: NextRequest) {
   try {

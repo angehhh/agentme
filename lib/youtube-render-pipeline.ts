@@ -1,6 +1,6 @@
-/**
- * Descarga un vídeo de YouTube (yt-dlp) y exporta MP4 verticales 1080×1920 (9:16) con FFmpeg.
- * Las rutas a binarios se resuelven vía process.cwd() (ver resolve-media-binaries).
+﻿/**
+ * Descarga un vÃ­deo de YouTube (yt-dlp) y exporta MP4 verticales 1080Ã—1920 (9:16) con FFmpeg.
+ * Las rutas a binarios se resuelven vÃ­a process.cwd() (ver resolve-media-binaries).
  */
 
 import { spawn } from 'child_process'
@@ -21,9 +21,9 @@ export type YoutubeRenderClip = {
 export const YOUTUBE_RENDER_MAX_CLIPS = 14
 export const YOUTUBE_RENDER_MIN_CLIP_SEC = 2
 export const YOUTUBE_RENDER_MAX_CLIP_SEC = 90
-/** Suma máxima de duraciones de clips (evita abusos de CPU). */
+/** Suma mÃ¡xima de duraciones de clips (evita abusos de CPU). */
 export const YOUTUBE_RENDER_MAX_TOTAL_CLIP_SEC = 16 * 60
-/** Vídeos de YouTube más largos no se procesan (descarga + memoria). */
+/** VÃ­deos de YouTube mÃ¡s largos no se procesan (descarga + memoria). */
 export const YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC = 2 * 60 * 60
 
 function youtubeDlClient() {
@@ -31,7 +31,7 @@ function youtubeDlClient() {
 }
 
 function safeFileName(s: string): string {
-  const t = s.replace(/[^\w\sáéíóúñüÁÉÍÓÚÑÜ-]/g, '_').replace(/\s+/g, ' ').trim().slice(0, 55)
+  const t = s.replace(/[^\w\sÃ¡Ã©Ã­Ã³ÃºÃ±Ã¼ÃÃ‰ÃÃ“ÃšÃ‘Ãœ-]/g, '_').replace(/\s+/g, ' ').trim().slice(0, 55)
   return t || 'clip'
 }
 
@@ -80,7 +80,7 @@ function runFfmpeg916(
     p.on('error', reject)
     p.on('close', code => {
       if (code === 0) resolve()
-      else reject(new Error(`ffmpeg terminó con código ${code}: ${err.slice(-1200)}`))
+      else reject(new Error(`ffmpeg terminÃ³ con cÃ³digo ${code}: ${err.slice(-1200)}`))
     })
   })
 }
@@ -115,7 +115,7 @@ export function validateRenderClips(clips: YoutubeRenderClip[]): { ok: true } | 
   if (clips.length > YOUTUBE_RENDER_MAX_CLIPS) {
     return {
       ok: false,
-      message: `Máximo ${YOUTUBE_RENDER_MAX_CLIPS} clips por descarga.`,
+      message: `MÃ¡ximo ${YOUTUBE_RENDER_MAX_CLIPS} clips por descarga.`,
     }
   }
   let total = 0
@@ -124,7 +124,7 @@ export function validateRenderClips(clips: YoutubeRenderClip[]): { ok: true } | 
     const start = Number(c.start_sec)
     const end = Number(c.end_sec)
     if (!Number.isFinite(start) || !Number.isFinite(end)) {
-      return { ok: false, message: `Clip ${i + 1}: tiempos no válidos.` }
+      return { ok: false, message: `Clip ${i + 1}: tiempos no vÃ¡lidos.` }
     }
     if (start < 0 || end <= start) {
       return { ok: false, message: `Clip ${i + 1}: el fin debe ser mayor que el inicio.` }
@@ -133,7 +133,7 @@ export function validateRenderClips(clips: YoutubeRenderClip[]): { ok: true } | 
     if (dur < YOUTUBE_RENDER_MIN_CLIP_SEC || dur > YOUTUBE_RENDER_MAX_CLIP_SEC) {
       return {
         ok: false,
-        message: `Clip ${i + 1}: duración entre ${YOUTUBE_RENDER_MIN_CLIP_SEC} y ${YOUTUBE_RENDER_MAX_CLIP_SEC} s.`,
+        message: `Clip ${i + 1}: duraciÃ³n entre ${YOUTUBE_RENDER_MIN_CLIP_SEC} y ${YOUTUBE_RENDER_MAX_CLIP_SEC} s.`,
       }
     }
     total += dur
@@ -165,7 +165,7 @@ async function downloadYoutubeToTmp(params: {
   ffmpegDir: string
   onProgress?: (msg: string) => void
 }): Promise<string> {
-  params.onProgress?.('Descargando vídeo (puede tardar varios minutos)…')
+  params.onProgress?.('Descargando vÃ­deo (puede tardar varios minutos)â€¦')
   const sourceBase = path.join(params.tmp, 'source')
   await params.youtubeDl(params.youtubeUrl, {
     output: `${sourceBase}.%(ext)s`,
@@ -181,13 +181,13 @@ async function downloadYoutubeToTmp(params: {
     f => f.startsWith('source.') && !f.endsWith('.part') && !f.endsWith('.ytdl'),
   )
   if (!sourceFile) {
-    throw new Error('No se encontró el archivo descargado. Prueba otra URL o formato.')
+    throw new Error('No se encontrÃ³ el archivo descargado. Prueba otra URL o formato.')
   }
   return path.join(params.tmp, sourceFile)
 }
 
 /**
- * Un clip → un MP4 9:16 en memoria (descarga completa del vídeo por petición).
+ * Un clip â†’ un MP4 9:16 en memoria (descarga completa del vÃ­deo por peticiÃ³n).
  */
 export async function renderYoutubeSingleClipToMp4Buffer(params: {
   youtubeUrl: string
@@ -203,12 +203,12 @@ export async function renderYoutubeSingleClipToMp4Buffer(params: {
   const ffmpegDir = path.dirname(ff)
 
   try {
-    params.onProgress?.('Comprobando vídeo en YouTube…')
+    params.onProgress?.('Comprobando vÃ­deo en YouTubeâ€¦')
     const info = await fetchVideoInfo(youtubeDl, params.youtubeUrl)
     const dur = typeof info.duration === 'number' ? info.duration : 0
     if (dur > YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC) {
       throw new Error(
-        `El vídeo dura más de ${YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC / 3600} h; reduce la duración o elige otro.`,
+        `El vÃ­deo dura mÃ¡s de ${YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC / 3600} h; reduce la duraciÃ³n o elige otro.`,
       )
     }
 
@@ -222,7 +222,7 @@ export async function renderYoutubeSingleClipToMp4Buffer(params: {
 
     const durationSec = params.clip.end_sec - params.clip.start_sec
     const outAbs = path.join(tmp, 'out.mp4')
-    params.onProgress?.('Render 9:16…')
+    params.onProgress?.('Render 9:16â€¦')
     await runFfmpeg916(ff, inputAbs, outAbs, params.clip.start_sec, durationSec)
     return await fs.readFile(outAbs)
   } finally {
@@ -231,7 +231,7 @@ export async function renderYoutubeSingleClipToMp4Buffer(params: {
 }
 
 /**
- * Varios clips → un ZIP con un MP4 por clip (una sola descarga del vídeo fuente).
+ * Varios clips â†’ un ZIP con un MP4 por clip (una sola descarga del vÃ­deo fuente).
  */
 export async function renderYoutubeClipsToZipBuffer(params: {
   youtubeUrl: string
@@ -247,12 +247,12 @@ export async function renderYoutubeClipsToZipBuffer(params: {
   const ffmpegDir = path.dirname(ff)
 
   try {
-    params.onProgress?.('Comprobando vídeo en YouTube…')
+    params.onProgress?.('Comprobando vÃ­deo en YouTubeâ€¦')
     const info = await fetchVideoInfo(youtubeDl, params.youtubeUrl)
     const dur = typeof info.duration === 'number' ? info.duration : 0
     if (dur > YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC) {
       throw new Error(
-        `El vídeo dura más de ${YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC / 3600} h; reduce la duración o elige otro.`,
+        `El vÃ­deo dura mÃ¡s de ${YOUTUBE_RENDER_MAX_SOURCE_DURATION_SEC / 3600} h; reduce la duraciÃ³n o elige otro.`,
       )
     }
 
@@ -271,12 +271,12 @@ export async function renderYoutubeClipsToZipBuffer(params: {
       const safeTitle = safeFileName(c.title || `clip_${i + 1}`)
       const outName = `${String(i + 1).padStart(2, '0')}_${safeTitle}.mp4`
       const outAbs = path.join(tmp, outName)
-      params.onProgress?.(`Render 9:16 ${i + 1}/${params.clips.length}…`)
+      params.onProgress?.(`Render 9:16 ${i + 1}/${params.clips.length}â€¦`)
       await runFfmpeg916(ff, inputAbs, outAbs, c.start_sec, durationSec)
       zipEntries.push({ abs: outAbs, name: outName })
     }
 
-    params.onProgress?.('Generando ZIP…')
+    params.onProgress?.('Generando ZIPâ€¦')
     return await zipFilesToBuffer(zipEntries)
   } finally {
     await fs.rm(tmp, { recursive: true, force: true }).catch(() => {})

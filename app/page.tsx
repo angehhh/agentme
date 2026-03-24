@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
-/* ─────────────────────────────────────────
-   ICON LIBRARY  — pure SVG, zero dependencies
-   ───────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   ICON LIBRARY  â€” pure SVG, zero dependencies
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const IC = {
   logo: (
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -98,9 +98,9 @@ const IC = {
   ),
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    DESIGN TOKENS
-   ───────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const T = {
   ink:       '#0C0C0C',
   ink70:     '#484848',
@@ -109,7 +109,7 @@ const T = {
   ink10:     '#E8E8E8',
   paper:     '#F5F4F1',
   white:     '#FFFFFF',
-  green:     '#28C840',     // single status accent — never decorative
+  green:     '#28C840',     // single status accent â€” never decorative
   yellow:    '#E8E350',     // "most popular" badge only
   serif:     "'Playfair Display', Georgia, serif",
   sans:      "'DM Sans', 'Helvetica Neue', sans-serif",
@@ -125,9 +125,9 @@ const Divider = () => (
   <div style={{ borderTop:`1px solid ${T.ink10}` }} />
 )
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    PAGE
-   ───────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function AgentMeLanding() {
   const router = useRouter()
   const [scrolled,   setScrolled]   = useState(false)
@@ -136,7 +136,7 @@ export default function AgentMeLanding() {
   const [caretOn,    setCaretOn]     = useState(true)
   const [modeIdx,    setModeIdx]     = useState(0)
 
-  const goal = 'Conseguir 3 reuniones de ventas para mañana'
+  const goal = 'Conseguir 3 reuniones de ventas para maÃ±ana'
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 20)
@@ -173,42 +173,42 @@ export default function AgentMeLanding() {
     { t: '04:02', msg: '12 mensajes enviados a prospectos' },
     { t: '05:18', msg: 'Primera respuesta positiva recibida' },
     { t: '06:44', msg: '3 reuniones confirmadas en agenda' },
-    { t: '07:00', msg: 'Briefing enviado — misión completada' },
+    { t: '07:00', msg: 'Briefing enviado â€” misiÃ³n completada' },
   ]
 
   const modes = [
     { icon: IC.target,   name: 'Opportunity Mode', tag: 'Empleo & becas',
-      desc: 'Escanea LinkedIn buscando ofertas de empleo alineadas con tu perfil. Filtra por experiencia, ubicación y más.' },
+      desc: 'Escanea LinkedIn buscando ofertas de empleo alineadas con tu perfil. Filtra por experiencia, ubicaciÃ³n y mÃ¡s.' },
     { icon: IC.social,   name: 'Social Mode',       tag: 'Contenido & redes',
-      desc: 'Calendario editorial con IA: ideas por nicho en formato carrusel, reel o hilo, con gancho, esquema y CTA. Tú publicas en tus redes.' },
-    { icon: IC.dollar,   name: 'Money Mode',        tag: 'Ahorro · Próximamente',
-      desc: 'Comparará precios, encontrará cupones y monitorizará ofertas. Solo te avisará cuando valga la pena.' },
-    { icon: IC.moon,     name: 'Sleep Mode',        tag: 'El diferenciador · Próximamente',
-      desc: 'Definirás un objetivo antes de dormir. El agente ejecutará mientras duermes y tendrás resultados al despertar.' },
+      desc: 'Calendario editorial con IA: ideas por nicho en formato carrusel, reel o hilo, con gancho, esquema y CTA. TÃº publicas en tus redes.' },
+    { icon: IC.dollar,   name: 'Money Mode',        tag: 'Ahorro Â· PrÃ³ximamente',
+      desc: 'CompararÃ¡ precios, encontrarÃ¡ cupones y monitorizarÃ¡ ofertas. Solo te avisarÃ¡ cuando valga la pena.' },
+    { icon: IC.moon,     name: 'Sleep Mode',        tag: 'El diferenciador Â· PrÃ³ximamente',
+      desc: 'DefinirÃ¡s un objetivo antes de dormir. El agente ejecutarÃ¡ mientras duermes y tendrÃ¡s resultados al despertar.' },
   ]
 
   const plans = [
-    { name: 'Free',    price: '0€',   sub: 'siempre',
-      items: ['5 búsquedas por día', '1 agente activo', 'Opportunity Mode básico', 'Estadísticas del mercado'],
+    { name: 'Free',    price: '0â‚¬',   sub: 'siempre',
+      items: ['5 bÃºsquedas por dÃ­a', '1 agente activo', 'Opportunity Mode bÃ¡sico', 'EstadÃ­sticas del mercado'],
       cta: 'Empezar gratis', primary: false },
-    { name: 'Pro',     price: '12€',  sub: 'al mes',
-      items: ['Búsquedas ilimitadas', 'Análisis IA de ofertas', 'Todos los modos', 'Tendencias y salarios', 'Ranking de relevancia'],
-      cta: '7 días gratis',  primary: true  },
-    { name: 'Hustler', price: '39€',  sub: 'al mes',
+    { name: 'Pro',     price: '12â‚¬',  sub: 'al mes',
+      items: ['BÃºsquedas ilimitadas', 'AnÃ¡lisis IA de ofertas', 'Todos los modos', 'Tendencias y salarios', 'Ranking de relevancia'],
+      cta: '7 dÃ­as gratis',  primary: true  },
+    { name: 'Hustler', price: '39â‚¬',  sub: 'al mes',
       items: ['Todo lo de Pro', 'Agentes ilimitados', 'Acceso a la API', 'Analytics avanzados', 'Soporte prioritario'],
       cta: 'Contactar',       primary: false },
   ]
 
   const testimonials = [
-    { n: 'Sara L.',   r: 'Creadora · 22 años',       i: 'S',
-      t: 'Opportunity Mode me encontró ofertas que ni sabía que existían. En 10 segundos tenía resultados filtrados y relevantes.' },
-    { n: 'Carlos R.', r: 'Nómada digital · 27 años',  i: 'C',
-      t: 'El análisis IA me ahorra horas. Me dice exactamente qué ofertas encajan conmigo y por qué. Brutal.' },
-    { n: 'María T.',  r: 'Emprendedora · 25 años',    i: 'M',
-      t: 'Busco trabajo remoto desde España y el agente me filtra solo lo relevante. Ya no pierdo tiempo en LinkedIn.' },
+    { n: 'Sara L.',   r: 'Creadora Â· 22 aÃ±os',       i: 'S',
+      t: 'Opportunity Mode me encontrÃ³ ofertas que ni sabÃ­a que existÃ­an. En 10 segundos tenÃ­a resultados filtrados y relevantes.' },
+    { n: 'Carlos R.', r: 'NÃ³mada digital Â· 27 aÃ±os',  i: 'C',
+      t: 'El anÃ¡lisis IA me ahorra horas. Me dice exactamente quÃ© ofertas encajan conmigo y por quÃ©. Brutal.' },
+    { n: 'MarÃ­a T.',  r: 'Emprendedora Â· 25 aÃ±os',    i: 'M',
+      t: 'Busco trabajo remoto desde EspaÃ±a y el agente me filtra solo lo relevante. Ya no pierdo tiempo en LinkedIn.' },
   ]
 
-  /* ─── shared section wrapper ─── */
+  /* â”€â”€â”€ shared section wrapper â”€â”€â”€ */
   const Section = ({ id, bg, children, pt = 130, pb = 130 }:
     { id?: string; bg?: string; children: React.ReactNode; pt?: number; pb?: number }) => (
     <section id={id} style={{ padding: `${pt}px 24px ${pb}px`, background: bg }}>
@@ -227,7 +227,7 @@ export default function AgentMeLanding() {
       ...style }}>{children}</h2>
   )
 
-  /* ─── BTN ─── */
+  /* â”€â”€â”€ BTN â”€â”€â”€ */
   const Btn = ({ label, onClick, variant = 'solid', size = 'md', icon }:
     { label: string; onClick: () => void; variant?: 'solid' | 'outline' | 'ghost'; size?: 'md' | 'lg'; icon?: React.ReactNode }) => {
     const pad = size === 'lg' ? '15px 38px' : '11px 24px'
@@ -283,7 +283,7 @@ export default function AgentMeLanding() {
 
       <div>
 
-        {/* ══ NAVBAR ══ */}
+        {/* â•â• NAVBAR â•â• */}
         <nav style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
           height: 64,
@@ -304,7 +304,7 @@ export default function AgentMeLanding() {
 
             {/* links */}
             <div style={{ display: 'flex', gap: 34 }}>
-              {[['Cómo funciona','como-funciona'],['Modos','modos'],['Precios','precios']].map(([l,id]) => (
+              {[['CÃ³mo funciona','como-funciona'],['Modos','modos'],['Precios','precios']].map(([l,id]) => (
                 <button key={id} onClick={() => scroll(id)}
                   style={{ fontFamily: T.sans, background: 'none', border: 'none',
                     fontSize: 14, fontWeight: 500, color: T.ink50, cursor: 'pointer',
@@ -316,13 +316,13 @@ export default function AgentMeLanding() {
 
             {/* cta group */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Btn label="Iniciar sesión" onClick={() => router.push('/auth')} variant="ghost" />
+              <Btn label="Iniciar sesiÃ³n" onClick={() => router.push('/auth')} variant="ghost" />
               <Btn label="Empezar gratis" onClick={() => router.push('/auth')} variant="solid" />
             </div>
           </div>
         </nav>
 
-        {/* ══ HERO ══ */}
+        {/* â•â• HERO â•â• */}
         <section style={{ paddingTop: 148, paddingBottom: 0, textAlign: 'center', padding: '148px 24px 0' }}>
 
           {/* live badge */}
@@ -331,7 +331,7 @@ export default function AgentMeLanding() {
             padding: '7px 18px', fontSize: 13, fontWeight: 500,
             letterSpacing: '.01em', marginBottom: 44 }}>
             <Dot />
-            Agente IA para jóvenes ambiciosos
+            Agente IA para jÃ³venes ambiciosos
           </div>
 
           {/* headline */}
@@ -340,14 +340,14 @@ export default function AgentMeLanding() {
             letterSpacing: '-.04em', color: T.ink,
             maxWidth: 900, margin: '0 auto 32px' }}>
             Tu agente trabaja<br/>
-            <em style={{ fontStyle: 'italic', color: T.ink50 }}>mientras tú vives</em>
+            <em style={{ fontStyle: 'italic', color: T.ink50 }}>mientras tÃº vives</em>
           </h1>
 
           {/* sub */}
           <p className="fadeUp3" style={{ fontSize: 18, lineHeight: 1.78, color: T.ink50,
             maxWidth: 480, margin: '0 auto 40px', fontWeight: 400 }}>
             Define un objetivo. AGENTME lo ejecuta solo en internet.
-            Cada mañana recibes los resultados.
+            Cada maÃ±ana recibes los resultados.
           </p>
 
           {/* ctas */}
@@ -355,14 +355,14 @@ export default function AgentMeLanding() {
             gap: 12, marginBottom: 14 }}>
             <Btn label="Empezar gratis" onClick={() => router.push('/auth')}
               variant="solid" size="lg" icon={IC.arrowRight} />
-            <Btn label="Ver cómo funciona" onClick={() => scroll('como-funciona')}
+            <Btn label="Ver cÃ³mo funciona" onClick={() => scroll('como-funciona')}
               variant="outline" size="lg" />
           </div>
           <p style={{ fontSize: 13, color: T.ink30, marginBottom: 90 }}>
-            Sin tarjeta de crédito · Cancela cuando quieras
+            Sin tarjeta de crÃ©dito Â· Cancela cuando quieras
           </p>
 
-          {/* ── MOCK ── */}
+          {/* â”€â”€ MOCK â”€â”€ */}
           <div className="fadeUp5" style={{ maxWidth: 1000, margin: '0 auto', position: 'relative' }}>
 
             {/* bottom fade */}
@@ -387,7 +387,7 @@ export default function AgentMeLanding() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9,
                   fontSize: 12, fontFamily: 'monospace', color: '#404040' }}>
                   <Dot color="#28C840" />
-                  agentme.app — sleep_mode — activo
+                  agentme.app â€” sleep_mode â€” activo
                 </div>
                 <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#303030' }}>
                   03:41 AM
@@ -415,7 +415,7 @@ export default function AgentMeLanding() {
                         </div>
                         <div>
                           <p style={{ color: '#FFF', fontSize: 14, fontWeight: 600 }}>Sleep Mode</p>
-                          <p style={{ color: '#484848', fontSize: 12 }}>Ejecutando misión</p>
+                          <p style={{ color: '#484848', fontSize: 12 }}>Ejecutando misiÃ³n</p>
                         </div>
                       </div>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 6,
@@ -472,7 +472,7 @@ export default function AgentMeLanding() {
                     {[
                       { icon: IC.zap,      v: '47',   l: 'Acciones' },
                       { icon: IC.clock,    v: '4.2h', l: 'Activo'   },
-                      { icon: IC.activity, v: '100%', l: 'Éxito'    },
+                      { icon: IC.activity, v: '100%', l: 'Ã‰xito'    },
                     ].map(s => (
                       <div key={s.l} style={{ background: '#161616', borderRadius: 10,
                         padding: '13px 8px', textAlign: 'center', border: '1px solid #242424' }}>
@@ -486,7 +486,7 @@ export default function AgentMeLanding() {
                   </div>
                 </div>
 
-                {/* RIGHT — log feed */}
+                {/* RIGHT â€” log feed */}
                 <div style={{ background: '#161616', borderRadius: 12, padding: 20,
                   border: '1px solid #242424', display: 'flex', flexDirection: 'column' }}>
 
@@ -516,7 +516,7 @@ export default function AgentMeLanding() {
                           {log.t}
                         </span>
                         <span style={{ color: i >= 4 ? T.green : '#303030', flexShrink: 0 }}>
-                          {i >= 4 ? '✓' : '›'}
+                          {i >= 4 ? 'âœ“' : 'â€º'}
                         </span>
                         <span style={{ color: i >= 4 ? '#D0D0D0' : '#525252', lineHeight: 1.5 }}>
                           {log.msg}
@@ -529,9 +529,9 @@ export default function AgentMeLanding() {
                     <div style={{ marginTop: 22, padding: 16, borderRadius: 10,
                       background: 'rgba(232,227,80,.06)', border: '1px solid rgba(232,227,80,.18)' }}>
                       <p style={{ color: '#E8E350', fontWeight: 700, fontSize: 13,
-                        fontFamily: T.sans, marginBottom: 4 }}>Misión completada</p>
+                        fontFamily: T.sans, marginBottom: 4 }}>MisiÃ³n completada</p>
                       <p style={{ color: '#505050', fontSize: 12, fontFamily: T.sans }}>
-                        3 reuniones confirmadas · Briefing enviado a las 07:00
+                        3 reuniones confirmadas Â· Briefing enviado a las 07:00
                       </p>
                     </div>
                   )}
@@ -541,7 +541,7 @@ export default function AgentMeLanding() {
           </div>
         </section>
 
-        {/* ══ PLATFORMS ══ */}
+        {/* â•â• PLATFORMS â•â• */}
         <div style={{ marginTop: 88 }}><Divider /></div>
         <section style={{ padding: '52px 24px' }}>
           <div style={{ maxWidth: 960, margin: '0 auto', textAlign: 'center' }}>
@@ -563,21 +563,21 @@ export default function AgentMeLanding() {
         </section>
         <Divider />
 
-        {/* ══ HOW IT WORKS ══ */}
+        {/* â•â• HOW IT WORKS â•â• */}
         <Section id="como-funciona">
           <div style={{ marginBottom: 72 }}>
-            <Label text="Cómo funciona" />
-            <H2>El agente que<br/><em style={{ fontStyle: 'italic', color: T.ink50 }}>realmente actúa.</em></H2>
+            <Label text="CÃ³mo funciona" />
+            <H2>El agente que<br/><em style={{ fontStyle: 'italic', color: T.ink50 }}>realmente actÃºa.</em></H2>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2 }}>
             {[
               { icon: IC.search, num: '01', title: 'Define tu objetivo',
-                body: 'Escribe en lenguaje natural qué quieres conseguir. Sin configuración, sin formularios.' },
-              { icon: IC.zap,    num: '02', title: 'El agente actúa',
-                body: 'Navega, envía mensajes, aplica a ofertas y ejecuta tareas de forma completamente autónoma.' },
+                body: 'Escribe en lenguaje natural quÃ© quieres conseguir. Sin configuraciÃ³n, sin formularios.' },
+              { icon: IC.zap,    num: '02', title: 'El agente actÃºa',
+                body: 'Navega, envÃ­a mensajes, aplica a ofertas y ejecuta tareas de forma completamente autÃ³noma.' },
               { icon: IC.mail,   num: '03', title: 'Recibes resultados',
-                body: 'Resultados guardados en tu dashboard con análisis de relevancia y estadísticas del mercado.' },
+                body: 'Resultados guardados en tu dashboard con anÃ¡lisis de relevancia y estadÃ­sticas del mercado.' },
             ].map((step, i) => (
               <div key={i} style={{
                 padding: '44px 40px',
@@ -606,7 +606,7 @@ export default function AgentMeLanding() {
           </div>
         </Section>
 
-        {/* ══ MODES ══ */}
+        {/* â•â• MODES â•â• */}
         <Divider />
         <Section id="modos" bg={T.white}>
           {/* header */}
@@ -673,9 +673,9 @@ export default function AgentMeLanding() {
             <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 16 }}>
               {[
                 { icon: IC.zap,      label: 'Acciones esta noche',  value: '47 acciones'     },
-                { icon: IC.clock,    label: 'Tiempo de operación',  value: '4 h 13 min'      },
-                { icon: IC.activity, label: 'Tasa de éxito global', value: '94.7 %'          },
-                { icon: IC.target,   label: 'Objetivo de la misión',value: '3 / 3 reuniones' },
+                { icon: IC.clock,    label: 'Tiempo de operaciÃ³n',  value: '4 h 13 min'      },
+                { icon: IC.activity, label: 'Tasa de Ã©xito global', value: '94.7 %'          },
+                { icon: IC.target,   label: 'Objetivo de la misiÃ³n',value: '3 / 3 reuniones' },
               ].map((s, i) => (
                 <div key={i} style={{ background: T.paper, borderRadius: 13,
                   padding: '22px 26px', border: `1px solid ${T.ink10}`,
@@ -695,7 +695,7 @@ export default function AgentMeLanding() {
           </div>
         </Section>
 
-        {/* ══ TESTIMONIALS ══ */}
+        {/* â•â• TESTIMONIALS â•â• */}
         <Divider />
         <Section>
           <Label text="Testimonios" />
@@ -705,7 +705,7 @@ export default function AgentMeLanding() {
             <blockquote style={{ fontFamily: T.serif, fontStyle: 'italic',
               fontSize: 'clamp(26px,3.8vw,44px)', lineHeight: 1.3,
               color: T.ink, letterSpacing: '-.025em', marginBottom: 32 }}>
-              "En la primera semana AGENTME me consiguió 4 clientes nuevos mientras yo seguía con mis proyectos. Es como tener un comercial trabajando las 24 horas."
+              "En la primera semana AGENTME me consiguiÃ³ 4 clientes nuevos mientras yo seguÃ­a con mis proyectos. Es como tener un comercial trabajando las 24 horas."
             </blockquote>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <div style={{ width: 42, height: 42, borderRadius: '50%',
@@ -714,7 +714,7 @@ export default function AgentMeLanding() {
                 fontSize: 15, fontWeight: 700 }}>A</div>
               <div>
                 <p style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Alejandro M.</p>
-                <p style={{ fontSize: 13, color: T.ink30 }}>Diseñador freelance · 24 años</p>
+                <p style={{ fontSize: 13, color: T.ink30 }}>DiseÃ±ador freelance Â· 24 aÃ±os</p>
               </div>
               <div style={{ display: 'flex', gap: 3, marginLeft: 8, color: T.ink }}>
                 {[...Array(5)].map((_, i) => <span key={i}>{IC.star}</span>)}
@@ -748,12 +748,12 @@ export default function AgentMeLanding() {
           </div>
         </Section>
 
-        {/* ══ PRICING ══ */}
+        {/* â•â• PRICING â•â• */}
         <Divider />
         <Section id="precios" bg={T.white}>
           <div style={{ marginBottom: 80 }}>
             <Label text="Precios" />
-            <H2>Menos que un café al día.<br/><em style={{ fontStyle: 'italic', color: T.ink50 }}>Mucho más valor.</em></H2>
+            <H2>Menos que un cafÃ© al dÃ­a.<br/><em style={{ fontStyle: 'italic', color: T.ink50 }}>Mucho mÃ¡s valor.</em></H2>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)',
@@ -772,7 +772,7 @@ export default function AgentMeLanding() {
                     background: T.yellow, color: T.ink,
                     fontSize: 11, fontWeight: 800, letterSpacing: '.06em',
                     padding: '4px 18px', borderRadius: 100, whiteSpace: 'nowrap' }}>
-                    MÁS POPULAR
+                    MÃS POPULAR
                   </div>
                 )}
 
@@ -824,7 +824,7 @@ export default function AgentMeLanding() {
           </div>
         </Section>
 
-        {/* ══ FINAL CTA ══ */}
+        {/* â•â• FINAL CTA â•â• */}
         <Divider />
         <Section>
           <div style={{ background: T.ink, borderRadius: 24, padding: '92px 64px',
@@ -839,7 +839,7 @@ export default function AgentMeLanding() {
               </em>
             </h2>
             <p style={{ fontSize: 17, color: '#4A4A4A', marginBottom: 46, lineHeight: 1.72 }}>
-              7 días gratis. Sin tarjeta de crédito.<br/>Resultados desde el primer día.
+              7 dÃ­as gratis. Sin tarjeta de crÃ©dito.<br/>Resultados desde el primer dÃ­a.
             </p>
             <button onClick={() => router.push('/auth')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -856,7 +856,7 @@ export default function AgentMeLanding() {
           </div>
         </Section>
 
-        {/* ══ FOOTER ══ */}
+        {/* â•â• FOOTER â•â• */}
         <Divider />
         <footer style={{ padding: '64px 24px 44px', background: T.white }}>
           <div style={{ maxWidth: 1120, margin: '0 auto' }}>
@@ -872,7 +872,7 @@ export default function AgentMeLanding() {
                     fontSize: 16, color: T.ink }}>AGENTME</span>
                 </div>
                 <p style={{ fontSize: 14, color: T.ink30, lineHeight: 1.7 }}>
-                  El primer agente IA diseñado para la vida de un joven ambicioso.
+                  El primer agente IA diseÃ±ado para la vida de un joven ambicioso.
                 </p>
                 <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
                   {[IC.twitter, IC.linkedin, IC.globe].map((ico, i) => (
@@ -893,7 +893,7 @@ export default function AgentMeLanding() {
                 {[
                   { title: 'Producto', links: ['Modos','Precios','Seguridad','Changelog','API'] },
                   { title: 'Empresa',  links: ['Blog','Carreras','Prensa','Inversores'] },
-                  { title: 'Legal',    links: ['Privacidad','Términos','Cookies','Contacto'] },
+                  { title: 'Legal',    links: ['Privacidad','TÃ©rminos','Cookies','Contacto'] },
                 ].map(col => (
                   <div key={col.title}>
                     <p style={{ fontSize: 13, fontWeight: 700, color: T.ink,
@@ -916,7 +916,7 @@ export default function AgentMeLanding() {
               alignItems: 'center', paddingTop: 28,
               borderTop: `1px solid ${T.ink10}`, flexWrap: 'wrap', gap: 16 }}>
               <p style={{ fontSize: 13, color: T.ink30 }}>
-                © 2026 AGENTME. Todos los derechos reservados.
+                Â© 2026 AGENTME. Todos los derechos reservados.
               </p>
               <div style={{ display: 'flex', gap: 8 }}>
                 {['GDPR','SOC 2','HIPAA'].map(b => (

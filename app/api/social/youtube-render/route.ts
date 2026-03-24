@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractYoutubeVideoId } from '@/lib/youtube-video-id'
 import {
@@ -60,7 +60,7 @@ async function assertRenderLimit(userId: string, tier: 'free' | 'pro'): Promise<
     return NextResponse.json(
       {
         error: 'limit_reached',
-        message: `Plan Free: ${SOCIAL_LIMITS.youtubeRender.freePerWeek} descarga(s) de vídeo 9:16/semana (lun UTC). Pro: sin límite en la app.`,
+        message: `Plan Free: ${SOCIAL_LIMITS.youtubeRender.freePerWeek} descarga(s) de vÃ­deo 9:16/semana (lun UTC). Pro: sin lÃ­mite en la app.`,
         limit: SOCIAL_LIMITS.youtubeRender.freePerWeek,
       },
       { status: 429 },
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         {
           error: 'render_disabled',
           message:
-            'La descarga y render 9:16 no está activa en este despliegue. Usa un servidor propio (VPS/Docker) con `next start` o define ENABLE_YOUTUBE_RENDER=1 en Vercel sabiendo los límites de tiempo y disco.',
+            'La descarga y render 9:16 no estÃ¡ activa en este despliegue. Usa un servidor propio (VPS/Docker) con `next start` o define ENABLE_YOUTUBE_RENDER=1 en Vercel sabiendo los lÃ­mites de tiempo y disco.',
         },
         { status: 501 },
       )
@@ -102,10 +102,10 @@ export async function POST(req: NextRequest) {
       clips?: YoutubeRenderClip[]
       output?: 'zip' | 'mp4'
       clipIndex?: number
-      /** Si true: sube a Storage y responde JSON (caduca a los 2 días). Si false: solo binario. */
+      /** Si true: sube a Storage y responde JSON (caduca a los 2 dÃ­as). Si false: solo binario. */
       store?: boolean
       videoTitle?: string
-      /** Proyecto nube existente (mismo vídeo) */
+      /** Proyecto nube existente (mismo vÃ­deo) */
       sessionId?: string
       /** Snapshot del pack IA para el detalle del proyecto */
       clipsPlan?: unknown
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
     const videoId = extractYoutubeVideoId(youtubeUrl)
     if (!videoId) {
       return NextResponse.json(
-        { error: 'URL inválida', message: 'Pega un enlace válido de YouTube.' },
+        { error: 'URL invÃ¡lida', message: 'Pega un enlace vÃ¡lido de YouTube.' },
         { status: 400 },
       )
     }
@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
           user_id: userId,
           mode: 'social_youtube_render',
           status: 'completed',
-          goal: `YouTube MP4 9:16 [${tier}]: ${videoId} · clip ${clipIndex + 1}`,
+          goal: `YouTube MP4 9:16 [${tier}]: ${videoId} Â· clip ${clipIndex + 1}`,
           actions: 1,
           created_at: new Date().toISOString(),
         })
@@ -272,7 +272,7 @@ export async function POST(req: NextRequest) {
         user_id: userId,
         mode: 'social_youtube_render',
         status: 'completed',
-        goal: `YouTube ZIP 9:16 [${tier}]: ${videoId} · ${clips.length} clips`,
+        goal: `YouTube ZIP 9:16 [${tier}]: ${videoId} Â· ${clips.length} clips`,
         actions: clips.length,
         created_at: new Date().toISOString(),
       })
@@ -329,8 +329,8 @@ export async function POST(req: NextRequest) {
           error: 'render_fallido',
           message:
             msg.length > 400
-              ? `${msg.slice(0, 400)}…`
-              : msg || 'No se pudo descargar o procesar el vídeo. Revisa yt-dlp y FFmpeg (variables YT_DLP_PATH / FFMPEG_BIN si hace falta).',
+              ? `${msg.slice(0, 400)}â€¦`
+              : msg || 'No se pudo descargar o procesar el vÃ­deo. Revisa yt-dlp y FFmpeg (variables YT_DLP_PATH / FFMPEG_BIN si hace falta).',
         },
         { status: 502 },
       )

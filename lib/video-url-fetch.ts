@@ -1,4 +1,4 @@
-import { VIDEO_UPLOAD_MAX_MB } from '@/lib/social-limits'
+﻿import { VIDEO_UPLOAD_MAX_MB } from '@/lib/social-limits'
 
 const MAX_BYTES = VIDEO_UPLOAD_MAX_MB * 1024 * 1024
 
@@ -46,14 +46,14 @@ export type VideoFetchResult =
   | { ok: false; message: string }
 
 /**
- * Descarga un vídeo por URL directa (p. ej. .mp4 en CDN). No soporta YouTube ni redes que requieran login.
+ * Descarga un vÃ­deo por URL directa (p. ej. .mp4 en CDN). No soporta YouTube ni redes que requieran login.
  */
 export async function fetchVideoFromUrl(videoUrl: string): Promise<VideoFetchResult> {
   let url: URL
   try {
     url = new URL(videoUrl.trim())
   } catch {
-    return { ok: false, message: 'URL no válida.' }
+    return { ok: false, message: 'URL no vÃ¡lida.' }
   }
 
   if (!['http:', 'https:'].includes(url.protocol)) {
@@ -64,7 +64,7 @@ export async function fetchVideoFromUrl(videoUrl: string): Promise<VideoFetchRes
     return {
       ok: false,
       message:
-        'Esa plataforma no permite descarga directa desde aquí. Sube el archivo MP4 o usa un enlace directo a un .mp4 (CDN, almacenamiento propio, etc.).',
+        'Esa plataforma no permite descarga directa desde aquÃ­. Sube el archivo MP4 o usa un enlace directo a un .mp4 (CDN, almacenamiento propio, etc.).',
     }
   }
 
@@ -80,7 +80,7 @@ export async function fetchVideoFromUrl(videoUrl: string): Promise<VideoFetchRes
     })
 
     if (!res.ok) {
-      return { ok: false, message: `No se pudo descargar el vídeo (HTTP ${res.status}).` }
+      return { ok: false, message: `No se pudo descargar el vÃ­deo (HTTP ${res.status}).` }
     }
 
     const len = res.headers.get('content-length')
@@ -89,7 +89,7 @@ export async function fetchVideoFromUrl(videoUrl: string): Promise<VideoFetchRes
       if (!Number.isFinite(n) || n > MAX_BYTES) {
         return {
           ok: false,
-          message: `El archivo supera el máximo de ${VIDEO_UPLOAD_MAX_MB} MB (límite de transcripción).`,
+          message: `El archivo supera el mÃ¡ximo de ${VIDEO_UPLOAD_MAX_MB} MB (lÃ­mite de transcripciÃ³n).`,
         }
       }
     }
@@ -98,12 +98,12 @@ export async function fetchVideoFromUrl(videoUrl: string): Promise<VideoFetchRes
     if (buf.length > MAX_BYTES) {
       return {
         ok: false,
-        message: `El archivo supera el máximo de ${VIDEO_UPLOAD_MAX_MB} MB (límite de transcripción).`,
+        message: `El archivo supera el mÃ¡ximo de ${VIDEO_UPLOAD_MAX_MB} MB (lÃ­mite de transcripciÃ³n).`,
       }
     }
 
     if (buf.length < 512) {
-      return { ok: false, message: 'El archivo descargado es demasiado pequeño o vacío.' }
+      return { ok: false, message: 'El archivo descargado es demasiado pequeÃ±o o vacÃ­o.' }
     }
 
     const path = url.pathname.toLowerCase()
@@ -118,7 +118,7 @@ export async function fetchVideoFromUrl(videoUrl: string): Promise<VideoFetchRes
     if (!looksVideo && !ct.includes('octet-stream')) {
       return {
         ok: false,
-        message: 'La URL no parece un vídeo (content-type o extensión). Usa un enlace directo a .mp4 / video/*.',
+        message: 'La URL no parece un vÃ­deo (content-type o extensiÃ³n). Usa un enlace directo a .mp4 / video/*.',
       }
     }
 

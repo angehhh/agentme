@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
@@ -33,7 +33,7 @@ import {
   Zap,
 } from 'lucide-react'
 
-/** Pantalla inicial vs herramienta concreta (ampliable con más ids) */
+/** Pantalla inicial vs herramienta concreta (ampliable con mÃ¡s ids) */
 type SocialSection = 'hub' | 'editorial' | 'hooklab' | 'ytclips'
 
 const T = {
@@ -56,7 +56,7 @@ const FORMAT_COLOR: Record<EditorialFormat, string> = {
   hilo: T.blue,
 }
 
-/** Fondo tipo “squircle” gris claro (referencia UI minimal) */
+/** Fondo tipo â€œsquircleâ€ gris claro (referencia UI minimal) */
 const ICON_TILE_BG = '#E6E6E4'
 const STROKE = 1.75
 
@@ -141,7 +141,7 @@ type YtCloudRenderProject = {
   title: string
   kind: 'mp4' | 'zip'
   filename: string
-  /** Índice del clip en el plan IA (solo MP4); alinea plan ↔ archivo */
+  /** Ãndice del clip en el plan IA (solo MP4); alinea plan â†” archivo */
   clip_index?: number | null
   created_at?: string
   duration_sec: number | null
@@ -151,7 +151,7 @@ type YtCloudRenderProject = {
   download_url: string | null
 }
 
-/** clip_index en API/JSON a veces viene como string; null = sin índice (huérfano). */
+/** clip_index en API/JSON a veces viene como string; null = sin Ã­ndice (huÃ©rfano). */
 function parseClipIndex(v: unknown): number | null {
   if (v === null || v === undefined) return null
   if (typeof v === 'number' && Number.isFinite(v)) return Math.floor(v)
@@ -163,8 +163,8 @@ function parseClipIndex(v: unknown): number | null {
 }
 
 /**
- * Alinea MP4s con cada fila del plan: primero por clip_index, luego huecos con archivos sin índice (orden created_at).
- * Evita quedarse en 10/12 por `clip_index ===` fallando entre número y string.
+ * Alinea MP4s con cada fila del plan: primero por clip_index, luego huecos con archivos sin Ã­ndice (orden created_at).
+ * Evita quedarse en 10/12 por `clip_index ===` fallando entre nÃºmero y string.
  */
 function assignMp4sToPlanSlots(
   planClips: Array<Record<string, unknown>>,
@@ -198,7 +198,7 @@ function assignMp4sToPlanSlots(
 }
 
 function formatYtDurationBadge(sec: number | null | undefined): string {
-  if (sec == null || !Number.isFinite(sec) || sec <= 0) return '—'
+  if (sec == null || !Number.isFinite(sec) || sec <= 0) return 'â€”'
   const m = Math.floor(sec / 60)
   if (m >= 60) return `${Math.floor(m / 60)}h ${m % 60}m`
   if (m >= 1) return `${m}'`
@@ -230,7 +230,7 @@ function buildClipsPlanPayload(clips: YoutubeVerticalClip[]) {
   }
 }
 
-/** Barra de progreso estilo Opus Clip (análisis IA o render MP4 / subida) */
+/** Barra de progreso estilo Opus Clip (anÃ¡lisis IA o render MP4 / subida) */
 function OpusProgressOverlay({
   visible,
   pct,
@@ -243,16 +243,16 @@ function OpusProgressOverlay({
   if (!visible) return null
   const phase =
     variant === 'analysis'
-      ? pct < 22 ? 'Leyendo subtítulos del vídeo…' :
-        pct < 42 ? 'Analizando ritmo y picos de retención…' :
-        pct < 62 ? 'IA eligiendo los mejores cortes…' :
-        pct < 82 ? 'Redactando copy, hashtags y checklist…' :
-        'Organizando el pack de shorts…'
-      : pct < 28 ? 'Descargando fuente…' :
-        pct < 55 ? 'Render 9:16…' :
-        pct < 88 ? 'Subiendo a la nube…' :
-        'Casi listo…'
-  const eta = pct >= (variant === 'analysis' ? 84 : 92) ? 'ETA ~0m' : '…'
+      ? pct < 22 ? 'Leyendo subtÃ­tulos del vÃ­deoâ€¦' :
+        pct < 42 ? 'Analizando ritmo y picos de retenciÃ³nâ€¦' :
+        pct < 62 ? 'IA eligiendo los mejores cortesâ€¦' :
+        pct < 82 ? 'Redactando copy, hashtags y checklistâ€¦' :
+        'Organizando el pack de shortsâ€¦'
+      : pct < 28 ? 'Descargando fuenteâ€¦' :
+        pct < 55 ? 'Render 9:16â€¦' :
+        pct < 88 ? 'Subiendo a la nubeâ€¦' :
+        'Casi listoâ€¦'
+  const eta = pct >= (variant === 'analysis' ? 84 : 92) ? 'ETA ~0m' : 'â€¦'
   const outerBg =
     variant === 'analysis'
       ? 'rgba(15, 23, 42, 0.78)'
@@ -309,14 +309,14 @@ function OpusProgressOverlay({
           fontFamily: T.sans,
           lineHeight: 1.4,
         }}>
-          {Math.min(100, Math.round(pct))}% ({eta}) · {phase}
+          {Math.min(100, Math.round(pct))}% ({eta}) Â· {phase}
         </span>
       </div>
     </div>
   )
 }
 
-/** Píldora compacta estilo Opus: % + ETA (borde neón verde) */
+/** PÃ­ldora compacta estilo Opus: % + ETA (borde neÃ³n verde) */
 function OpusClipProgressPill({ pct, etaLabel }: { pct: number; etaLabel: string }) {
   const p = Math.max(0, Math.min(100, Math.round(pct)))
   return (
@@ -347,7 +347,7 @@ function OpusClipProgressPill({ pct, etaLabel }: { pct: number; etaLabel: string
   )
 }
 
-/** Overlay estilo Opus (fondo claro) encima de la rejilla de vídeos 9:16 en proyecto nube */
+/** Overlay estilo Opus (fondo claro) encima de la rejilla de vÃ­deos 9:16 en proyecto nube */
 function YtProjectVideoGridGateOverlay({
   progress,
   onBypass,
@@ -381,13 +381,13 @@ function YtProjectVideoGridGateOverlay({
       <OpusClipProgressPill pct={pct} etaLabel={eta} />
       <p style={{ margin: 0, fontSize: 13, color: '#6b7280', lineHeight: 1.55, maxWidth: 440 }}>
         Creando los clips en la nube: <strong style={{ color: '#374151' }}>{progress.ready}</strong> de{' '}
-        <strong style={{ color: '#374151' }}>{progress.required}</strong> con MP4 listo. Tiempo estimado según los que faltan.
+        <strong style={{ color: '#374151' }}>{progress.required}</strong> con MP4 listo. Tiempo estimado segÃºn los que faltan.
         Actualizamos cada pocos segundos.
         {progress.ready < progress.required ? (
           <>
             {' '}
-            Si el contador no sube, faltan generaciones desde el análisis (o hay retraso en el servidor). Puedes usar{' '}
-            <strong style={{ color: '#374151' }}>Ver proyecto igualmente</strong> para ver los que ya están listos.
+            Si el contador no sube, faltan generaciones desde el anÃ¡lisis (o hay retraso en el servidor). Puedes usar{' '}
+            <strong style={{ color: '#374151' }}>Ver proyecto igualmente</strong> para ver los que ya estÃ¡n listos.
           </>
         ) : null}
       </p>
@@ -420,7 +420,7 @@ function etaLabelFromRemainingClips(remaining: number, secondsPerClip = 140): st
   return `${m}m`
 }
 
-/** Progreso de clips MP4 en detalle de sesión (plan IA vs assets) */
+/** Progreso de clips MP4 en detalle de sesiÃ³n (plan IA vs assets) */
 function sessionClipProgressFromDetail(detail: {
   session: { clips_plan?: unknown }
   assets: YtCloudRenderProject[]
@@ -439,7 +439,7 @@ function sessionClipProgressFromDetail(detail: {
   return { required, ready: withUrl, complete: withUrl >= required }
 }
 
-/** Proyecto = un vídeo YouTube con todos sus clips / ZIP en la nube */
+/** Proyecto = un vÃ­deo YouTube con todos sus clips / ZIP en la nube */
 type YtCloudSession = {
   id: string
   youtube_video_id: string
@@ -475,7 +475,7 @@ function ensureYoutubeClipShape(c: Partial<YoutubeVerticalClip>): YoutubeVertica
   }
 }
 
-/** Copy, hashtags, checklist y metadatos del clip (modal «INFORMACIÓN» Pro). */
+/** Copy, hashtags, checklist y metadatos del clip (modal Â«INFORMACIÃ“NÂ» Pro). */
 function YoutubeClipPremiumInfoContent({ c }: { c: YoutubeVerticalClip }) {
   return (
     <>
@@ -491,7 +491,7 @@ function YoutubeClipPremiumInfoContent({ c }: { c: YoutubeVerticalClip }) {
           marginBottom: 14, padding: '14px 16px', borderRadius: 12, background: T.paper,
           border: `1px solid ${T.ink10}`,
         }}>
-          <SectionLabel color={T.blue} style={{ marginBottom: 6 }}>Descripción para publicar</SectionLabel>
+          <SectionLabel color={T.blue} style={{ marginBottom: 6 }}>DescripciÃ³n para publicar</SectionLabel>
           <p style={{ fontSize: 14, color: T.ink60, margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
             {c.publish_description}
           </p>
@@ -543,7 +543,7 @@ function YoutubeClipPremiumInfoContent({ c }: { c: YoutubeVerticalClip }) {
 
       {c.dynamic_caption_style.trim() ? (
         <p style={{ fontSize: 13, color: T.ink60, margin: '0 0 10px', lineHeight: 1.55 }}>
-          <strong style={{ color: T.ink }}>Subtítulos dinámicos (estilo viral):</strong> {c.dynamic_caption_style}
+          <strong style={{ color: T.ink }}>SubtÃ­tulos dinÃ¡micos (estilo viral):</strong> {c.dynamic_caption_style}
         </p>
       ) : null}
 
@@ -563,7 +563,7 @@ function YoutubeClipPremiumInfoContent({ c }: { c: YoutubeVerticalClip }) {
       </div>
       {c.edit_checklist.length > 0 && (
         <div style={{ marginBottom: 14 }}>
-          <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>CHECKLIST DE EDICIÓN</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em' }}>CHECKLIST DE EDICIÃ“N</span>
           <ol style={{ margin: '8px 0 0', paddingLeft: 20, fontSize: 13, color: T.ink60, lineHeight: 1.55 }}>
             {c.edit_checklist.map((step, j) => (
               <li key={j} style={{ marginBottom: 4 }}>{step}</li>
@@ -587,7 +587,7 @@ function YoutubeClipPremiumInfoContent({ c }: { c: YoutubeVerticalClip }) {
 
 function postToText(p: EditorialPost): string {
   const lines = [
-    `## ${p.day_label} · ${FORMAT_LABEL[p.format]}`,
+    `## ${p.day_label} Â· ${FORMAT_LABEL[p.format]}`,
     `**${p.title}**`,
     '',
     `Hook: ${p.hook}`,
@@ -602,12 +602,12 @@ function postToText(p: EditorialPost): string {
     lines.push('', `Hashtags: ${p.hashtags.trim()}`)
   }
   if (p.production_tip?.trim()) {
-    lines.push('', `Producción: ${p.production_tip.trim()}`)
+    lines.push('', `ProducciÃ³n: ${p.production_tip.trim()}`)
   }
   return lines.join('\n')
 }
 
-/** Al entrar el clip en pantalla, encola la vista previa MP4 automática. */
+/** Al entrar el clip en pantalla, encola la vista previa MP4 automÃ¡tica. */
 function YoutubeClipAutoPreviewObserver({
   clipIndex,
   packResetKey,
@@ -670,7 +670,7 @@ export default function SocialView({
   const [audience, setAudience] = useState('')
   const [tone, setTone] = useState('profesional y cercano')
   const [mainPlatform, setMainPlatform] = useState('Instagram')
-  const [language, setLanguage] = useState('español')
+  const [language, setLanguage] = useState('espaÃ±ol')
   const [settingsLoading, setSettingsLoading] = useState(true)
   const [settingsErr, setSettingsErr] = useState<string | null>(null)
   const [savingPrefs, setSavingPrefs] = useState(false)
@@ -697,11 +697,11 @@ export default function SocialView({
   const [ytClips, setYtClips] = useState<YoutubeVerticalClip[]>([])
   const [ytTitleHint, setYtTitleHint] = useState<string | null>(null)
   const [ytLoading, setYtLoading] = useState(false)
-  /** Progreso simulado estilo Opus mientras la IA analiza el vídeo (youtube-clips) */
+  /** Progreso simulado estilo Opus mientras la IA analiza el vÃ­deo (youtube-clips) */
   const [ytAnalysisFakeProgress, setYtAnalysisFakeProgress] = useState(0)
   const [ytErr, setYtErr] = useState<string | null>(null)
   const [ytCopied, setYtCopied] = useState(false)
-  /** Índice del clip que se está renderizando a MP4, o null */
+  /** Ãndice del clip que se estÃ¡ renderizando a MP4, o null */
   const [ytRenderingClipIndex, setYtRenderingClipIndex] = useState<number | null>(null)
   const [ytRenderZipLoading, setYtRenderZipLoading] = useState(false)
   const [ytRenderErr, setYtRenderErr] = useState<string | null>(null)
@@ -715,14 +715,14 @@ export default function SocialView({
     assets: YtCloudRenderProject[]
   } | null>(null)
   const [ytSessionDetailLoading, setYtSessionDetailLoading] = useState(false)
-  /** Sesión nube del vídeo actual (para encadenar MP4/ZIP en el mismo proyecto) */
+  /** SesiÃ³n nube del vÃ­deo actual (para encadenar MP4/ZIP en el mismo proyecto) */
   const [ytRenderSessionId, setYtRenderSessionId] = useState<string | null>(null)
   const [ytRenderFakeProgress, setYtRenderFakeProgress] = useState(0)
-  /** Saltar bloqueo “esperar todos los MP4” (proyecto en nube / lista de clips) */
+  /** Saltar bloqueo â€œesperar todos los MP4â€ (proyecto en nube / lista de clips) */
   const [ytBypassProjectClipsGate, setYtBypassProjectClipsGate] = useState(false)
-  /** URLs firmadas en Supabase (MP4 ya generados) por índice de clip — vista previa sin re-render */
+  /** URLs firmadas en Supabase (MP4 ya generados) por Ã­ndice de clip â€” vista previa sin re-render */
   const [ytCloudMp4UrlByClip, setYtCloudMp4UrlByClip] = useState<Record<number, string>>({})
-  /** Object URLs del MP4 9:16 generado por índice de clip (para <video> + descarga opcional) */
+  /** Object URLs del MP4 9:16 generado por Ã­ndice de clip (para <video> + descarga opcional) */
   const [ytAutomatedPreviewByClip, setYtAutomatedPreviewByClip] = useState<Record<number, string>>({})
   /** Nombre de archivo sugerido por clip, tras generar la vista previa */
   const [ytAutomatedFilenameByClip, setYtAutomatedFilenameByClip] = useState<Record<number, string>>({})
@@ -734,32 +734,32 @@ export default function SocialView({
   const ytAbortRef = useRef<AbortController | null>(null)
   const ytRenderAbortRef = useRef<AbortController | null>(null)
   const ytOpenSessionIdRef = useRef<string | null>(null)
-  /** Cola de índices de clip para generar vista previa MP4 automáticamente (uno tras otro) */
+  /** Cola de Ã­ndices de clip para generar vista previa MP4 automÃ¡ticamente (uno tras otro) */
   const ytAutoPreviewPendingRef = useRef<Set<number>>(new Set())
   const ytPreviewDrainLockRef = useRef(false)
-  /** Evita encolar el clip 0 dos veces por el mismo vídeo al hidratar / regenerar pack */
+  /** Evita encolar el clip 0 dos veces por el mismo vÃ­deo al hidratar / regenerar pack */
   const ytAutoInitialRequestedRef = useRef<string>('')
   const [ytPreviewKick, setYtPreviewKick] = useState(0)
   /** Se incrementa al terminar un pack nuevo (resetea observers de scroll) */
   const [ytClipsPackId, setYtClipsPackId] = useState(0)
-  /** Modal «INFORMACIÓN» (contenido premium por clip) */
+  /** Modal Â«INFORMACIÃ“NÂ» (contenido premium por clip) */
   const [ytClipInfoModalIndex, setYtClipInfoModalIndex] = useState<number | null>(null)
-  /** Modal «INFORMACIÓN» en la rejilla del proyecto en la nube (Pro: guía completa si el plan lo trae) */
+  /** Modal Â«INFORMACIÃ“NÂ» en la rejilla del proyecto en la nube (Pro: guÃ­a completa si el plan lo trae) */
   const [ytCloudClipInfoModal, setYtCloudClipInfoModal] = useState<null | {
     clipNum: number
     title: string
     downloadUrl: string | null
     filenameHint: string
-    /** Pack con plan IA guardado en sesión: guía completa solo se muestra a Pro */
+    /** Pack con plan IA guardado en sesiÃ³n: guÃ­a completa solo se muestra a Pro */
     premiumClip: YoutubeVerticalClip | null
-    /** Solo MP4 sin plan en la sesión (solo se muestra a Pro) */
+    /** Solo MP4 sin plan en la sesiÃ³n (solo se muestra a Pro) */
     fallbackDesc?: string
     /** Rango temporal del clip (cabecera para todos si hay plan) */
     clipTiming?: { start_sec: number; end_sec: number } | null
   }>(null)
   /**
-   * Origen del pack de clips en pantalla: `analysis` = último “Analizar” (persistido así en sessionStorage);
-   * `storage` = borrador antiguo sin marca; se descarta si la API dice 0 proyectos y no hay sesión abierta.
+   * Origen del pack de clips en pantalla: `analysis` = Ãºltimo â€œAnalizarâ€ (persistido asÃ­ en sessionStorage);
+   * `storage` = borrador antiguo sin marca; se descarta si la API dice 0 proyectos y no hay sesiÃ³n abierta.
    */
   const ytClipsSourceRef = useRef<'none' | 'analysis' | 'storage'>('none')
   /** Origen para URLs embed de YouTube (mejora carga del iframe). */
@@ -866,7 +866,7 @@ export default function SocialView({
     }
   }, [userId])
 
-  /** Si no hay proyectos en la nube ni sesión abierta, no mostrar un borrador viejo de sessionStorage (evita “0 proyectos” + clips antiguos). */
+  /** Si no hay proyectos en la nube ni sesiÃ³n abierta, no mostrar un borrador viejo de sessionStorage (evita â€œ0 proyectosâ€ + clips antiguos). */
   useEffect(() => {
     if (section !== 'ytclips') return
     if (!ytSessionsFetchedOnce || ytSessionsLoading) return
@@ -1113,7 +1113,7 @@ export default function SocialView({
       setGenLoading(false)
       if (!res.ok) {
         if (data.error === 'limit_reached') {
-          setGenErr(typeof data.message === 'string' ? data.message : 'Límite diario alcanzado.')
+          setGenErr(typeof data.message === 'string' ? data.message : 'LÃ­mite diario alcanzado.')
         } else {
           setGenErr(typeof data.message === 'string' ? data.message : 'No se pudo generar.')
         }
@@ -1130,14 +1130,14 @@ export default function SocialView({
       if (!aliveRef.current) return
       setGenLoading(false)
       if (e instanceof Error && e.name === 'AbortError') return
-      setGenErr('Error de conexión.')
+      setGenErr('Error de conexiÃ³n.')
     }
   }
 
   const copyWeek = async () => {
     if (!calendar) return
     const text = [
-      `# Calendario editorial — ${calendar.week_theme}`,
+      `# Calendario editorial â€” ${calendar.week_theme}`,
       '',
       ...calendar.posts.map(postToText),
     ].join('\n\n---\n\n')
@@ -1194,7 +1194,7 @@ export default function SocialView({
       setHookLoading(false)
       if (!res.ok) {
         if (data.error === 'limit_reached') {
-          setHookErr(typeof data.message === 'string' ? data.message : 'Límite diario alcanzado.')
+          setHookErr(typeof data.message === 'string' ? data.message : 'LÃ­mite diario alcanzado.')
         } else {
           setHookErr(typeof data.message === 'string' ? data.message : 'No se pudo generar Hook Lab.')
         }
@@ -1211,25 +1211,25 @@ export default function SocialView({
       if (!aliveRef.current) return
       setHookLoading(false)
       if (e instanceof Error && e.name === 'AbortError') return
-      setHookErr('Error de conexión.')
+      setHookErr('Error de conexiÃ³n.')
     }
   }
 
   const copyHookLabAll = async () => {
     if (!hookLab) return
     const lines: string[] = [
-      `# Hook Lab — ${hookLab.topic}`,
+      `# Hook Lab â€” ${hookLab.topic}`,
       '',
       `## ${hookLab.hooks.length} ganchos`,
       ...hookLab.hooks.map((h, i) => `${i + 1}. ${h}`),
       '',
-      `## ${hookLab.angles.length} ángulo(s)`,
+      `## ${hookLab.angles.length} Ã¡ngulo(s)`,
       ...hookLab.angles.map((a, i) => `### ${i + 1}. ${a.title}\n${a.pitch}`),
     ]
     if (hookLab.sound_mood?.trim()) {
       lines.push(
         '',
-        '## Audio sugerido (solo guía de estilo, sin archivo de audio)',
+        '## Audio sugerido (solo guÃ­a de estilo, sin archivo de audio)',
         hookLab.sound_mood.trim(),
       )
     }
@@ -1257,7 +1257,7 @@ export default function SocialView({
     title: string | null,
     clips: YoutubeVerticalClip[],
   ): string {
-    const header = title || 'YouTube — clips 9:16'
+    const header = title || 'YouTube â€” clips 9:16'
     const lines = [
       `# ${header}`,
       `Video: https://www.youtube.com/watch?v=${videoId}`,
@@ -1265,12 +1265,12 @@ export default function SocialView({
     ]
     clips.forEach((c, i) => {
       lines.push(
-        `## Clip ${i + 1} · ${formatMmSs(c.start_sec)} – ${formatMmSs(c.end_sec)}`,
+        `## Clip ${i + 1} Â· ${formatMmSs(c.start_sec)} â€“ ${formatMmSs(c.end_sec)}`,
         `**${c.title}**`,
         `Enlace: ${youtubeWatchUrl(videoId, c.start_sec)}`,
         '',
         `Hook overlay: ${c.hook_overlay}`,
-        `Por qué frena el scroll: ${c.why_stops_scroll}`,
+        `Por quÃ© frena el scroll: ${c.why_stops_scroll}`,
         `Encuadre 9:16: ${c.nine_sixteen_framing}`,
         `Zonas seguras captions: ${c.safe_zones_caption}`,
         `Textos en pantalla: ${c.on_screen_text_suggestions.join(' | ')}`,
@@ -1278,16 +1278,16 @@ export default function SocialView({
         `CTA final: ${c.cta_end}`,
         `Potencial (1-10): ${c.estimated_virality_1_10}`,
         '',
-        `Descripción para publicar:`,
-        c.publish_description || '—',
+        `DescripciÃ³n para publicar:`,
+        c.publish_description || 'â€”',
         '',
-        `Hashtags: ${c.suggested_hashtags.length ? c.suggested_hashtags.join(' ') : '—'}`,
-        `Plataformas recomendadas: ${c.best_platforms.length ? c.best_platforms.join(', ') : '—'}`,
-        `Idea miniatura/cover: ${c.thumbnail_cover_idea || '—'}`,
-        `Estilo captions dinámicos: ${c.dynamic_caption_style || '—'}`,
+        `Hashtags: ${c.suggested_hashtags.length ? c.suggested_hashtags.join(' ') : 'â€”'}`,
+        `Plataformas recomendadas: ${c.best_platforms.length ? c.best_platforms.join(', ') : 'â€”'}`,
+        `Idea miniatura/cover: ${c.thumbnail_cover_idea || 'â€”'}`,
+        `Estilo captions dinÃ¡micos: ${c.dynamic_caption_style || 'â€”'}`,
         '',
-        `Checklist edición:`,
-        ...(c.edit_checklist.length ? c.edit_checklist.map((x, j) => `${j + 1}. ${x}`) : ['—']),
+        `Checklist ediciÃ³n:`,
+        ...(c.edit_checklist.length ? c.edit_checklist.map((x, j) => `${j + 1}. ${x}`) : ['â€”']),
         '',
       )
     })
@@ -1334,7 +1334,7 @@ export default function SocialView({
           userId,
           youtubeUrl: ytUrl.trim(),
           captionLang: ytCaptionLang.trim() || undefined,
-          language: language.trim() || 'español',
+          language: language.trim() || 'espaÃ±ol',
         }),
       })
       const data = await res.json()
@@ -1370,7 +1370,7 @@ export default function SocialView({
       if (!aliveRef.current) return
       setYtLoading(false)
       if (e instanceof Error && e.name === 'AbortError') return
-      setYtErr('Error de conexión.')
+      setYtErr('Error de conexiÃ³n.')
     }
   }
 
@@ -1390,7 +1390,7 @@ export default function SocialView({
   }
 
   /**
-   * Genera el MP4 9:16, lo guarda en la nube (sesión) y muestra vista previa local.
+   * Genera el MP4 9:16, lo guarda en la nube (sesiÃ³n) y muestra vista previa local.
    * Si `alsoDownload`, dispara la descarga del archivo al terminar (un solo paso para el usuario).
    */
   const generateYoutubeRenderClipPreview = async (
@@ -1441,7 +1441,7 @@ export default function SocialView({
           setYtRenderErr(
             typeof data.message === 'string'
               ? data.message
-              : `No se pudo generar el vídeo del clip ${clipIndex + 1}.`,
+              : `No se pudo generar el vÃ­deo del clip ${clipIndex + 1}.`,
           )
           return
         }
@@ -1492,7 +1492,7 @@ export default function SocialView({
         return
       }
       if (!res.ok || !ct.includes('video/mp4')) {
-        let msg = `No se pudo generar el vídeo del clip ${clipIndex + 1}.`
+        let msg = `No se pudo generar el vÃ­deo del clip ${clipIndex + 1}.`
         try {
           const j = (await res.json()) as { message?: string }
           if (typeof j.message === 'string') msg = j.message
@@ -1530,7 +1530,7 @@ export default function SocialView({
     } catch (e: unknown) {
       if (!aliveRef.current) return
       if (e instanceof Error && e.name === 'AbortError') return
-      setYtRenderErr('Error de conexión o tiempo agotado.')
+      setYtRenderErr('Error de conexiÃ³n o tiempo agotado.')
     } finally {
       if (aliveRef.current) setYtRenderingClipIndex(null)
     }
@@ -1594,7 +1594,7 @@ export default function SocialView({
     }
   }
 
-  /** Descarga directa de un MP4 por URL firmada (proyecto en la nube), sin abrir pestaña. */
+  /** Descarga directa de un MP4 por URL firmada (proyecto en la nube), sin abrir pestaÃ±a. */
   const downloadCloudSessionMp4 = useCallback((url: string, filename: string) => {
     void (async () => {
       try {
@@ -1626,7 +1626,7 @@ export default function SocialView({
     })()
   }, [])
 
-  /** 1.ª vez: render + descarga; si ya hay MP4 (local o nube), solo descarga. */
+  /** 1.Âª vez: render + descarga; si ya hay MP4 (local o nube), solo descarga. */
   const downloadOrRenderYoutubeClipMp4 = (clipIndex: number) => {
     if (ytAutomatedPreviewByClip[clipIndex] ?? ytCloudMp4UrlByClip[clipIndex]) {
       downloadYoutubeClipFromPreview(clipIndex)
@@ -1788,7 +1788,7 @@ export default function SocialView({
     } catch (e: unknown) {
       if (!aliveRef.current) return
       if (e instanceof Error && e.name === 'AbortError') return
-      setYtRenderErr('Error de conexión o tiempo agotado.')
+      setYtRenderErr('Error de conexiÃ³n o tiempo agotado.')
     } finally {
       if (aliveRef.current) setYtRenderZipLoading(false)
     }
@@ -1831,21 +1831,21 @@ export default function SocialView({
                 <h2 style={{ fontFamily: T.serif, fontSize: 24, fontWeight: 700, letterSpacing: '-.025em', color: T.ink, margin: 0 }}>
                   Social Mode
                 </h2>
-                <p style={{ fontSize: 13, color: T.ink40, marginTop: 2 }}>Studio para creadores · IA</p>
+                <p style={{ fontSize: 13, color: T.ink40, marginTop: 2 }}>Studio para creadores Â· IA</p>
               </div>
               {!isPro && (
                 <div style={{
                   fontSize: 12, fontWeight: 600, color: T.ink40, background: T.paper,
                   border: `1px solid ${T.ink10}`, padding: '5px 14px', borderRadius: 100,
                 }}>
-                  Free · límites por semana
+                  Free Â· lÃ­mites por semana
                 </div>
               )}
             </div>
             <p style={{ fontSize: 15, color: T.ink60, lineHeight: 1.65, maxWidth: 720 }}>
               <strong>Genera contenido como un pro:</strong> calendario de publicaciones, ganchos para reels y{' '}
-              <strong>Shorts listos</strong> desde URL (YouTube hoy): la IA analiza el vídeo, corta los mejores momentos en <strong>9:16</strong> y organiza copy para TikTok, Reels y Shorts.{' '}
-              Pensado para creadores que quieren publicar más sin partir de cero. Sin conectar OAuth.
+              <strong>Shorts listos</strong> desde URL (YouTube hoy): la IA analiza el vÃ­deo, corta los mejores momentos en <strong>9:16</strong> y organiza copy para TikTok, Reels y Shorts.{' '}
+              Pensado para creadores que quieren publicar mÃ¡s sin partir de cero. Sin conectar OAuth.
             </p>
           </div>
 
@@ -1854,8 +1854,8 @@ export default function SocialView({
               background: 'rgba(232,179,64,.12)', border: '1px solid rgba(200,150,40,.25)', borderRadius: 12,
               padding: '14px 18px', marginBottom: 22, fontSize: 13, color: '#6B5A2E', lineHeight: 1.55,
             }}>
-              Estás en <strong>plan Free</strong> (salida reducida y límites por semana). Sube a <strong>Pro</strong> para calendario de 7 días,
-              Hook Lab completo y más <strong>Shorts listos</strong> (YouTube) al día.
+              EstÃ¡s en <strong>plan Free</strong> (salida reducida y lÃ­mites por semana). Sube a <strong>Pro</strong> para calendario de 7 dÃ­as,
+              Hook Lab completo y mÃ¡s <strong>Shorts listos</strong> (YouTube) al dÃ­a.
             </div>
           )}
 
@@ -1889,13 +1889,13 @@ export default function SocialView({
                   display: 'inline-block', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
                   color: T.coral, background: 'rgba(232,93,76,.08)', padding: '4px 10px', borderRadius: 100, marginBottom: 8,
                 }}>
-                  Semanal · IA
+                  Semanal Â· IA
                 </span>
                 <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.55, margin: 0 }}>
                   Para planificar la semana: carrusel, reel e hilo con hashtags y tips de rodaje. Menos bloqueo ante el calendario.{' '}
                   {isPro
-                    ? 'Sin límite de generaciones (Pro).'
-                    : `Vista previa de ${EDITORIAL_DAYS.free} días.`}
+                    ? 'Sin lÃ­mite de generaciones (Pro).'
+                    : `Vista previa de ${EDITORIAL_DAYS.free} dÃ­as.`}
                 </p>
               </div>
             </button>
@@ -1929,11 +1929,11 @@ export default function SocialView({
                   display: 'inline-block', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
                   color: T.violet, background: 'rgba(123,104,238,.1)', padding: '4px 10px', borderRadius: 100, marginBottom: 8,
                 }}>
-                  Ganchos · CTA
+                  Ganchos Â· CTA
                 </span>
                 <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.55, margin: 0 }}>
                   Abre reels con ideas fuertes: {hl.hooks} ganchos y {hl.angles}{' '}
-                  {hl.angles === 1 ? 'ángulo' : 'ángulos'}
+                  {hl.angles === 1 ? 'Ã¡ngulo' : 'Ã¡ngulos'}
                   {isPro ? ' + audio y textos en pantalla.' : '.'} Ideal antes de grabar.
                 </p>
               </div>
@@ -1968,10 +1968,10 @@ export default function SocialView({
                   display: 'inline-block', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
                   color: T.coral, background: 'rgba(232,93,76,.1)', padding: '4px 10px', borderRadius: 100, marginBottom: 8,
                 }}>
-                  URL → IA → proyecto · estilo Opus
+                  URL â†’ IA â†’ proyecto Â· estilo Opus
                 </span>
                 <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.55, margin: 0 }}>
-                  Pega un enlace, analizamos el vídeo y generamos clips 9:16 con toda la info. Proyectos en la nube que caducan solos a los 2 días. {isPro ? 'Pro: pack completo (~12 momentos), sin límite de usos.' : 'Free: hasta ~4 momentos por análisis.'}
+                  Pega un enlace, analizamos el vÃ­deo y generamos clips 9:16 con toda la info. Proyectos en la nube que caducan solos a los 2 dÃ­as. {isPro ? 'Pro: pack completo (~12 momentos), sin lÃ­mite de usos.' : 'Free: hasta ~4 momentos por anÃ¡lisis.'}
                 </p>
               </div>
             </button>
@@ -1986,13 +1986,13 @@ export default function SocialView({
               <IconTile icon={Sparkles} background="#EEF0F5" iconColor={T.ink40} />
               <div>
                 <p style={{ fontFamily: T.serif, fontSize: 18, fontWeight: 700, color: T.ink, margin: '0 0 6px' }}>
-                  Más herramientas
+                  MÃ¡s herramientas
                 </p>
                 <span style={{
                   display: 'inline-block', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
                   color: T.ink40, background: T.paper, padding: '4px 10px', borderRadius: 100, marginBottom: 8,
                 }}>
-                  Próximamente
+                  PrÃ³ximamente
                 </span>
                 <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.55, margin: 0 }}>
                   Ideas, formatos y flujos nuevos para Social Mode.
@@ -2023,24 +2023,24 @@ export default function SocialView({
           Tu nicho y estilo
         </h3>
         <p style={{ fontSize: 12, color: T.ink40, marginBottom: 18 }}>
-          Se guarda en tu cuenta para la próxima vez.
+          Se guarda en tu cuenta para la prÃ³xima vez.
         </p>
         {settingsLoading ? (
-          <p style={{ color: T.ink40 }}>Cargando…</p>
+          <p style={{ color: T.ink40 }}>Cargandoâ€¦</p>
         ) : (
           <>
             <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>Nicho *</label>
             <input
               value={niche}
               onChange={e => setNiche(e.target.value)}
-              placeholder="Ej. fitness para gente ocupada, SaaS B2B, recetas veganas rápidas…"
+              placeholder="Ej. fitness para gente ocupada, SaaS B2B, recetas veganas rÃ¡pidasâ€¦"
               style={{ ...inputStyle, marginBottom: 14 }}
             />
             <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>Audiencia</label>
             <input
               value={audience}
               onChange={e => setAudience(e.target.value)}
-              placeholder="Quién te sigue o a quién quieres llegar"
+              placeholder="QuiÃ©n te sigue o a quiÃ©n quieres llegar"
               style={{ ...inputStyle, marginBottom: 14 }}
             />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, marginBottom: 14 }}>
@@ -2060,7 +2060,7 @@ export default function SocialView({
               </div>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>Idioma del contenido</label>
-                <input value={language} onChange={e => setLanguage(e.target.value)} placeholder="español" style={inputStyle} />
+                <input value={language} onChange={e => setLanguage(e.target.value)} placeholder="espaÃ±ol" style={inputStyle} />
               </div>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
@@ -2073,7 +2073,7 @@ export default function SocialView({
                   background: T.paper, fontWeight: 600, fontSize: 13, fontFamily: T.sans, cursor: savingPrefs ? 'wait' : 'pointer',
                 }}
               >
-                {savingPrefs ? 'Guardando…' : 'Guardar preferencias'}
+                {savingPrefs ? 'Guardandoâ€¦' : 'Guardar preferencias'}
               </button>
               <button
                 type="button"
@@ -2086,16 +2086,16 @@ export default function SocialView({
                 }}
               >
                 {genLoading
-                  ? `Generando ${calDays} día${calDays > 1 ? 's' : ''}…`
+                  ? `Generando ${calDays} dÃ­a${calDays > 1 ? 's' : ''}â€¦`
                   : isPro
-                    ? 'Generar semana completa — 7 días (IA)'
-                    : 'Generar vista previa — 3 días (IA)'}
+                    ? 'Generar semana completa â€” 7 dÃ­as (IA)'
+                    : 'Generar vista previa â€” 3 dÃ­as (IA)'}
               </button>
             </div>
             <p style={{ fontSize: 11, color: T.ink40, marginTop: 12 }}>
               <strong>Calendario:</strong>{' '}
-              Free <strong>1/semana</strong> (lun UTC), solo {EDITORIAL_DAYS.free} ideas · Pro{' '}
-              <strong>sin límite de generaciones</strong> (UTC), {EDITORIAL_DAYS.pro} días + extras.
+              Free <strong>1/semana</strong> (lun UTC), solo {EDITORIAL_DAYS.free} ideas Â· Pro{' '}
+              <strong>sin lÃ­mite de generaciones</strong> (UTC), {EDITORIAL_DAYS.pro} dÃ­as + extras.
             </p>
           </>
         )}
@@ -2137,7 +2137,7 @@ export default function SocialView({
             marginBottom: 24,
           }}>
             <SectionLabel color={isPro ? T.violet : T.coral}>
-              {isPro ? 'Hilo de la semana' : 'Vista previa · Free'}
+              {isPro ? 'Hilo de la semana' : 'Vista previa Â· Free'}
             </SectionLabel>
             <p style={{
               fontFamily: T.serif, fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', fontWeight: 700,
@@ -2147,7 +2147,7 @@ export default function SocialView({
             </p>
             {!isPro && (
               <p style={{ fontSize: 13, color: T.coral, margin: 0, fontWeight: 600, opacity: 0.95 }}>
-                {calendar.posts.length} días de muestra · Pro desbloquea 7 días + hashtags y rodaje.
+                {calendar.posts.length} dÃ­as de muestra Â· Pro desbloquea 7 dÃ­as + hashtags y rodaje.
               </p>
             )}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 20, alignItems: 'center' }}>
@@ -2219,7 +2219,7 @@ export default function SocialView({
                       fontSize: 15, color: T.ink, margin: 0, lineHeight: 1.55, fontStyle: 'italic',
                       padding: '14px 16px', borderRadius: 12, background: T.paper, borderLeft: `3px solid ${FORMAT_COLOR[p.format]}`,
                     }}>
-                      “{p.hook}”
+                      â€œ{p.hook}â€
                     </p>
                   </div>
 
@@ -2286,7 +2286,7 @@ export default function SocialView({
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                         <IconTile icon={Ico.camera} box={36} size={18} />
-                        <SectionLabel color={T.green} style={{ marginBottom: 0 }}>Producción</SectionLabel>
+                        <SectionLabel color={T.green} style={{ marginBottom: 0 }}>ProducciÃ³n</SectionLabel>
                       </div>
                       <p style={{ fontSize: 13, color: T.ink60, margin: 0, lineHeight: 1.6 }}>{p.production_tip}</p>
                     </div>
@@ -2331,7 +2331,7 @@ export default function SocialView({
           Hook Lab
         </h2>
         <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.6, maxWidth: 640 }}>
-          Ganchos, ángulos y (en Pro) audio y textos para overlay. El mismo nicho, tono y audiencia del calendario editorial se envían a la IA.
+          Ganchos, Ã¡ngulos y (en Pro) audio y textos para overlay. El mismo nicho, tono y audiencia del calendario editorial se envÃ­an a la IA.
         </p>
       </div>
       <div style={{
@@ -2358,20 +2358,20 @@ export default function SocialView({
         <p style={{ fontSize: 13, color: T.ink60, marginBottom: 16, lineHeight: 1.55 }}>
           {isPro ? (
             <>
-              Pack Pro: <strong>{hl.hooks} ganchos</strong>, <strong>{hl.angles} ángulos</strong>, sugerencia de <strong>audio</strong> y{' '}
-              <strong>3 textos</strong> para overlay — mismo tema, listo para rodar.
+              Pack Pro: <strong>{hl.hooks} ganchos</strong>, <strong>{hl.angles} Ã¡ngulos</strong>, sugerencia de <strong>audio</strong> y{' '}
+              <strong>3 textos</strong> para overlay â€” mismo tema, listo para rodar.
             </>
           ) : (
             <>
-              Vista Free: <strong>{hl.hooks} ganchos</strong> y <strong>{hl.angles} ángulo</strong> por tema (vídeo corto vertical).
+              Vista Free: <strong>{hl.hooks} ganchos</strong> y <strong>{hl.angles} Ã¡ngulo</strong> por tema (vÃ­deo corto vertical).
             </>
           )}
         </p>
-        <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>Tema del vídeo *</label>
+        <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>Tema del vÃ­deo *</label>
         <input
           value={hookTopic}
           onChange={e => setHookTopic(e.target.value)}
-          placeholder="Ej. Por qué tu rutina de skincare no funciona, errores al invertir si eres principiante…"
+          placeholder="Ej. Por quÃ© tu rutina de skincare no funciona, errores al invertir si eres principianteâ€¦"
           style={{ ...inputStyle, marginBottom: 14 }}
         />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
@@ -2397,12 +2397,12 @@ export default function SocialView({
               cursor: hookLoading || !hookTopic.trim() ? 'wait' : 'pointer', opacity: !hookTopic.trim() ? 0.5 : 1,
             }}
           >
-            {hookLoading ? 'Generando…' : 'Generar Hook Lab (IA)'}
+            {hookLoading ? 'Generandoâ€¦' : 'Generar Hook Lab (IA)'}
           </button>
         </div>
         <p style={{ fontSize: 11, color: T.ink40, marginTop: 12 }}>
-          <strong>Hook Lab:</strong> Free <strong>{SOCIAL_LIMITS.hookLab.freePerWeek}/semana</strong> (lun UTC) · Pro{' '}
-          <strong>sin límite</strong> (UTC).
+          <strong>Hook Lab:</strong> Free <strong>{SOCIAL_LIMITS.hookLab.freePerWeek}/semana</strong> (lun UTC) Â· Pro{' '}
+          <strong>sin lÃ­mite</strong> (UTC).
         </p>
       </div>
 
@@ -2429,7 +2429,7 @@ export default function SocialView({
               marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#B84A3D',
               background: 'rgba(232,93,76,.1)', padding: '4px 10px', borderRadius: 100,
             }}>
-              {hookLab.hooks.length} hooks · {hookLab.angles.length} ángulos
+              {hookLab.hooks.length} hooks Â· {hookLab.angles.length} Ã¡ngulos
             </span>
           </div>
 
@@ -2441,7 +2441,7 @@ export default function SocialView({
             boxShadow: SHADOW.soft,
             marginBottom: 24,
           }}>
-            <SectionLabel color={T.coral}>Tema del vídeo</SectionLabel>
+            <SectionLabel color={T.coral}>Tema del vÃ­deo</SectionLabel>
             <p style={{
               fontFamily: T.serif, fontSize: 'clamp(1.2rem, 2.8vw, 1.45rem)', fontWeight: 700,
               color: T.ink, lineHeight: 1.35, margin: '0 0 16px',
@@ -2537,12 +2537,12 @@ export default function SocialView({
                 fontSize: 12, color: T.ink40, margin: '0 0 14px', lineHeight: 1.5,
                 padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,.65)', border: `1px solid ${T.ink10}`,
               }}>
-                <strong style={{ color: T.ink60 }}>No hay nada que reproducir aquí:</strong> esto es una orientación para que elijas música,
+                <strong style={{ color: T.ink60 }}>No hay nada que reproducir aquÃ­:</strong> esto es una orientaciÃ³n para que elijas mÃºsica,
                 voz en off o sonidos en TikTok, CapCut, Instagram, bibliotecas libres de derechos, etc.
               </p>
               <a
                 href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
-                  `${hookLab.topic} música ${hookLab.sound_mood}`.slice(0, 180),
+                  `${hookLab.topic} mÃºsica ${hookLab.sound_mood}`.slice(0, 180),
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -2552,7 +2552,7 @@ export default function SocialView({
                 }}
               >
                 <ExternalLink size={16} strokeWidth={STROKE} />
-                Buscar inspiración en YouTube
+                Buscar inspiraciÃ³n en YouTube
               </a>
             </div>
           )}
@@ -2591,7 +2591,7 @@ export default function SocialView({
 
           <div>
             <h4 style={{ fontSize: 14, fontWeight: 800, color: T.ink, margin: '0 0 14px', letterSpacing: '-.01em' }}>
-              Ángulos narrativos
+              Ãngulos narrativos
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {hookLab.angles.map((a, i) => (
@@ -2637,10 +2637,10 @@ export default function SocialView({
           Shorts listos
         </h2>
         <p style={{ fontSize: 14, color: T.ink60, lineHeight: 1.6, maxWidth: 720 }}>
-          <strong>1)</strong> Pega la <strong>URL</strong> del vídeo (ahora <strong>YouTube</strong>; Drive u otros enlaces, próximamente).{' '}
-          <strong>2)</strong> La <strong>IA analiza</strong> el contenido y propone los mejores cortes con copy y hashtags. Verás una <strong>barra de progreso estilo Opus</strong> mientras trabaja.{' '}
-          <strong>3)</strong> Al terminar, abre el <strong>proyecto</strong> en la nube: ahí están todos los <strong>clips en vista previa 9:16</strong> y las descargas.{' '}
-          <strong>4)</strong> A los <strong>{YOUTUBE_RENDER_TTL_DAYS} días</strong> el proyecto y los archivos se <strong>eliminan solos</strong>.
+          <strong>1)</strong> Pega la <strong>URL</strong> del vÃ­deo (ahora <strong>YouTube</strong>; Drive u otros enlaces, prÃ³ximamente).{' '}
+          <strong>2)</strong> La <strong>IA analiza</strong> el contenido y propone los mejores cortes con copy y hashtags. VerÃ¡s una <strong>barra de progreso estilo Opus</strong> mientras trabaja.{' '}
+          <strong>3)</strong> Al terminar, abre el <strong>proyecto</strong> en la nube: ahÃ­ estÃ¡n todos los <strong>clips en vista previa 9:16</strong> y las descargas.{' '}
+          <strong>4)</strong> A los <strong>{YOUTUBE_RENDER_TTL_DAYS} dÃ­as</strong> el proyecto y los archivos se <strong>eliminan solos</strong>.
         </p>
       </div>
 
@@ -2648,8 +2648,8 @@ export default function SocialView({
         background: 'rgba(196,30,58,.08)', border: '1px solid rgba(196,30,58,.2)', borderRadius: 12,
         padding: '14px 18px', marginBottom: 20, fontSize: 13, color: '#6B2D2D', lineHeight: 1.55,
       }}>
-        <strong>Importante:</strong> hace falta que el vídeo tenga <strong>subtítulos o transcripción</strong> disponibles en YouTube.
-        Si no hay, prueba otro vídeo o uno con subtítulos automáticos activos.
+        <strong>Importante:</strong> hace falta que el vÃ­deo tenga <strong>subtÃ­tulos o transcripciÃ³n</strong> disponibles en YouTube.
+        Si no hay, prueba otro vÃ­deo o uno con subtÃ­tulos automÃ¡ticos activos.
       </div>
 
       <div style={{
@@ -2674,8 +2674,8 @@ export default function SocialView({
               <span style={{ fontSize: 13, fontWeight: 700, color: '#888' }}>({ytSessions.length})</span>
             </h3>
             <p style={{ margin: '6px 0 0', fontSize: 12, color: '#9a9a9a', lineHeight: 1.5, maxWidth: 560 }}>
-              Cada tarjeta es un vídeo analizado: entra para ver <strong style={{ color: '#cfcfcf' }}>todos los clips 9:16</strong> con vista previa. La barra verde mientras se generan MP4/ZIP. Caducidad automática a los{' '}
-              <strong style={{ color: '#cfcfcf' }}>{YOUTUBE_RENDER_TTL_DAYS} días</strong>.
+              Cada tarjeta es un vÃ­deo analizado: entra para ver <strong style={{ color: '#cfcfcf' }}>todos los clips 9:16</strong> con vista previa. La barra verde mientras se generan MP4/ZIP. Caducidad automÃ¡tica a los{' '}
+              <strong style={{ color: '#cfcfcf' }}>{YOUTUBE_RENDER_TTL_DAYS} dÃ­as</strong>.
             </p>
           </div>
           <button
@@ -2694,18 +2694,18 @@ export default function SocialView({
               fontFamily: T.sans,
             }}
           >
-            {ytSessionsLoading ? 'Actualizando…' : 'Actualizar'}
+            {ytSessionsLoading ? 'Actualizandoâ€¦' : 'Actualizar'}
           </button>
         </div>
 
         {ytSessionsLoading && ytSessions.length === 0 ? (
-          <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Cargando proyectos…</p>
+          <p style={{ margin: 0, fontSize: 13, color: '#888' }}>Cargando proyectosâ€¦</p>
         ) : null}
 
         {!ytSessionsLoading && ytSessions.length === 0 ? (
           <p style={{ margin: 0, fontSize: 13, color: '#888', lineHeight: 1.55 }}>
-            Aún no hay proyectos. <strong style={{ color: '#bbb' }}>Descarga un MP4 9:16</strong> o un{' '}
-            <strong style={{ color: '#bbb' }}>ZIP</strong> desde los clips de abajo y se creará un proyecto agrupado.
+            AÃºn no hay proyectos. <strong style={{ color: '#bbb' }}>Descarga un MP4 9:16</strong> o un{' '}
+            <strong style={{ color: '#bbb' }}>ZIP</strong> desde los clips de abajo y se crearÃ¡ un proyecto agrupado.
           </p>
         ) : null}
 
@@ -2837,7 +2837,7 @@ export default function SocialView({
                       {s.video_title || s.youtube_video_id}
                     </p>
                     <p style={{ margin: 0, fontSize: 11, color: '#888' }}>
-                      Shorts listos · {s.ready_assets}/{s.total_assets} listos
+                      Shorts listos Â· {s.ready_assets}/{s.total_assets} listos
                     </p>
                   </div>
                 </button>
@@ -2858,14 +2858,14 @@ export default function SocialView({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
               <div>
                 <p style={{ margin: 0, fontSize: 11, fontWeight: 800, color: '#6ee7b7', letterSpacing: '.06em' }}>
-                  PROYECTO · TODOS LOS SHORTS
+                  PROYECTO Â· TODOS LOS SHORTS
                 </p>
                 <h4 style={{ margin: '6px 0 0', fontSize: 17, fontWeight: 800, color: '#fff' }}>
-                  {ytSessionDetail?.session.video_title ?? 'Cargando…'}
+                  {ytSessionDetail?.session.video_title ?? 'Cargandoâ€¦'}
                 </h4>
                 {ytSessionDetail ? (
                   <p style={{ margin: '6px 0 0', fontSize: 12, color: '#999', lineHeight: 1.5 }}>
-                    Vista previa de cada clip en <strong style={{ color: '#ccc' }}>9:16</strong>. {ytSessionDetail.session.expires_label} ·{' '}
+                    Vista previa de cada clip en <strong style={{ color: '#ccc' }}>9:16</strong>. {ytSessionDetail.session.expires_label} Â·{' '}
                     {ytSessionDetail.assets.length} archivo(s)
                   </p>
                 ) : null}
@@ -2896,7 +2896,7 @@ export default function SocialView({
             </div>
 
             {ytSessionDetailLoading ? (
-              <p style={{ color: '#888', fontSize: 13 }}>Cargando información…</p>
+              <p style={{ color: '#888', fontSize: 13 }}>Cargando informaciÃ³nâ€¦</p>
             ) : null}
 
             <div style={{ position: 'relative' }}>
@@ -2967,7 +2967,7 @@ export default function SocialView({
                           color: '#9ca3af',
                           letterSpacing: '.08em',
                         }}>
-                          CLIPS 9:16 · VISTA PREVIA
+                          CLIPS 9:16 Â· VISTA PREVIA
                         </p>
                         <div style={{
                           display: 'grid',
@@ -2978,7 +2978,7 @@ export default function SocialView({
                             const title = String(a.title ?? `Clip ${assetIdx + 1}`)
                             const slug =
                               title
-                                .replace(/[^\w\s-àáéíóúñü]/gi, '')
+                                .replace(/[^\w\s-Ã Ã¡Ã©Ã­Ã³ÃºÃ±Ã¼]/gi, '')
                                 .replace(/\s+/g, '-')
                                 .slice(0, 48) || `clip-${assetIdx + 1}`
                             const fname = `clip-${assetIdx + 1}-9-16-${slug}.mp4`
@@ -3060,7 +3060,7 @@ export default function SocialView({
                                         }}
                                       >
                                         <Info size={14} strokeWidth={2} aria-hidden />
-                                        INFORMACIÓN
+                                        INFORMACIÃ“N
                                         {!isPro ? (
                                           <span style={{ fontSize: 8, fontWeight: 800, opacity: 0.9 }}>+P</span>
                                         ) : null}
@@ -3117,7 +3117,7 @@ export default function SocialView({
                         color: '#9ca3af',
                         letterSpacing: '.08em',
                       }}>
-                        CLIPS 9:16 · VISTA PREVIA Y COPY
+                        CLIPS 9:16 Â· VISTA PREVIA Y COPY
                       </p>
                       <div style={{
                         display: 'grid',
@@ -3130,7 +3130,7 @@ export default function SocialView({
                           const title = String(row.title ?? `Clip ${idx + 1}`)
                           const slug =
                             title
-                              .replace(/[^\w\s-àáéíóúñü]/gi, '')
+                              .replace(/[^\w\s-Ã Ã¡Ã©Ã­Ã³ÃºÃ±Ã¼]/gi, '')
                               .replace(/\s+/g, '-')
                               .slice(0, 48) || `clip-${idx + 1}`
                           const fname = `clip-${idx + 1}-9-16-${slug}.mp4`
@@ -3176,7 +3176,7 @@ export default function SocialView({
                                     color: '#777',
                                     lineHeight: 1.45,
                                   }}>
-                                    MP4 aún no en la nube. Usa <strong style={{ color: '#aaa' }}>Descargar MP4 9:16</strong> abajo.
+                                    MP4 aÃºn no en la nube. Usa <strong style={{ color: '#aaa' }}>Descargar MP4 9:16</strong> abajo.
                                   </div>
                                 )}
                                 <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
@@ -3217,7 +3217,7 @@ export default function SocialView({
                                       }}
                                     >
                                       <Info size={14} strokeWidth={2} aria-hidden />
-                                      INFORMACIÓN
+                                      INFORMACIÃ“N
                                       {!isPro ? (
                                         <span style={{ fontSize: 8, fontWeight: 800, opacity: 0.9 }}>+P</span>
                                       ) : null}
@@ -3270,31 +3270,31 @@ export default function SocialView({
 
       <div style={{ background: T.white, borderRadius: 16, padding: '24px 28px', border: `1px solid ${T.ink10}`, marginBottom: 24 }}>
         <p style={{ fontSize: 13, color: T.ink60, lineHeight: 1.55, margin: '0 0 18px' }}>
-          Pega el enlace del vídeo largo. <strong>Hoy funciona con YouTube</strong> (hace falta transcripción/subtítulos).{' '}
+          Pega el enlace del vÃ­deo largo. <strong>Hoy funciona con YouTube</strong> (hace falta transcripciÃ³n/subtÃ­tulos).{' '}
           <strong>Drive, Vimeo u otros</strong>: mismo flujo, en roadmap.
         </p>
         <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>
-          URL del vídeo
+          URL del vÃ­deo
         </label>
         <input
           value={ytUrl}
           onChange={e => setYtUrl(e.target.value)}
-          placeholder="YouTube: https://youtube.com/watch?v=… · youtu.be/…"
+          placeholder="YouTube: https://youtube.com/watch?v=â€¦ Â· youtu.be/â€¦"
           style={{ ...inputStyle, marginBottom: 14 }}
         />
         <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>
-          Idioma de subtítulos (opcional, ej. es, en)
+          Idioma de subtÃ­tulos (opcional, ej. es, en)
         </label>
         <input
           value={ytCaptionLang}
           onChange={e => setYtCaptionLang(e.target.value)}
-          placeholder="Dejar vacío = idioma por defecto del vídeo"
+          placeholder="Dejar vacÃ­o = idioma por defecto del vÃ­deo"
           style={{ ...inputStyle, marginBottom: 14 }}
         />
         <label style={{ fontSize: 11, fontWeight: 700, color: T.ink40, display: 'block', marginBottom: 6 }}>
           Idioma del copy generado
         </label>
-        <input value={language} onChange={e => setLanguage(e.target.value)} style={{ ...inputStyle, marginBottom: 16 }} placeholder="español" />
+        <input value={language} onChange={e => setLanguage(e.target.value)} style={{ ...inputStyle, marginBottom: 16 }} placeholder="espaÃ±ol" />
 
         <button
           type="button"
@@ -3306,7 +3306,7 @@ export default function SocialView({
             cursor: ytLoading ? 'wait' : 'pointer', opacity: !ytUrl.trim() ? 0.5 : 1,
           }}
         >
-          {ytLoading ? 'Analizando vídeo con IA…' : 'Analizar y generar shorts'}
+          {ytLoading ? 'Analizando vÃ­deo con IAâ€¦' : 'Analizar y generar shorts'}
         </button>
 
         {ytLoading ? (() => {
@@ -3335,13 +3335,13 @@ export default function SocialView({
           )
         })() : null}
         <p style={{ fontSize: 11, color: T.ink40, marginTop: 12 }}>
-          <strong>Límites pack IA:</strong> Free <strong>{SOCIAL_LIMITS.youtubeClips.freePerWeek}/semana</strong> (lun UTC) · Pro{' '}
-          <strong>sin límite</strong> (UTC). {isPro ? 'Hasta ~12 momentos por análisis.' : 'Hasta ~4 momentos.'}
+          <strong>LÃ­mites pack IA:</strong> Free <strong>{SOCIAL_LIMITS.youtubeClips.freePerWeek}/semana</strong> (lun UTC) Â· Pro{' '}
+          <strong>sin lÃ­mite</strong> (UTC). {isPro ? 'Hasta ~12 momentos por anÃ¡lisis.' : 'Hasta ~4 momentos.'}
         </p>
         <p style={{ fontSize: 11, color: T.ink40, marginTop: 8, marginBottom: 0 }}>
-          <strong>Límites vídeo 9:16 (MP4 o ZIP):</strong> cada descarga cuenta · Free{' '}
-          <strong>{SOCIAL_LIMITS.youtubeRender.freePerWeek}/semana</strong> · Pro{' '}
-          <strong>sin límite</strong> (aparte del pack IA).
+          <strong>LÃ­mites vÃ­deo 9:16 (MP4 o ZIP):</strong> cada descarga cuenta Â· Free{' '}
+          <strong>{SOCIAL_LIMITS.youtubeRender.freePerWeek}/semana</strong> Â· Pro{' '}
+          <strong>sin lÃ­mite</strong> (aparte del pack IA).
         </p>
       </div>
 
@@ -3375,7 +3375,7 @@ export default function SocialView({
                 {ytVideoTitle || ytTitleHint || 'Clips sugeridos'}
               </h3>
               <p style={{ fontSize: 12, color: T.ink40, margin: '4px 0 0' }}>
-                {ytClips.length} piezas · 9:16 · copy + hashtags + checklist
+                {ytClips.length} piezas Â· 9:16 Â· copy + hashtags + checklist
               </p>
             </div>
             <button
@@ -3399,8 +3399,8 @@ export default function SocialView({
             background: 'rgba(64,120,90,.08)', border: '1px solid rgba(64,120,90,.22)', borderRadius: 12,
             padding: '12px 16px', marginBottom: 18, fontSize: 12, color: '#2D4A3A', lineHeight: 1.55,
           }}>
-            <strong>Vista previa + MP4 9:16:</strong> si el clip ya está en tu <strong>proyecto en la nube</strong>, la vista previa aparece al momento; si no, se <strong>genera sola</strong> al ver cada tarjeta (uno tras otro).{' '}
-            <strong>Descargar MP4</strong> guarda el archivo (también en la nube 2 días). Cada render vuelve a descargar el vídeo en el servidor (lento).{' '}
+            <strong>Vista previa + MP4 9:16:</strong> si el clip ya estÃ¡ en tu <strong>proyecto en la nube</strong>, la vista previa aparece al momento; si no, se <strong>genera sola</strong> al ver cada tarjeta (uno tras otro).{' '}
+            <strong>Descargar MP4</strong> guarda el archivo (tambiÃ©n en la nube 2 dÃ­as). Cada render vuelve a descargar el vÃ­deo en el servidor (lento).{' '}
             <button
               type="button"
               onClick={() => { void downloadYoutubeRenderZip() }}
@@ -3411,7 +3411,7 @@ export default function SocialView({
                 fontSize: 'inherit', fontFamily: 'inherit',
               }}
             >
-              {ytRenderZipLoading ? 'Generando ZIP…' : 'Descargar todos en un ZIP'}
+              {ytRenderZipLoading ? 'Generando ZIPâ€¦' : 'Descargar todos en un ZIP'}
             </button>
             . En <strong>Vercel</strong> suele estar desactivado: <code style={{ fontSize: 11 }}>ENABLE_YOUTUBE_RENDER=1</code> o{' '}
             <code style={{ fontSize: 11 }}>next start</code> local/VPS. Si falla yt-dlp, define <code style={{ fontSize: 11 }}>YT_DLP_PATH</code>.
@@ -3444,7 +3444,7 @@ export default function SocialView({
                       {c.title}
                     </p>
                     <p style={{ fontSize: 12, fontWeight: 700, color: T.coral, margin: 0 }}>
-                      {formatMmSs(c.start_sec)} – {formatMmSs(c.end_sec)} · ~{Math.round(c.end_sec - c.start_sec)} s
+                      {formatMmSs(c.start_sec)} â€“ {formatMmSs(c.end_sec)} Â· ~{Math.round(c.end_sec - c.start_sec)} s
                     </p>
                   </div>
                   <a
@@ -3493,7 +3493,7 @@ export default function SocialView({
                             zIndex: 2,
                           }}
                         >
-                          Tu navegador no reproduce vídeo embebido.
+                          Tu navegador no reproduce vÃ­deo embebido.
                         </video>
                       ) : (
                         <>
@@ -3526,8 +3526,8 @@ export default function SocialView({
                               fontWeight: 600,
                             }}>
                               {ytRenderingClipIndex === i
-                                ? 'Generando tu clip vertical 9:16…'
-                                : 'Aquí verás el MP4 vertical generado. Si ya existe en tu proyecto en la nube, se muestra al instante; si no, se genera al ver la tarjeta (uno tras otro).'}
+                                ? 'Generando tu clip vertical 9:16â€¦'
+                                : 'AquÃ­ verÃ¡s el MP4 vertical generado. Si ya existe en tu proyecto en la nube, se muestra al instante; si no, se genera al ver la tarjeta (uno tras otro).'}
                             </span>
                           </div>
                         </>
@@ -3565,7 +3565,7 @@ export default function SocialView({
                         />
                       </div>
                       <p style={{ margin: '8px 0 0', fontSize: 11, color: T.ink40, lineHeight: 1.45 }}>
-                        Si el reproductor no carga (bloqueo de incrustación del vídeo),{' '}
+                        Si el reproductor no carga (bloqueo de incrustaciÃ³n del vÃ­deo),{' '}
                         <a
                           href={youtubeWatchUrl(ytVideoId, c.start_sec)}
                           target="_blank"
@@ -3582,11 +3582,11 @@ export default function SocialView({
                     <p style={{
                       fontSize: 11, fontWeight: 800, color: T.ink40, letterSpacing: '.08em', margin: '0 0 8px',
                     }}>
-                      MP4 VERTICAL 9:16 (AUTOMATIZACIÓN)
+                      MP4 VERTICAL 9:16 (AUTOMATIZACIÃ“N)
                     </p>
                     <p style={{ fontSize: 12, color: T.ink60, margin: '0 0 14px', lineHeight: 1.55 }}>
                       El recuadro muestra el <strong>MP4 9:16 real</strong> (desde la nube si ya lo generaste, o tras el render).{' '}
-                      <strong>Descargar MP4</strong> baja el archivo sin volver a procesar cuando ya está listo.
+                      <strong>Descargar MP4</strong> baja el archivo sin volver a procesar cuando ya estÃ¡ listo.
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                       <button
@@ -3621,7 +3621,7 @@ export default function SocialView({
                       >
                         <Download size={18} strokeWidth={1.75} aria-hidden />
                         {ytRenderingClipIndex === i
-                          ? 'Generando y descargando…'
+                          ? 'Generando y descargandoâ€¦'
                           : (ytAutomatedPreviewByClip[i] ?? ytCloudMp4UrlByClip[i])
                             ? 'Descargar MP4 otra vez'
                             : 'Descargar MP4 9:16'}
@@ -3691,14 +3691,14 @@ export default function SocialView({
                     }}
                   >
                     <Info size={18} strokeWidth={2} aria-hidden />
-                    INFORMACIÓN
+                    INFORMACIÃ“N
                     {!isPro ? (
                       <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.85 }}>+ Pro</span>
                     ) : null}
                   </button>
                   {!isPro ? (
                     <span style={{ fontSize: 12, color: T.ink40, lineHeight: 1.45 }}>
-                      Ver el título del short en el modal; copy, hashtags y checklist con Pro.
+                      Ver el tÃ­tulo del short en el modal; copy, hashtags y checklist con Pro.
                     </span>
                   ) : null}
                 </div>
@@ -3760,7 +3760,7 @@ export default function SocialView({
                   color: isPro ? T.violet : T.ink40,
                   textTransform: 'uppercase',
                 }}>
-                  {isPro ? 'Pro · guía del clip' : 'Información del clip'}
+                  {isPro ? 'Pro Â· guÃ­a del clip' : 'InformaciÃ³n del clip'}
                 </p>
                 <h3
                   id="yt-clip-info-title"
@@ -3776,7 +3776,7 @@ export default function SocialView({
                   {ytClips[ytClipInfoModalIndex].title}
                 </h3>
                 <p style={{ margin: '6px 0 0', fontSize: 12, color: T.ink40 }}>
-                  Clip {ytClipInfoModalIndex + 1} · {formatMmSs(ytClips[ytClipInfoModalIndex].start_sec)} –{' '}
+                  Clip {ytClipInfoModalIndex + 1} Â· {formatMmSs(ytClips[ytClipInfoModalIndex].start_sec)} â€“{' '}
                   {formatMmSs(ytClips[ytClipInfoModalIndex].end_sec)}
                 </p>
               </div>
@@ -3813,8 +3813,8 @@ export default function SocialView({
                   border: `1px dashed ${T.ink20}`,
                 }}>
                   <p style={{ margin: 0, fontSize: 14, color: T.ink60, lineHeight: 1.6 }}>
-                    <strong style={{ color: T.ink }}>Plan Pro:</strong> desbloquea la guía completa de este short
-                    (hook, descripción para publicar, hashtags, plataformas, checklist de edición, textos en pantalla,
+                    <strong style={{ color: T.ink }}>Plan Pro:</strong> desbloquea la guÃ­a completa de este short
+                    (hook, descripciÃ³n para publicar, hashtags, plataformas, checklist de ediciÃ³n, textos en pantalla,
                     etc.).
                   </p>
                 </div>
@@ -3884,7 +3884,7 @@ export default function SocialView({
                   color: ytCloudClipInfoModal.premiumClip ? T.violet : '#9ca3af',
                   textTransform: 'uppercase',
                 }}>
-                  {ytCloudClipInfoModal.premiumClip ? 'Pro · guía del clip' : 'Información del clip'}
+                  {ytCloudClipInfoModal.premiumClip ? 'Pro Â· guÃ­a del clip' : 'InformaciÃ³n del clip'}
                 </p>
                 <h3
                   id="yt-cloud-clip-info-title"
@@ -3902,12 +3902,12 @@ export default function SocialView({
                 <p style={{ margin: '6px 0 0', fontSize: 12, color: '#9ca3af' }}>
                   {ytCloudClipInfoModal.clipTiming ? (
                     <>
-                      Clip {ytCloudClipInfoModal.clipNum} ·{' '}
-                      {formatMmSs(ytCloudClipInfoModal.clipTiming.start_sec)} –{' '}
-                      {formatMmSs(ytCloudClipInfoModal.clipTiming.end_sec)} · proyecto en la nube
+                      Clip {ytCloudClipInfoModal.clipNum} Â·{' '}
+                      {formatMmSs(ytCloudClipInfoModal.clipTiming.start_sec)} â€“{' '}
+                      {formatMmSs(ytCloudClipInfoModal.clipTiming.end_sec)} Â· proyecto en la nube
                     </>
                   ) : (
-                    <>Clip {ytCloudClipInfoModal.clipNum} · proyecto en la nube</>
+                    <>Clip {ytCloudClipInfoModal.clipNum} Â· proyecto en la nube</>
                   )}
                 </p>
               </div>
@@ -3955,8 +3955,8 @@ export default function SocialView({
                   border: '1px dashed rgba(255,255,255,.22)',
                 }}>
                   <p style={{ margin: 0, fontSize: 13, color: '#d1d5db', lineHeight: 1.55 }}>
-                    <strong style={{ color: '#fff' }}>Plan Pro:</strong> desbloquea la guía completa (hook, copy para
-                    publicar, hashtags, plataformas, checklist de edición, textos en pantalla…).
+                    <strong style={{ color: '#fff' }}>Plan Pro:</strong> desbloquea la guÃ­a completa (hook, copy para
+                    publicar, hashtags, plataformas, checklist de ediciÃ³n, textos en pantallaâ€¦).
                   </p>
                 </div>
               ) : null}
@@ -4000,7 +4000,7 @@ export default function SocialView({
                 </button>
               ) : (
                 <p style={{ margin: '16px 0 0', fontSize: 12, color: '#6b7280', lineHeight: 1.5 }}>
-                  Aún no hay MP4 en la nube para este clip.
+                  AÃºn no hay MP4 en la nube para este clip.
                 </p>
               )}
             </div>

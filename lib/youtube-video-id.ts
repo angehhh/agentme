@@ -1,4 +1,4 @@
-/** Extrae el ID de 11 caracteres de URLs habituales de YouTube */
+﻿/** Extrae el ID de 11 caracteres de URLs habituales de YouTube */
 export function extractYoutubeVideoId(input: string): string | null {
   const s = input.trim()
   if (!s) return null

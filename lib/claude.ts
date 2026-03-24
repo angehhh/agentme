@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
+﻿import Anthropic from '@anthropic-ai/sdk'
 import type { JobResult, MarketStats } from './agent'
 
 const anthropic = new Anthropic({
@@ -23,7 +23,7 @@ export async function analyzeJobs(
   if (!process.env.ANTHROPIC_API_KEY || jobs.length === 0) return null
 
   const jobList = jobs.map((j, i) =>
-    `${i + 1}. "${j.title}" en ${j.company || 'empresa desconocida'} (${j.location || 'ubicación no especificada'})`
+    `${i + 1}. "${j.title}" en ${j.company || 'empresa desconocida'} (${j.location || 'ubicaciÃ³n no especificada'})`
   ).join('\n')
 
   try {
@@ -37,21 +37,21 @@ export async function analyzeJobs(
 Estas son las ofertas encontradas:
 ${jobList}
 
-Responde SOLO con JSON válido (sin markdown, sin backticks). El formato:
+Responde SOLO con JSON vÃ¡lido (sin markdown, sin backticks). El formato:
 {
-  "summary": "Un párrafo breve (2-3 frases) resumiendo las oportunidades encontradas y recomendación general",
+  "summary": "Un pÃ¡rrafo breve (2-3 frases) resumiendo las oportunidades encontradas y recomendaciÃ³n general",
   "rankings": [
-    { "index": 1, "relevance": "alta", "reason": "Frase corta explicando por qué encaja", "tip": "Consejo específico para aplicar a esta oferta" },
-    { "index": 2, "relevance": "media", "reason": "Frase corta", "tip": "Consejo específico" }
+    { "index": 1, "relevance": "alta", "reason": "Frase corta explicando por quÃ© encaja", "tip": "Consejo especÃ­fico para aplicar a esta oferta" },
+    { "index": 2, "relevance": "media", "reason": "Frase corta", "tip": "Consejo especÃ­fico" }
   ]
 }
 
 Reglas:
 - relevance: "alta", "media" o "baja"
-- reason: máximo 15 palabras, en español, directo
-- tip: consejo personalizado para aplicar a esa oferta concreta (máx 25 palabras), ej: "Destaca tu experiencia con React y proyectos de e-commerce en tu CV"
+- reason: mÃ¡ximo 15 palabras, en espaÃ±ol, directo
+- tip: consejo personalizado para aplicar a esa oferta concreta (mÃ¡x 25 palabras), ej: "Destaca tu experiencia con React y proyectos de e-commerce en tu CV"
 - Devuelve un ranking para CADA oferta (${jobs.length} en total)
-- summary: máximo 3 frases, en español`
+- summary: mÃ¡ximo 3 frases, en espaÃ±ol`
       }]
     })
 
@@ -111,25 +111,25 @@ export async function generateMarketInsights(
       max_tokens: 512,
       messages: [{
         role: 'user',
-        content: `Eres un analista del mercado laboral español. El usuario busca "${query}" en "${location}".
+        content: `Eres un analista del mercado laboral espaÃ±ol. El usuario busca "${query}" en "${location}".
 
 Datos:
 - Total aproximado en LinkedIn: ${stats.totalLinkedIn || 'desconocido'}
-- Distribución por ciudad en resultados: ${cityList || 'no disponible'}
-- Títulos encontrados: ${titles}
+- DistribuciÃ³n por ciudad en resultados: ${cityList || 'no disponible'}
+- TÃ­tulos encontrados: ${titles}
 
-Responde SOLO con JSON válido (sin markdown):
+Responde SOLO con JSON vÃ¡lido (sin markdown):
 {
   "trends": "1-2 frases sobre la tendencia actual de este sector (demanda, crecimiento, etc.)",
-  "salaryRange": "Rango salarial estimado para este tipo de puesto en España (ej: '25.000€ - 40.000€/año')",
+  "salaryRange": "Rango salarial estimado para este tipo de puesto en EspaÃ±a (ej: '25.000â‚¬ - 40.000â‚¬/aÃ±o')",
   "topCities": [
     { "city": "Madrid", "demand": "Alta" },
     { "city": "Barcelona", "demand": "Media" }
   ],
-  "tip": "1 consejo práctico para el candidato (máx 20 palabras)"
+  "tip": "1 consejo prÃ¡ctico para el candidato (mÃ¡x 20 palabras)"
 }
 
-Reglas: en español, datos realistas del mercado español 2025-2026, máximo 3 ciudades en topCities.`
+Reglas: en espaÃ±ol, datos realistas del mercado espaÃ±ol 2025-2026, mÃ¡ximo 3 ciudades en topCities.`
       }]
     })
 

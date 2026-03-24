@@ -1,7 +1,7 @@
-/**
- * Límites y ventanas de tiempo del Social Mode (calendario + Hook Lab).
- * Free: poca frecuencia y salidas “preview”.
- * Pro (y no-free): en las rutas API no se aplica tope diario — solo Free cuenta misiones por semana/día según modo.
+﻿/**
+ * LÃ­mites y ventanas de tiempo del Social Mode (calendario + Hook Lab).
+ * Free: poca frecuencia y salidas â€œpreviewâ€.
+ * Pro (y no-free): en las rutas API no se aplica tope diario â€” solo Free cuenta misiones por semana/dÃ­a segÃºn modo.
  */
 
 export type SocialPlanTier = 'free' | 'pro'
@@ -38,30 +38,30 @@ export const SOCIAL_LIMITS = {
     freePerWeek: 2,
     proPerDay: 80,
   },
-  /** Vídeo → contenido (transcripción + IA): misiones mode = social_video */
+  /** VÃ­deo â†’ contenido (transcripciÃ³n + IA): misiones mode = social_video */
   videoContent: {
     freePerWeek: 1,
     proPerDay: 15,
   },
-  /** YouTube → clips verticales 9:16 (guía por subtítulos + IA): mode = social_youtube_clips */
+  /** YouTube â†’ clips verticales 9:16 (guÃ­a por subtÃ­tulos + IA): mode = social_youtube_clips */
   youtubeClips: {
     freePerWeek: 2,
     proPerDay: 20,
   },
-  /** YouTube → descarga + recorte real MP4 9:16 + ZIP: mode = social_youtube_render (pesado; servidor propio) */
+  /** YouTube â†’ descarga + recorte real MP4 9:16 + ZIP: mode = social_youtube_render (pesado; servidor propio) */
   youtubeRender: {
     freePerWeek: 1,
     proPerDay: 5,
   },
 } as const
 
-/** Tamaño máximo de vídeo subido o descargado por URL (Whisper ~25 MB). */
+/** TamaÃ±o mÃ¡ximo de vÃ­deo subido o descargado por URL (Whisper ~25 MB). */
 export const VIDEO_UPLOAD_MAX_MB = 24
 
-/** Días de calendario generados por tier */
+/** DÃ­as de calendario generados por tier */
 export const EDITORIAL_DAYS = { free: 3, pro: 7 } as const
 
-/** Hook Lab: ganchos y ángulos por tier */
+/** Hook Lab: ganchos y Ã¡ngulos por tier */
 export const HOOK_LAB_COUNTS = {
   free: { hooks: 5, angles: 1 },
   pro: { hooks: 12, angles: 5 },
